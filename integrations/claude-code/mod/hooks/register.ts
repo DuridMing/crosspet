@@ -70,7 +70,7 @@ async function dropSession($: EngineInterface, who: string, sid: string): Promis
   } catch {}
 }
 
-// 事件記錄（反饋「AI 幹活時她沒反應」用）：<資料目錄>/events/claude-mod.jsonl，格式和 crosspet-hook.py 一樣（見 docs/架构.md「记录」）。
+// 事件記錄（反饋「AI 幹活時她沒反應」用）：<資料目錄>/events/claude-mod.jsonl，格式和 crosspet-hook.py 一樣（見 docs/架构.md「記錄」）。
 // 只記事件名、工具名、會話 id 的雜湊、結果，不記內容；只留最近 200 行。events 資料夾由桌寵啟動時建好
 function shortHash(s: string): string {
   let h = 0x811c9dc5

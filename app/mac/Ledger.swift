@@ -1,7 +1,7 @@
 import Foundation
 
 /// 記錄檔案（反饋用）：一行一個 JSON，只留最近 200 行（超過 240 行時截回 200）。
-/// 桌寵處理記錄 events/pet.jsonl、換角色記錄 switches.jsonl 都用它；格式見 docs/架构.md「记录」。寫不了就算了，不影響桌寵
+/// 桌寵處理記錄 events/pet.jsonl、換角色記錄 switches.jsonl 都用它；格式見 docs/架构.md「記錄」。寫不了就算了，不影響桌寵
 enum Ledger {
     static func append(_ url: URL, _ line: [String: Any], keep: Int = 200) {
         var row = line

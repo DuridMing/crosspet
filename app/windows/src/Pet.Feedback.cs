@@ -56,7 +56,7 @@ namespace CrossPet
             return s;
         }
 
-        // ---- 記錄（反饋用，格式見 docs/架构.md「记录」）----
+        // ---- 記錄（反饋用，格式見 docs/架构.md「記錄」）----
         static string EventsDir => Path.Combine(Store.Data, "events");
         static string PetEventsFile => Path.Combine(EventsDir, "pet.jsonl");
         static string SwitchesFile => Path.Combine(Store.Data, "switches.jsonl");

@@ -108,7 +108,7 @@ export function apply(ctx, config = {}) {
   // 設定裡關掉時寫 ai-autostart-off。用獨立程式開啟（detached），Harness 退出時桌寵不會被一起關掉
   const appData = process.platform === "win32" ? data : join(homedir(), "Library", "Application Support", "CrossPet");
 
-  // ---- 事件記錄（反饋「AI 幹活時她沒反應」用）：資料目錄 events/deepseek.jsonl，格式和 crosspet-hook.py 一樣（見 docs/架构.md「记录」）。
+  // ---- 事件記錄（反饋「AI 幹活時她沒反應」用）：資料目錄 events/deepseek.jsonl，格式和 crosspet-hook.py 一樣（見 docs/架构.md「記錄」）。
   // 只記事件名、工具名、結果，不記訊息和工具引數；只留最近 200 行。外掛只有一個程式，按順序排隊寫就行
   const ledgerDir = join(config.dataDir || (process.env.CROSSPET_DATA_DIR ? data : appData), "events");
   let ledgerChain = Promise.resolve();

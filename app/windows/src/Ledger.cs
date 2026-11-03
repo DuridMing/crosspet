@@ -8,7 +8,7 @@ using System.Text;
 namespace CrossPet
 {
     /// <summary>記錄檔案（反饋用）：一行一個 JSON，只留最近 200 行（超過 240 行時截回 200）。
-    /// 桌寵處理記錄 events\pet.jsonl、換角色記錄 switches.jsonl 都用它；格式見 docs/架构.md「记录」。
+    /// 桌寵處理記錄 events\pet.jsonl、換角色記錄 switches.jsonl 都用它；格式見 docs/架构.md「記錄」。
     /// 自己拼 JSON（值只有字串、數字、布林）：外殼是 .NET Framework、測試是 .NET 8，兩邊沒有共用的 JSON 庫。寫不了就算了，不影響桌寵</summary>
     static class Ledger
     {
