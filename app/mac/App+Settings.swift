@@ -18,7 +18,7 @@ extension App {
     }
     var textLinked: Bool { defaults.object(forKey: "textLinked") as? Bool ?? true }
     var showName: Bool { defaults.object(forKey: "showName") as? Bool ?? true }
-    var followApps: Bool { defaults.object(forKey: "followApps") as? Bool ?? true }
+    var followApps: Bool { defaults.object(forKey: "followApps") as? Bool ?? false }   // maid fork：預設不跟著前台程式換角色
     // 跟随 AI 工作事件（#23 给 macOS 补上的）：默认关——macOS 以前没有这个行为，升级后不该突然按事件换角色；Windows 一直默认开
     var followEvents: Bool { defaults.object(forKey: "followEvents") as? Bool ?? false }
     var eggsEnabled: Bool { defaults.object(forKey: "eggs") as? Bool ?? true }
