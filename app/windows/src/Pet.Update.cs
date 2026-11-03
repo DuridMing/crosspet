@@ -26,6 +26,8 @@ namespace CrossPet
         static readonly HttpClient download = new HttpClient { Timeout = TimeSpan.FromMinutes(10) };
         async Task CheckForUpdate(bool manual = false)
         {
+            // maid fork：預設不自動檢查更新，只在設定裡手動按「檢查更新」時查；要恢復自動檢查：settings.json 加 "autoUpdateCheck": true
+            if (!manual && !Store.Flag("autoUpdateCheck")) return;
             try
             {
                 Dictionary<string, object> body = null;
