@@ -817,7 +817,7 @@ function timeSlot(d) {
 }
 function festivalOf(d) {
   const y = d.getFullYear(), md = ymd(d).slice(5), [spring, lantern, dragonboat, midautumn] = LUNAR[y] || []
-  // 單日的節日優先（中秋偶爾落在國慶假期裡）
+  // 單日的節日優先
   if (md === lantern) return 'lantern'
   if (md === dragonboat) return 'dragonboat'
   if (md === midautumn) return 'midautumn'
@@ -828,7 +828,7 @@ function festivalOf(d) {
     const days = (d - new Date(`${y}-${spring}T00:00:00`)) / 86400000
     if (days >= 0 && days < 7) return 'spring'   // 初一到初七
   }
-  if (md >= '10-01' && md <= '10-07') return 'national'
+  if (md === '10-10') return 'national'   // maid fork：台灣國慶日（雙十節）
   return null
 }
 function greetMemory(update) {
