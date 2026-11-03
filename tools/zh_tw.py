@@ -53,6 +53,12 @@ HAN = re.compile(r"[一-鿿]")
 
 cc = opencc.OpenCC("s2twp")
 
+# OpenCC 靠上下文判斷「周」要不要變「週」，單獨一個字（額度條的「周 99%」「周一」）會漏掉。
+# 這裡補上：當「星期」用的周一律改週，周圍、周期這類詞不動。
+WEEK = re.compile(r"周(?![圍期邊全到遭轉旋折密長])")
+# 「誒」是大陸常用的語氣詞，台灣慣用「欸」
+FIXUPS = [(WEEK, "週"), (re.compile("誒"), "欸")]
+
 
 def convert(text: str) -> str:
     out, pos = [], 0
@@ -61,7 +67,10 @@ def convert(text: str) -> str:
         out.append(m.group(0))
         pos = m.end()
     out.append(cc.convert(text[pos:]))
-    return "".join(out)
+    s = "".join(out)
+    for pat, rep in FIXUPS:
+        s = pat.sub(rep, s)
+    return s
 
 
 def files():
