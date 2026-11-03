@@ -48,7 +48,10 @@ iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/AppIcon.icns"
 rm -rf "$ICONSET"
 
 cp -R app/web "$APP/Contents/Resources/web"
-cp -R characters "$APP/Contents/Resources/characters"
+# maid fork：只帶 maid/ship-characters.txt 列出的角色
+mkdir -p "$APP/Contents/Resources/characters"
+cp characters/*.md "$APP/Contents/Resources/characters/"
+grep -vE '^\s*(#|$)' maid/ship-characters.txt | while read -r c; do cp -R "characters/$c" "$APP/Contents/Resources/characters/$c"; done
 cp integrations/crosspet-hook.py "$APP/Contents/Resources/crosspet-hook.py"
 # 接入部分也打进包里：App 启动时会把已经装过的 Claude mod / DeepSeek 插件更新到新版；
 # 接入工具也带上，安装 / 更新命令直接用它，不用再下载整份源码

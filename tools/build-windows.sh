@@ -19,7 +19,9 @@ mkdir -p "$OUT/tools"
 cp "$BIN"/CrossPet.exe "$BIN"/CrossPet.exe.config "$BIN"/Microsoft.Web.WebView2.*.dll "$OUT/"
 cp -R "$BIN/runtimes" "$OUT/runtimes"
 cp -R app/web "$OUT/web"
-rsync -a --exclude raw --exclude .DS_Store characters/ "$OUT/characters/"
+# maid fork：只帶 maid/ship-characters.txt 列出的角色
+mkdir -p "$OUT/characters" && cp characters/*.md "$OUT/characters/"
+grep -vE '^\s*(#|$)' maid/ship-characters.txt | while read -r c; do rsync -a --exclude raw --exclude .DS_Store "characters/$c" "$OUT/characters/"; done
 rsync -a --exclude .DS_Store integrations/ "$OUT/integrations/"
 cp tools/integrate.py "$OUT/tools/"
 cp VERSION LICENSE app/windows/apps.json app/windows/install.cmd app/windows/install.ps1 app/windows/uninstall.cmd app/windows/uninstall.ps1 "$OUT/"

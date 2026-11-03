@@ -64,8 +64,8 @@ namespace CrossPet
         public static void LoadSettings()
         {
             Settings = ReadJson(SettingsFile) ?? new Dictionary<string, object>();
-            if (!Settings.ContainsKey("followApps")) Settings["followApps"] = true;
-            if (!Settings.ContainsKey("followEvents")) Settings["followEvents"] = true;
+            if (!Settings.ContainsKey("followApps")) Settings["followApps"] = false;   // maid fork：預設不跟著前台程式換角色
+            if (!Settings.ContainsKey("followEvents")) Settings["followEvents"] = false;   // maid fork：預設不跟著 AI 工作事件換角色
             if (!(Settings.TryGetValue("names", out var n) && n is Dictionary<string, object>)) Settings["names"] = new Dictionary<string, object>();
         }
         public static void SaveSettings() { try { WriteJson(SettingsFile, Settings); } catch (Exception e) { Log("保存设置失败: " + e.Message); } }
