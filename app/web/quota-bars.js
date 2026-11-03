@@ -1,5 +1,5 @@
 // 額度條樣式（設定「額度顯示樣式：額度條」）：單家顯示時每個額度一行——名字、條、剩餘百分比、短重置時間；條按剩餘分三檔變色。
-// 只做排版判斷；畫進小窗的 render 在瀏覽器裡用。設計見 docs/superpowers/specs/2026-10-21-quota-bars-design.md，测试 tests/quota_bars.test.js
+// 只做排版判斷；畫進小窗的 render 在瀏覽器裡用。設計見 docs/superpowers/specs/2026-10-21-quota-bars-design.md，測試 tests/quota_bars.test.js
 // 資料：額度物件 q = { text, low, bars?, note? }。bars = [{ label, left（剩餘 0–1）, reset?（Unix 秒）, group? }]；
 // 沒有 bars（舊版 Claude mod、餘額）就按 text 的固定格式拆，拆不動的那段照舊顯示文字
 ;(function (root) {

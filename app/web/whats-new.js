@@ -1,7 +1,7 @@
 // 「新功能」（What's New）：每版的新功能，寫給普通使用者看的短文案——只寫新功能，不寫修了什麼（修復看 CHANGELOG）。
 // 更新後桌寵頭頂的卡片（index.html）數條數，設定裡的「新功能」頁（settings.html）列出來。兩個平臺共用，隨包釋出。
 // 發版前在最上面加一版（沒有新功能的版本不寫）；go：「去設定 ›」跳到哪個標籤頁、哪個開關（key 是設定頁裡 data-key 的名字）。
-// 設計見 docs/superpowers/specs/2026-10-16-whats-new-design.md；测试 tests/whats_new.test.js
+// 設計見 docs/superpowers/specs/2026-10-16-whats-new-design.md；測試 tests/whats_new.test.js
 ;(function (root) {
   const LIST = [
     { version: '1.3.8', items: [

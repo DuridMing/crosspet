@@ -157,7 +157,7 @@ static class Program
         Check("層級：前臺是工作列，不插", !ZOrderRule.TuckBelow("Shell_TrayWnd", false) && !ZOrderRule.TuckBelow("Shell_SecondaryTrayWnd", false));
         Check("層級：前臺是 CrossPet 自己（右鍵選單、設定視窗），不插", !ZOrderRule.TuckBelow("WindowsForms10.Window.808.app.0.1", true));
         Check("層級：取不到類名，不插", !ZOrderRule.TuckBelow("", false) && !ZOrderRule.TuckBelow(null, false));
-        // 記錄檔案（反饋用）：一行一個 JSON，超過 240 行截回 200 行（docs/架构.md「记录」）
+        // 記錄檔案（反饋用）：一行一個 JSON，超過 240 行截回 200 行（docs/架构.md「記錄」）
         var line = Ledger.Line(new Dictionary<string, object> { ["char"] = "gpt", ["ev"] = "Pre\"Tool\nUse", ["ok"] = true, ["n"] = 3 });
         var parsed = JsonDocument.Parse(line).RootElement;
         Check("記錄：一行能被解析、欄位齊（含 t）", parsed.GetProperty("char").GetString() == "gpt" && parsed.GetProperty("ev").GetString() == "Pre\"Tool\nUse"

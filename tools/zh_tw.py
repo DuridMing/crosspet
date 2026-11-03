@@ -30,6 +30,9 @@ TARGETS = [
     "app/web",
     "app/mac",
     "app/windows/src",
+    "app/windows/App.config",
+    "app/windows/CrossPet.csproj",
+    "app/windows/app.manifest",
     "app/windows/install.ps1",
     "app/windows/uninstall.ps1",
     "app/build.sh",
@@ -46,9 +49,10 @@ TARGETS = [
 SHIP_LIST = REPO / "maid/ship-characters.txt"
 
 TEXT_EXT = {".js", ".mjs", ".cjs", ".ts", ".html", ".css", ".json", ".py", ".swift", ".cs",
-            ".sh", ".ps1", ".cmd", ".yaml", ".yml", ".txt", ".md"}
+            ".sh", ".ps1", ".cmd", ".yaml", ".yml", ".txt", ".md", ".csproj", ".config", ".manifest"}
 # 這些片段不轉：docs/ 底下的檔名（文件沒轉，轉了會指到不存在的路徑）
-KEEP = re.compile(r"docs/[^\s）)」』\"'`]+")
+# 檔名遇到全形標點就停，不然「docs/架构.md「记录」」、「….md；测试」後面的字也會被當成檔名而漏轉
+KEEP = re.compile(r"docs/[^\s）)「」『』，；。、：\"'`]+")
 HAN = re.compile(r"[一-鿿]")
 
 cc = opencc.OpenCC("s2twp")

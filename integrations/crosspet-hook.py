@@ -32,7 +32,7 @@ state_dir = Path(os.environ.get("CROSSPET_STATE_DIR") or (str(default_data / "st
 # ---- 事件記錄（反饋「AI 幹活時她沒反應」用）：資料目錄 events/<接入名>.jsonl，每條事件一行，記處理結果 ----
 # 只記事件名、工具名、會話 id 的雜湊前 6 位、有沒有輪次號、結果（shown 演了 / dropped 被哪條規則丟了 / error 出錯）。
 # 絕不記內容：prompt、工具引數和結果、AI 的回答、對話記錄路徑、工作目錄。只留最近 200 行（超過 240 行時截回 200）。
-# 格式和 DeepSeek Harness 外掛、Claude Code mod 寫的一樣，見 docs/架构.md「记录」
+# 格式和 DeepSeek Harness 外掛、Claude Code mod 寫的一樣，見 docs/架构.md「記錄」
 LEDGER_KEEP, LEDGER_MAX = 200, 240
 ledger_info = {"ev": "", "tool": "", "sid": "", "turn": False}
 
