@@ -5,19 +5,19 @@ using System.Linq;
 
 namespace CrossPet
 {
-    /// <summary>安装目录是否完整（不依赖界面，tests/windows/LogicTests 测）。
-    /// #24：一键更新时安装脚本先删旧目录再复制，钩子正占着 python\python.exe 删不掉，删到一半就停了——
-    /// characters、integrations 没了，之后每次启动都崩，用户只看到「打不开」。1.3.7 起安装脚本不再原地删（见 install.ps1），
-    /// 这里是兜底：启动前看一眼，缺了就提示，有下载好的安装包就用它修</summary>
+    /// <summary>安裝目錄是否完整（不依賴介面，tests/windows/LogicTests 測）。
+    /// #24：一鍵更新時安裝指令碼先刪舊目錄再複製，鉤子正佔著 python\python.exe 刪不掉，刪到一半就停了——
+    /// characters、integrations 沒了，之後每次啟動都崩，使用者只看到「打不開」。1.3.7 起安裝指令碼不再原地刪（見 install.ps1），
+    /// 這裡是兜底：啟動前看一眼，缺了就提示，有下載好的安裝包就用它修</summary>
     static class InstallCheck
     {
         public static readonly string[] Required = { "characters", "web", "integrations", "tools", "python" };
 
-        /// <summary>安装目录里缺了哪些必需的文件夹（按 Required 的顺序）</summary>
+        /// <summary>安裝目錄裡缺了哪些必需的資料夾（按 Required 的順序）</summary>
         public static List<string> Missing(string installDir) =>
             Required.Where(d => !Directory.Exists(Path.Combine(installDir, d))).ToList();
 
-        /// <summary>一键更新下载过的安装包（%TEMP%\CrossPet-update\&lt;版本&gt;\CrossPet）里，版本最新、本身完整、带 install.ps1 的那个；没有返回 null</summary>
+        /// <summary>一鍵更新下載過的安裝包（%TEMP%\CrossPet-update\&lt;版本&gt;\CrossPet）裡，版本最新、本身完整、帶 install.ps1 的那個；沒有返回 null</summary>
         public static string RepairPackage(string updateRoot)
         {
             if (!Directory.Exists(updateRoot)) return null;
@@ -31,26 +31,26 @@ namespace CrossPet
 
         public enum Place { Installed, Package, InsideZip, Other }
 
-        /// <summary>CrossPet.exe 是从哪儿打开的（#28：直接运行解压出来的 exe，容易以为装好了，接入 AI 时钩子却记着下载文件夹的路径）。
-        /// Installed：就在安装目录；Package：解压出来的完整安装包（有 install.ps1、文件夹齐全），可以一键安装；
-        /// InsideZip：在资源管理器里直接双击压缩包里的 exe，Windows 只把它取到临时文件夹（路径里有「xxx.zip」这一层），要先解压；
-        /// Other：别的（开发时从编译目录跑），照常启动</summary>
+        /// <summary>CrossPet.exe 是從哪兒開啟的（#28：直接執行解壓出來的 exe，容易以為裝好了，接入 AI 時鉤子卻記著下載資料夾的路徑）。
+        /// Installed：就在安裝目錄；Package：解壓出來的完整安裝包（有 install.ps1、資料夾齊全），可以一鍵安裝；
+        /// InsideZip：在資源管理器裡直接雙擊壓縮包裡的 exe，Windows 只把它取到臨時資料夾（路徑裡有「xxx.zip」這一層），要先解壓；
+        /// Other：別的（開發時從編譯目錄跑），照常啟動</summary>
         public static Place Locate(string exeDir, string installDir)
         {
             string Full(string d) { try { return Path.GetFullPath(d).TrimEnd('\\', '/'); } catch { return d.TrimEnd('\\', '/'); } }
             if (string.Equals(Full(exeDir), Full(installDir), StringComparison.OrdinalIgnoreCase)) return Place.Installed;
-            // 宁可漏问，也不能把装好的当成安装包（那样每次打开都问要不要安装，点取消就退出，等于打不开）：
-            // AppData 被重定向、目录链接、短文件名都可能让上面对不上，所以只要本身就叫 …\Programs\CrossPet 也算装好了
+            // 寧可漏問，也不能把裝好的當成安裝包（那樣每次開啟都問要不要安裝，點取消就退出，等於打不開）：
+            // AppData 被重定向、目錄連結、短檔名都可能讓上面對不上，所以只要本身就叫 …\Programs\CrossPet 也算裝好了
             var segs = Full(exeDir).Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
             if (segs.Length >= 2 && string.Equals(segs[segs.Length - 1], "CrossPet", StringComparison.OrdinalIgnoreCase)
                 && string.Equals(segs[segs.Length - 2], "Programs", StringComparison.OrdinalIgnoreCase)) return Place.Installed;
-            // 先认压缩包：有的解压方式会把整包取到临时文件夹，看着齐全，可关掉压缩包窗口就被清掉，不能从那儿装
+            // 先認壓縮包：有的解壓方式會把整包取到臨時資料夾，看著齊全，可關掉壓縮包視窗就被清掉，不能從那兒裝
             if (exeDir.Split('\\', '/').Any(seg => seg.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))) return Place.InsideZip;
             if (File.Exists(Path.Combine(exeDir, "install.ps1")) && Missing(exeDir).Count == 0) return Place.Package;
             return Place.Other;
         }
 
-        // v1.3.10 → 「0001.0003.0010」：按数字比，不按字母比（1.3.10 比 1.3.9 新）
+        // v1.3.10 → 「0001.0003.0010」：按數字比，不按字母比（1.3.10 比 1.3.9 新）
         static string VersionKey(string tag) =>
             string.Join(".", tag.TrimStart('v', 'V').Split('-')[0].Split('.').Select(n => (int.TryParse(n, out var i) ? i : 0).ToString("D4")));
     }

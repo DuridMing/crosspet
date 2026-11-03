@@ -7,9 +7,9 @@ using System.Text;
 
 namespace CrossPet
 {
-    /// <summary>记录文件（反馈用）：一行一个 JSON，只留最近 200 行（超过 240 行时截回 200）。
-    /// 桌宠处理记录 events\pet.jsonl、换角色记录 switches.jsonl 都用它；格式见 docs/架构.md「记录」。
-    /// 自己拼 JSON（值只有字符串、数字、布尔）：外壳是 .NET Framework、测试是 .NET 8，两边没有共用的 JSON 库。写不了就算了，不影响桌宠</summary>
+    /// <summary>記錄檔案（反饋用）：一行一個 JSON，只留最近 200 行（超過 240 行時截回 200）。
+    /// 桌寵處理記錄 events\pet.jsonl、換角色記錄 switches.jsonl 都用它；格式見 docs/架构.md「记录」。
+    /// 自己拼 JSON（值只有字串、數字、布林）：外殼是 .NET Framework、測試是 .NET 8，兩邊沒有共用的 JSON 庫。寫不了就算了，不影響桌寵</summary>
     static class Ledger
     {
         public static string Line(IDictionary<string, object> line)
@@ -30,7 +30,7 @@ namespace CrossPet
             catch { }
         }
 
-        /// <summary>文件最后 n 行（没有文件返回空串）</summary>
+        /// <summary>檔案最後 n 行（沒有檔案返回空串）</summary>
         public static string Tail(string path, int n)
         {
             try { return File.Exists(path) ? string.Join("\n", File.ReadAllLines(path).Reverse().Take(n).Reverse()) : ""; } catch { return ""; }

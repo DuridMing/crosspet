@@ -6,7 +6,7 @@ using System.Web.Script.Serialization;
 
 namespace CrossPet
 {
-    /// <summary>目录、设置、日志、内置资源同步、角色清单。和 macOS 版 / docs/windows.md 的约定一致。</summary>
+    /// <summary>目錄、設定、日誌、內建資源同步、角色清單。和 macOS 版 / docs/windows.md 的約定一致。</summary>
     static class Store
     {
         public static readonly string Install = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\', '/');
@@ -21,8 +21,8 @@ namespace CrossPet
         public static string Python => Path.Combine(Install, "python", "python.exe");
         public static string Version => ReadText(Path.Combine(Install, "VERSION"))?.Trim() ?? "0";
 
-        // 网页从两个虚拟域名读文件：程序自带的网页 https://crosspet.app/（安装目录\web，文件夹映射）
-        // 和角色立绘 https://crosspet.data/characters/…（数据目录，用户可以改；程序自己读文件交出去，见 SpriteResources）
+        // 網頁從兩個虛擬域名讀檔案：程式自帶的網頁 https://crosspet.app/（安裝目錄\web，資料夾對映）
+        // 和角色立繪 https://crosspet.data/characters/…（資料目錄，使用者可以改；程式自己讀檔案交出去，見 SpriteResources）
         public const string AppHost = "crosspet.app", DataHost = "crosspet.data";
         public static string PageUrl(string page) => $"https://{AppHost}/{page}";
 
@@ -58,61 +58,61 @@ namespace CrossPet
             catch { }
         }
 
-        // ---- 设置 ----
+        // ---- 設定 ----
         public static Dictionary<string, object> Settings = new Dictionary<string, object>();
         static string SettingsFile => Path.Combine(Data, "settings.json");
         public static void LoadSettings()
         {
             Settings = ReadJson(SettingsFile) ?? new Dictionary<string, object>();
-            if (!Settings.ContainsKey("followApps")) Settings["followApps"] = false;   // maid fork：預設不跟著前台程式換角色
+            if (!Settings.ContainsKey("followApps")) Settings["followApps"] = false;   // maid fork：預設不跟著前臺程式換角色
             if (!Settings.ContainsKey("followEvents")) Settings["followEvents"] = false;   // maid fork：預設不跟著 AI 工作事件換角色
             if (!(Settings.TryGetValue("names", out var n) && n is Dictionary<string, object>)) Settings["names"] = new Dictionary<string, object>();
         }
-        public static void SaveSettings() { try { WriteJson(SettingsFile, Settings); } catch (Exception e) { Log("保存设置失败: " + e.Message); } }
+        public static void SaveSettings() { try { WriteJson(SettingsFile, Settings); } catch (Exception e) { Log("儲存設定失敗: " + e.Message); } }
         public static bool Flag(string key) => Settings.TryGetValue(key, out var v) && v is bool b && b;
         public static Dictionary<string, object> Names => (Dictionary<string, object>)Settings["names"];
 
         /// <summary>
-        /// 和 macOS 版一样：内置角色每次启动整份覆盖（这样更新后能拿到新立绘），用户自己加的角色文件夹不动；
-        /// 钩子脚本复制到数据目录；前台程序 → 角色的对照表第一次才放，之后用户改了就留着。
+        /// 和 macOS 版一樣：內建角色每次啟動整份覆蓋（這樣更新後能拿到新立繪），使用者自己加的角色資料夾不動；
+        /// 鉤子指令碼複製到資料目錄；前臺程式 → 角色的對照表第一次才放，之後使用者改了就留著。
         /// </summary>
         public static void SyncResources()
         {
             Directory.CreateDirectory(Characters);
             Directory.CreateDirectory(State);
-            Directory.CreateDirectory(Path.Combine(Data, "events"));   // 钩子 / 插件的事件记录（反馈用）；Claude Code 的 mod 只能写文件、不能建文件夹
+            Directory.CreateDirectory(Path.Combine(Data, "events"));   // 鉤子 / 外掛的事件記錄（反饋用）；Claude Code 的 mod 只能寫檔案、不能建資料夾
             var src = Path.Combine(Install, "characters");
             foreach (var dir in Directory.GetDirectories(src))
             {
                 var dst = Path.Combine(Characters, Path.GetFileName(dir));
                 try { if (Directory.Exists(dst)) Directory.Delete(dst, true); CopyDir(dir, dst); }
-                catch (Exception e) { Log("同步角色失败 " + dir + ": " + e.Message); }
+                catch (Exception e) { Log("同步角色失敗 " + dir + ": " + e.Message); }
             }
-            // 下面这些复制失败（文件被别的程序占着）只记一笔：旧的那份还能用，不能因为一个说明文件把桌宠拦在启动前
-            // （更新失败回退后重开旧版本，characters\LICENSE.md 还被占着，整个启动就失败了）
+            // 下面這些複製失敗（檔案被別的程式佔著）只記一筆：舊的那份還能用，不能因為一個說明檔案把桌寵攔在啟動前
+            // （更新失敗回退後重開舊版本，characters\LICENSE.md 還被佔著，整個啟動就失敗了）
             foreach (var md in Directory.GetFiles(src, "*.md"))
-                try { File.Copy(md, Path.Combine(Characters, Path.GetFileName(md)), true); } catch (Exception e) { Log("同步说明文件失败 " + md + ": " + e.Message); }
-            // 1.3.4 测试版 1 把网页同步到了 数据目录\web（后来不这么做了）：删掉这份用不上的拷贝
+                try { File.Copy(md, Path.Combine(Characters, Path.GetFileName(md)), true); } catch (Exception e) { Log("同步說明檔案失敗 " + md + ": " + e.Message); }
+            // 1.3.4 測試版 1 把網頁同步到了 資料目錄\web（後來不這麼做了）：刪掉這份用不上的複製
             try { var web = Path.Combine(Data, "web"); if (Directory.Exists(web)) Directory.Delete(web, true); } catch { }
             var hook = Path.Combine(Install, "integrations", "crosspet-hook.py");
             if (File.Exists(hook))
-                try { File.Copy(hook, Path.Combine(Data, "crosspet-hook.py"), true); } catch (Exception e) { Log("同步钩子脚本失败: " + e.Message); }
-            // 只更新已经接入过的 Cursor 桥，不给没装 Cursor 的用户新建这份文件
+                try { File.Copy(hook, Path.Combine(Data, "crosspet-hook.py"), true); } catch (Exception e) { Log("同步鉤子指令碼失敗: " + e.Message); }
+            // 只更新已經接入過的 Cursor 橋，不給沒裝 Cursor 的使用者新建這份檔案
             var bridge = Path.Combine(Install, "integrations", "cursor", "crosspet-cursor-bridge.py");
             var bridgeCopy = Path.Combine(Data, "crosspet-cursor-bridge.py");
             if (File.Exists(bridge) && File.Exists(bridgeCopy))
-                try { File.Copy(bridge, bridgeCopy, true); } catch (Exception e) { Log("更新 Cursor 桥接脚本失败: " + e.Message); }
+                try { File.Copy(bridge, bridgeCopy, true); } catch (Exception e) { Log("更新 Cursor 橋接指令碼失敗: " + e.Message); }
             if (!File.Exists(AppMap)) File.Copy(Path.Combine(Install, "apps.json"), AppMap);
             else
             {
-                // 新版本加的程序补进用户的对照表；用户改过、删成空值的不动
+                // 新版本加的程式補進使用者的對照表；使用者改過、刪成空值的不動
                 var mine = ReadJson(AppMap);
                 var bundled = ReadJson(Path.Combine(Install, "apps.json"));
                 if (mine != null && bundled != null)
                 {
                     var added = bundled.Keys.Where(k => !mine.Keys.Any(m => string.Equals(m, k, StringComparison.OrdinalIgnoreCase))).ToList();
                     foreach (var k in added) mine[k] = bundled[k];
-                    if (added.Count > 0) try { WriteJson(AppMap, mine); } catch (Exception e) { Log("更新程序对照表失败: " + e.Message); }
+                    if (added.Count > 0) try { WriteJson(AppMap, mine); } catch (Exception e) { Log("更新程式對照表失敗: " + e.Message); }
                 }
             }
         }
@@ -125,13 +125,13 @@ namespace CrossPet
                 if (!string.Equals(Path.GetFileName(d), "raw", StringComparison.OrdinalIgnoreCase)) CopyDir(d, Path.Combine(to, Path.GetFileName(d)));
         }
 
-        /// <summary>扫描 characters/&lt;id&gt;/：character.json + 立绘；和 macOS 版 loadCharacters 一样的规则</summary>
-        // 皮肤（另一套衣服）：character.json 里写 "skinOf": "<角色>"，不单独算角色；选了它，那个角色就用这套立绘，台词、动作逻辑照旧
+        /// <summary>掃描 characters/&lt;id&gt;/：character.json + 立繪；和 macOS 版 loadCharacters 一樣的規則</summary>
+        // 皮膚（另一套衣服）：character.json 裡寫 "skinOf": "<角色>"，不單獨算角色；選了它，那個角色就用這套立繪，臺詞、動作邏輯照舊
         public static Dictionary<string, List<(string id, string name)>> SkinChoices = new Dictionary<string, List<(string, string)>>();
-        public static Dictionary<string, string> BaseOutfit = new Dictionary<string, string>();   // 原版衣服叫什么（outfit，比如「女仆装」）
+        public static Dictionary<string, string> BaseOutfit = new Dictionary<string, string>();   // 原版衣服叫什麼（outfit，比如「女僕裝」）
         public static Dictionary<string, object> Skins => Settings.TryGetValue("skins", out var v) && v is Dictionary<string, object> d ? d : null;
 
-        // 立绘：<文件名去掉 -2、-3> 是姿态名，idle-blink 是眨眼帧（照着 idle 本身画的）
+        // 立繪：<檔名去掉 -2、-3> 是姿態名，idle-blink 是眨眼幀（照著 idle 本身畫的）
         static (Dictionary<string, List<string>> poses, string blink, string blinkBase) Sprites(string dir)
         {
             var id = Path.GetFileName(dir);
@@ -141,7 +141,7 @@ namespace CrossPet
                                                       .OrderBy(f => Path.GetFileName(f), StringComparer.Ordinal))
             {
                 var stem = Path.GetFileNameWithoutExtension(f);
-                if (!CardImages.IsSprite(stem)) continue;   // 展示立绘只给设置页的卡片用
+                if (!CardImages.IsSprite(stem)) continue;   // 展示立繪只給設定頁的卡片用
                 var url = $"https://{DataHost}/characters/{Uri.EscapeDataString(id)}/{Uri.EscapeDataString(Path.GetFileName(f))}";
                 if (stem == "idle-blink") { blink = url; continue; }
                 if (stem == "idle") blinkBase = url;
@@ -181,8 +181,8 @@ namespace CrossPet
                     && SkinChoices.TryGetValue(id, out var list) && list.Any(x => x.id == skin))
                 {
                     (poses, blink, blinkBase) = alt;
-                    info["skin"] = skin;   // 网页据此挑彩蛋（有的彩蛋只在穿某件衣服时出现）
-                    // 皮肤可以有自己的台词 / 登场招呼：写了的覆盖原版，没写的照旧
+                    info["skin"] = skin;   // 網頁據此挑彩蛋（有的彩蛋只在穿某件衣服時出現）
+                    // 皮膚可以有自己的臺詞 / 登場招呼：寫了的覆蓋原版，沒寫的照舊
                     if (skinInfo[skin].TryGetValue("lines", out var ol) && ol is Dictionary<string, object> own)
                     {
                         var lines = info.TryGetValue("lines", out var bl) && bl is Dictionary<string, object> b0 ? b0 : new Dictionary<string, object>();

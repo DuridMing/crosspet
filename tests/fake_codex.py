@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""假的 codex 命令：只模拟 `--version` 和 `app-server` 的 account/rateLimits/read，给 CrossPet 的测试用。
-FAKE_CODEX_MODE：exit（一启动就退出，测写 stdin 时对面已经没了）/ ok（两个窗口）/ single（只有一个窗口）/ auth（没登录）/ nomethod（旧版没有这个接口）/ hang（一直不回）/ garbage（乱回）
+"""假的 codex 命令：只模擬 `--version` 和 `app-server` 的 account/rateLimits/read，給 CrossPet 的測試用。
+FAKE_CODEX_MODE：exit（一啟動就退出，測寫 stdin 時對面已經沒了）/ ok（兩個視窗）/ single（只有一個視窗）/ auth（沒登入）/ nomethod（舊版沒有這個介面）/ hang（一直不回）/ garbage（亂回）
 """
 import json, os, sys, time
 

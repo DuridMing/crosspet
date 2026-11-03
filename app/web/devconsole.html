@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh"><head><meta charset="utf-8">
-<title>CrossPet 开发者控制台</title>
+<title>CrossPet 開發者控制台</title>
 <style>
 :root { --bg: #f6f3ee; --panel: #fff; --ink: #3b2a22; --muted: #8a7a70; --line: #e7dfd5; --accent: #c8792f;
   --ok: #2f9e5b; --bad: #d64545; --warn: #e0a100; }
@@ -77,48 +77,48 @@ textarea { min-height: 300px; font: 12px/1.5 ui-monospace, Menlo, monospace; }
 <main>
   <header>
     <div class="row">
-      <b style="font-size:15px">CrossPet 开发者控制台</b><span class="pill" id="ver"></span>
+      <b style="font-size:15px">CrossPet 開發者控制台</b><span class="pill" id="ver"></span>
       <span style="flex:1"></span>
-      <button id="pause" class="on" title="测试时先不把真实 AI 的状态交给桌宠（事件仍会记在「实时事件」里）">⏸ 暂停真实 AI 事件</button>
-      <button id="release" title="松开保持，桌宠回到正常运行">↩︎ 让桌宠恢复正常</button>
-      <button id="reloadPet">⟳ 重新载入桌宠</button>
+      <button id="pause" class="on" title="測試時先不把真實 AI 的狀態交給桌寵（事件仍會記在「即時事件」裡）">⏸ 暫停真實 AI 事件</button>
+      <button id="release" title="鬆開保持，桌寵回到正常執行">↩︎ 讓桌寵恢復正常</button>
+      <button id="reloadPet">⟳ 重新載入桌寵</button>
     </div>
-    <div class="status" id="status">桌宠状态读取中…</div>
+    <div class="status" id="status">桌寵狀態讀取中…</div>
     <nav>
-      <button data-tab="poses" class="sel">姿态</button>
-      <button data-tab="scenes">场景演练</button>
-      <button data-tab="events">实时事件</button>
-      <button data-tab="feedback">反馈 <span class="pill" id="badCount">0</span></button>
+      <button data-tab="poses" class="sel">姿態</button>
+      <button data-tab="scenes">場景演練</button>
+      <button data-tab="events">即時事件</button>
+      <button data-tab="feedback">反饋 <span class="pill" id="badCount">0</span></button>
     </nav>
   </header>
 
   <section id="poses" class="sel">
     <div class="row" style="margin-bottom:10px">
-      <button id="tour" class="primary">▶ 逐个轮播这个角色的全部姿态</button>
-      <span class="hint" style="margin:0">点缩略图 = 让桌宠演这一张并保持住。看完在卡片上点 ✓ 或 ✗，✗ 可以写一句哪里不对。键盘 ← → 切换上一张 / 下一张。</span>
+      <button id="tour" class="primary">▶ 逐個輪播這個角色的全部姿態</button>
+      <span class="hint" style="margin:0">點縮圖 = 讓桌寵演這一張並保持住。看完在卡片上點 ✓ 或 ✗，✗ 可以寫一句哪裡不對。鍵盤 ← → 切換上一張 / 下一張。</span>
     </div>
     <div class="grid" id="grid"></div>
   </section>
 
   <section id="scenes">
-    <p class="hint">用和真实 AI 一样的事件流程跑一遍，看衔接、时机、台词、特效对不对。场景只作用于左边选中的角色；运行期间建议保持「暂停真实 AI 事件」。</p>
+    <p class="hint">用和真實 AI 一樣的事件流程跑一遍，看銜接、時機、臺詞、特效對不對。場景只作用於左邊選中的角色；執行期間建議保持「暫停真實 AI 事件」。</p>
     <div id="sceneList"></div>
   </section>
 
   <section id="events">
-    <p class="hint">真实 AI 写给桌宠的状态（/tmp/crosspet/）。暂停时这里照常记录，但不会交给桌宠。用来排查「AI 在干活、桌宠却没反应」。</p>
-    <table><thead><tr><th style="width:70px">时间</th><th style="width:80px">角色</th><th style="width:50px">类型</th><th>内容</th><th style="width:60px"></th></tr></thead><tbody id="log"></tbody></table>
+    <p class="hint">真實 AI 寫給桌寵的狀態（/tmp/crosspet/）。暫停時這裡照常記錄，但不會交給桌寵。用來排查「AI 在幹活、桌寵卻沒反應」。</p>
+    <table><thead><tr><th style="width:70px">時間</th><th style="width:80px">角色</th><th style="width:50px">型別</th><th>內容</th><th style="width:60px"></th></tr></thead><tbody id="log"></tbody></table>
   </section>
 
   <section id="feedback">
-    <div class="sum"><div><b id="nBad">0</b>有问题</div><div><b id="nOk">0</b>正常</div><div><b id="nTodo">0</b>还没看</div></div>
+    <div class="sum"><div><b id="nBad">0</b>有問題</div><div><b id="nOk">0</b>正常</div><div><b id="nTodo">0</b>還沒看</div></div>
     <div class="row" style="margin-bottom:10px">
-      <button class="primary" id="save">💾 保存反馈（同时复制到剪贴板）</button>
-      <button id="reveal">在访达中显示</button>
-      <button id="clearMarks">清空所有标记</button>
+      <button class="primary" id="save">💾 儲存反饋（同時複製到剪貼簿）</button>
+      <button id="reveal">在訪達中顯示</button>
+      <button id="clearMarks">清空所有標記</button>
       <span class="hint" style="margin:0" id="savedTo"></span>
     </div>
-    <p class="hint">保存后告诉 Claude「反馈存好了」，它会直接读这个文件。</p>
+    <p class="hint">儲存後告訴 Claude「反饋存好了」，它會直接讀這個檔案。</p>
     <textarea id="report" readonly></textarea>
   </section>
 </main>
@@ -134,24 +134,24 @@ const J = v => JSON.stringify(v)
 let manifest = { characters: {} }, appInfo = {}, sel = null, status = null, fallback = {}
 let statusWaiters = []
 
-// ---- 各姿态什么时候出现（和 docs/自定义角色.md 一致）----
+// ---- 各姿態什麼時候出現（和 docs/自定义角色.md 一致）----
 const BUILTIN = ['idle', 'listening', 'thinking', 'reading', 'writing', 'running', 'searching', 'delegating', 'drawing',
   'happy', 'proud', 'oops', 'surprised', 'pat', 'sleeping', 'tired', 'hum', 'stretch', 'yawn', 'compact', 'asking', 'update']
 const EGG_POSES = ['pop', 'pretend', 'caught', 'bye', 'escape']
 const WHEN = {
-  idle: '平时', listening: '收到你的消息', thinking: '思考', reading: '读文件、搜代码', writing: '写文件、改代码', running: '跑命令',
-  searching: '上网查资料', delegating: '派子任务', drawing: '画图', happy: '一轮完成', proud: '一轮用了 8 次以上工具的大活完成',
-  oops: '出错', surprised: '被打断 / 被戳', pat: '被摸头', sleeping: '10 分钟没动静', tired: '额度快用完', hum: '闲着时哼歌',
-  stretch: '闲着时伸懒腰', yawn: '闲着时打哈欠', compact: '压缩上下文', asking: 'AI 问你问题 / 等你授权', update: '有新版本', reset: 'Codex 额度提前重置',
-  reset_check: '重置提醒：被问「会重置吗？」时先查一下', reset_bell: '重置提醒：官方已宣布要重置', reset_hope: '重置提醒：预测 ≥70%',
-  reset_maybe: '重置提醒：预测 30–69%', reset_nope: '重置提醒：预测更低 / 没风声 / 连不上', feast: '余额增加（充值）',
-  sorry: '出错 / 被打断后你又发消息', pop: '彩蛋：跳出来', pretend: '彩蛋：装模作样（等你点她）', caught: '彩蛋：被识破', bye: '彩蛋：溜走',
-  escape: '彩蛋：没人点、自己走掉（可选，没画用 bye）',
-  greet_morning: '早上（5–11 点）第一次见面', greet_noon: '中午（11–14 点）第一次见面', greet_afternoon: '下午（14–18 点）第一次见面',
-  greet_evening: '晚上（18–23 点）第一次见面', greet_night: '深夜（23–2 点）第一次见面', greet_dawn: '凌晨（2–5 点）第一次见面',
-  fest_halloween: '万圣节（10-31）第一次见面', fest_christmas: '圣诞（12-24、12-25）第一次见面', fest_newyear: '元旦（1-1）第一次见面',
-  fest_spring: '春节（初一到初七）每天第一次见面', fest_lantern: '元宵（正月十五）第一次见面', fest_dragonboat: '端午（五月初五）第一次见面',
-  fest_midautumn: '中秋（八月十五）第一次见面', fest_national: '国庆（10-1 到 10-7）每天第一次见面',
+  idle: '平時', listening: '收到你的訊息', thinking: '思考', reading: '讀檔案、搜程式碼', writing: '寫檔案、改程式碼', running: '跑命令',
+  searching: '上網查資料', delegating: '派子任務', drawing: '畫圖', happy: '一輪完成', proud: '一輪用了 8 次以上工具的大活完成',
+  oops: '出錯', surprised: '被打斷 / 被戳', pat: '被摸頭', sleeping: '10 分鐘沒動靜', tired: '額度快用完', hum: '閒著時哼歌',
+  stretch: '閒著時伸懶腰', yawn: '閒著時打哈欠', compact: '壓縮上下文', asking: 'AI 問你問題 / 等你授權', update: '有新版本', reset: 'Codex 額度提前重置',
+  reset_check: '重置提醒：被問「會重置嗎？」時先查一下', reset_bell: '重置提醒：官方已宣佈要重置', reset_hope: '重置提醒：預測 ≥70%',
+  reset_maybe: '重置提醒：預測 30–69%', reset_nope: '重置提醒：預測更低 / 沒風聲 / 連不上', feast: '餘額增加（充值）',
+  sorry: '出錯 / 被打斷後你又發訊息', pop: '彩蛋：跳出來', pretend: '彩蛋：裝模作樣（等你點她）', caught: '彩蛋：被識破', bye: '彩蛋：溜走',
+  escape: '彩蛋：沒人點、自己走掉（可選，沒畫用 bye）',
+  greet_morning: '早上（5–11 點）第一次見面', greet_noon: '中午（11–14 點）第一次見面', greet_afternoon: '下午（14–18 點）第一次見面',
+  greet_evening: '晚上（18–23 點）第一次見面', greet_night: '深夜（23–2 點）第一次見面', greet_dawn: '凌晨（2–5 點）第一次見面',
+  fest_halloween: '萬聖節（10-31）第一次見面', fest_christmas: '聖誕（12-24、12-25）第一次見面', fest_newyear: '元旦（1-1）第一次見面',
+  fest_spring: '春節（初一到初七）每天第一次見面', fest_lantern: '元宵（正月十五）第一次見面', fest_dragonboat: '端午（五月初五）第一次見面',
+  fest_midautumn: '中秋（八月十五）第一次見面', fest_national: '國慶（10-1 到 10-7）每天第一次見面',
 }
 
 function posesOf(id) {
@@ -168,26 +168,26 @@ function posesOf(id) {
 }
 function whenOf(id, p) {
   const c = manifest.characters[id]
-  if ((c.idleActions || []).includes(p)) return '闲着时的专属小动作'
-  if (c.pokePose === p) return '被戳时'
-  if (c.longThink?.pose === p) return `思考超过 ${c.longThink.after || 20} 秒`
+  if ((c.idleActions || []).includes(p)) return '閒著時的專屬小動作'
+  if (c.pokePose === p) return '被戳時'
+  if (c.longThink?.pose === p) return `思考超過 ${c.longThink.after || 20} 秒`
   if (c.correctedPose === p) return WHEN.sorry
-  return WHEN[p] || '专属姿态'
+  return WHEN[p] || '專屬姿態'
 }
 const fileOf = u => decodeURIComponent(u.split('/').pop())
-// 台词按姿态名找；多会话的左右两帧共用一组台词（busy_left / busy_right → busy，swamped_* → swamped）
+// 臺詞按姿態名找；多會話的左右兩幀共用一組臺詞（busy_left / busy_right → busy，swamped_* → swamped）
 const lineKey = p => p.replace(/^(busy|swamped)_(left|right)$/, '$1')
 const lineOf = (c, p) => ((c.lines || {})[lineKey(p)] || [])[0] || ''
 
-// ---- 标记（存在本机）----
+// ---- 標記（存在本機）----
 let marks = {}
 try { marks = JSON.parse(localStorage.getItem('crosspet-dev-marks')) || {} } catch {}
 const saveMarks = () => { try { localStorage.setItem('crosspet-dev-marks', J(marks)) } catch {}; renderReport() }
 function markUI(key, el) {
   const m = marks[key] || {}
   const box = document.createElement('div')
-  box.innerHTML = `<div class="marks"><button class="ok">✓ 正常</button><button class="bad">✗ 有问题</button></div>
-    <input type="text" class="note" placeholder="哪里不对？（比如：特效压到头发 / 台词不合适）">`
+  box.innerHTML = `<div class="marks"><button class="ok">✓ 正常</button><button class="bad">✗ 有問題</button></div>
+    <input type="text" class="note" placeholder="哪裡不對？（比如：特效壓到頭髮 / 臺詞不合適）">`
   const [ok, bad] = box.querySelectorAll('button'), note = box.querySelector('input')
   const paint = () => {
     const v = marks[key]?.ok
@@ -213,14 +213,14 @@ function renderChars() {
       const bad = keys.filter(k => marks[k]?.ok === false).length, done = keys.filter(k => marks[k]?.ok !== undefined).length
       const d = document.createElement('div')
       d.className = 'char' + (id === sel ? ' sel' : '')
-      d.innerHTML = `<img src="${(c.poses.idle || c.poses.pop || [''])[0]}"><div><div class="n">${c.name}</div><div class="c">${done}/${keys.length} 已看${bad ? ` · <span style="color:var(--bad)">${bad} 个问题</span>` : ''}</div></div>`
+      d.innerHTML = `<img src="${(c.poses.idle || c.poses.pop || [''])[0]}"><div><div class="n">${c.name}</div><div class="c">${done}/${keys.length} 已看${bad ? ` · <span style="color:var(--bad)">${bad} 個問題</span>` : ''}</div></div>`
       d.onclick = () => { sel = id; renderChars(); renderGrid(); renderScenes() }
       box.append(d)
     }
   }
 }
 
-// ---- 姿态 ----
+// ---- 姿態 ----
 let tiles = [], playingIdx = -1
 function renderGrid() {
   const c = manifest.characters[sel], grid = $('grid')
@@ -233,12 +233,12 @@ function renderGrid() {
       const t = document.createElement('div'); t.className = 'tile'
       const fbPose = fallback[p] && c.poses[fallback[p]] ? fallback[p] : null
       const fx = (c.fx || {})[p]
-      const tag = !f.url ? `<span class="pill ${fbPose ? 'fb' : 'bad'}">${fbPose ? '缺图，用 ' + fbPose + ' 顶上' : '缺图'}</span>`
+      const tag = !f.url ? `<span class="pill ${fbPose ? 'fb' : 'bad'}">${fbPose ? '缺圖，用 ' + fbPose + ' 頂上' : '缺圖'}</span>`
         : list.length > 1 ? `<span class="pill">${f.i + 1}/${list.length}</span>` : ''
-      t.innerHTML = `<div class="thumb">${f.url ? `<img src="${f.url}" loading="lazy">` : `<div class="missing">还没有立绘<br>${fbPose ? '现在会用 ' + fbPose : (c.idleActions || []).includes(p) ? '画好之前不会出现' : '现在会用 idle'}</div>`}</div>
+      t.innerHTML = `<div class="thumb">${f.url ? `<img src="${f.url}" loading="lazy">` : `<div class="missing">還沒有立繪<br>${fbPose ? '現在會用 ' + fbPose : (c.idleActions || []).includes(p) ? '畫好之前不會出現' : '現在會用 idle'}</div>`}</div>
         <div class="tname"><code>${f.url ? fileOf(f.url) : p}</code>${tag}</div>
         <div class="when">${whenOf(sel, p)}${fx ? ` · 特效 <span class="pill">${fx}</span>` : ''}</div>
-        <div class="line">${lineOf(c, p) ? '「' + lineOf(c, p) + '」' : '<span style="color:var(--muted)">（没有台词）</span>'}</div>`
+        <div class="line">${lineOf(c, p) ? '「' + lineOf(c, p) + '」' : '<span style="color:var(--muted)">（沒有臺詞）</span>'}</div>`
       const idx = tiles.length
       t.querySelector('.thumb').onclick = () => play(idx)
       t.append(markUI(key, t))
@@ -258,9 +258,9 @@ function play(idx) {
 let touring = null
 $('tour').onclick = async () => {
   if (touring) { touring.stop = true; return }
-  touring = { stop: false }; $('tour').textContent = '■ 停止轮播'
+  touring = { stop: false }; $('tour').textContent = '■ 停止輪播'
   for (let i = 0; i < tiles.length && !touring.stop; i++) { play(i); await wait(3500) }
-  touring = null; $('tour').textContent = '▶ 逐个轮播这个角色的全部姿态'
+  touring = null; $('tour').textContent = '▶ 逐個輪播這個角色的全部姿態'
 }
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || !$('poses').classList.contains('sel')) return
@@ -268,7 +268,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft') { play(Math.max(0, playingIdx - 1)); e.preventDefault() }
 })
 
-// ---- 场景 ----
+// ---- 場景 ----
 let tsSeq = 0
 const nextTs = () => Date.now() / 1000 + (tsSeq++) * 0.001
 const st = (id, pose, event, tool = '', extra = {}) => pet(`applyCharState(${J(id)}, ${J({ pose, event, tool, ts: nextTs(), ...extra })})`)
@@ -281,137 +281,137 @@ async function tools(id, list, gap = 2600) {
   for (const [pose, tool] of list) { st(id, pose, 'PreToolUse', tool); await wait(gap); st(id, 'thinking', 'PostToolUse', tool); await wait(1800) }
 }
 const SCENES = [
-  { id: 'work', name: '一轮普通的工作', exp: '在听 → 思考 → 读读看 → 写写写 → 跑命令 → 查资料（中间会夹着思考；每个动作至少停 2.5 秒，太快的会合并）→ <b>开心</b>（打勾清单 + 彩纸）→ 约 5 秒后回到平时',
+  { id: 'work', name: '一輪普通的工作', exp: '在聽 → 思考 → 讀讀看 → 寫寫寫 → 跑命令 → 查資料（中間會夾著思考；每個動作至少停 2.5 秒，太快的會合並）→ <b>開心</b>（打勾清單 + 彩紙）→ 約 5 秒後回到平時',
     run: async (id, prog) => { st(id, 'listening', 'UserPromptSubmit'); await wait(2500)
-      prog('读 → 写 → 跑 → 查'); await tools(id, [['reading', 'Read'], ['writing', 'Edit'], ['running', 'Bash'], ['searching', 'WebSearch']])
+      prog('讀 → 寫 → 跑 → 查'); await tools(id, [['reading', 'Read'], ['writing', 'Edit'], ['running', 'Bash'], ['searching', 'WebSearch']])
       prog('完成'); st(id, 'happy', 'Stop') } },
-  { id: 'bigjob', name: '大活完成（戴皇冠）', exp: '连续 9 次工具后结束 → <b>proud</b>：头上戴着自己的皇冠，左上奖杯 + 闪光，约 6 秒',
+  { id: 'bigjob', name: '大活完成（戴皇冠）', exp: '連續 9 次工具後結束 → <b>proud</b>：頭上戴著自己的皇冠，左上獎盃 + 閃光，約 6 秒',
     run: async (id, prog) => { st(id, 'listening', 'UserPromptSubmit'); await wait(1500)
       for (let i = 1; i <= 9; i++) { prog(`工具 ${i}/9`); st(id, ['reading', 'writing', 'running'][i % 3], 'PreToolUse', 'Tool'); await wait(900); st(id, 'thinking', 'PostToolUse'); await wait(500) }
       prog('完成'); st(id, 'proud', 'Stop') } },
-  { id: 'draw', name: '画图', exp: '生图工具 → <b>画画</b>（右上画板，彩色笔触一笔笔画出来）→ 思考 → 开心',
+  { id: 'draw', name: '畫圖', exp: '生圖工具 → <b>畫畫</b>（右上畫板，彩色筆觸一筆筆畫出來）→ 思考 → 開心',
     run: async (id) => { st(id, 'listening', 'UserPromptSubmit'); await wait(1500); await tools(id, [['drawing', 'image_gen']], 4500); st(id, 'happy', 'Stop') } },
-  { id: 'delegate', name: '派子任务', exp: '<b>交给分身</b>（任务清单 + 纸飞机）→ 子任务结束回到思考 → 开心',
+  { id: 'delegate', name: '派子任務', exp: '<b>交給分身</b>（任務清單 + 紙飛機）→ 子任務結束回到思考 → 開心',
     run: async (id) => { st(id, 'delegating', 'SubagentStart'); await wait(4500); st(id, 'thinking', 'SubagentStop'); await wait(2500); st(id, 'happy', 'Stop') } },
-  { id: 'oops', name: '出错，然后被你纠正', exp: '跑命令 → <b>出错</b>（错误卡片）→ 3 秒后你发消息 → 有 correctedPose 的角色先<b>认错</b>（Claude：「You\'re absolutely right!」），其他角色是普通的「在听」→ 思考',
+  { id: 'oops', name: '出錯，然後被你糾正', exp: '跑命令 → <b>出錯</b>（錯誤卡片）→ 3 秒後你發訊息 → 有 correctedPose 的角色先<b>認錯</b>（Claude：「You\'re absolutely right!」），其他角色是普通的「在聽」→ 思考',
     run: async (id, prog) => { st(id, 'running', 'PreToolUse', 'Bash'); await wait(2500); st(id, 'oops', 'PostToolUse', 'Bash'); await wait(2700); st(id, 'oops', 'Stop')
-      prog('3 秒后发消息…'); await wait(3000); st(id, 'listening', 'UserPromptSubmit'); await wait(3500); prog('') } },
-  { id: 'asking', name: 'AI 问你问题', exp: '读文件 → AI 停下来问你（提问 / 要你授权）→ <b>等你回答</b>，一直保持到你回答 → 你回答后回到思考 → 开心',
+      prog('3 秒後發訊息…'); await wait(3000); st(id, 'listening', 'UserPromptSubmit'); await wait(3500); prog('') } },
+  { id: 'asking', name: 'AI 問你問題', exp: '讀檔案 → AI 停下來問你（提問 / 要你授權）→ <b>等你回答</b>，一直保持到你回答 → 你回答後回到思考 → 開心',
     run: async (id, prog) => { st(id, 'reading', 'PreToolUse', 'Read'); await wait(2600); st(id, 'asking', 'PreToolUse', 'AskUserQuestion')
       prog('等你回答中（8 秒）'); await wait(8000); st(id, 'thinking', 'PostToolUse', 'AskUserQuestion'); await wait(2600); st(id, 'happy', 'Stop'); prog('') } },
-  { id: 'abort', name: '被打断', exp: '干活中途被你按停 → <b>surprised</b>（「诶？！」）约 3 秒',
+  { id: 'abort', name: '被打斷', exp: '幹活中途被你按停 → <b>surprised</b>（「欸？！」）約 3 秒',
     run: async (id) => { st(id, 'writing', 'PreToolUse', 'Edit'); await wait(2500); st(id, 'surprised', 'Stop') } },
-  { id: 'compact', name: '压缩上下文', exp: '<b>compact</b>：往小箱子里硬塞东西（身体有挤压的动作）→ 压缩完回到思考 → 开心',
-    run: async (id, prog) => { st(id, 'compact', 'PreCompact'); prog('压缩中（6 秒）'); await wait(6000); st(id, 'thinking', 'PostCompact'); await wait(2500); st(id, 'happy', 'Stop'); prog('') } },
-  { id: 'piggy', name: '快速连发（Antigravity 那种）', exp: '工具结束后几毫秒就开始思考：桌宠只收到「思考 + 捎带的动作」，也应该先演<b>读读看 → 画画 → 写写写</b>，每个约 2.5 秒，再思考',
+  { id: 'compact', name: '壓縮上下文', exp: '<b>compact</b>：往小箱子裡硬塞東西（身體有擠壓的動作）→ 壓縮完回到思考 → 開心',
+    run: async (id, prog) => { st(id, 'compact', 'PreCompact'); prog('壓縮中（6 秒）'); await wait(6000); st(id, 'thinking', 'PostCompact'); await wait(2500); st(id, 'happy', 'Stop'); prog('') } },
+  { id: 'piggy', name: '快速連發（Antigravity 那種）', exp: '工具結束後幾毫秒就開始思考：桌寵只收到「思考 + 捎帶的動作」，也應該先演<b>讀讀看 → 畫畫 → 寫寫寫</b>，每個約 2.5 秒，再思考',
     run: async (id) => { for (const p of ['reading', 'drawing', 'writing']) { const t = nextTs(); st(id, 'thinking', 'PreInvocation', '', { after: p, afterTs: t }); await wait(3200) } st(id, 'happy', 'Stop') } },
-  { id: 'longthink', name: '想了很久', only: c => c.longThink, exp: '思考超过设定的秒数 → 换成专属的<b>深度思考</b>（DeepSeek：揉太阳穴 + 深海泡泡）。要等 20 多秒',
+  { id: 'longthink', name: '想了很久', only: c => c.longThink, exp: '思考超過設定的秒數 → 換成專屬的<b>深度思考</b>（DeepSeek：揉太陽穴 + 深海泡泡）。要等 20 多秒',
     run: async (id, prog) => { const c = manifest.characters[id]; st(id, 'listening', 'UserPromptSubmit'); await wait(1500); st(id, 'thinking', 'PostToolUse')
       for (let s = (c.longThink.after || 20) + 4; s > 0; s--) { prog(`等 ${s} 秒`); await wait(1000) } prog('') } },
-  { id: 'update', name: '有新版本', exp: '发现新版本 → <b>收到礼物</b>（NEW 小窗 + 往上跳的箭头 + 进度条）约 6.5 秒，气泡「有新版本…右键菜单里点更新」一直留着',
-    run: async (id, prog) => { pet(`notifyUpdate('v9.9.9')`); prog('6.5 秒后回到常态'); await wait(7000); prog('') } },
-  { id: 'tired', name: '额度快用完', exp: '名牌下额度变<b>红</b>，她换成<b>累了</b>（快没电的电池），说一句累了的台词；8 秒后恢复真实额度',
+  { id: 'update', name: '有新版本', exp: '發現新版本 → <b>收到禮物</b>（NEW 小窗 + 往上跳的箭頭 + 進度條）約 6.5 秒，氣泡「有新版本…右鍵選單裡點更新」一直留著',
+    run: async (id, prog) => { pet(`notifyUpdate('v9.9.9')`); prog('6.5 秒後回到常態'); await wait(7000); prog('') } },
+  { id: 'tired', name: '額度快用完', exp: '名牌下額度變<b>紅</b>，她換成<b>累了</b>（快沒電的電池），說一句累了的臺詞；8 秒後恢復真實額度',
     run: async (id, prog) => { const s = await petStatus(), saved = s.quota[id] ?? null
-      pet(`setQuota(${J(id)}, ${J({ text: '测试 剩余 3% ｜ 本周 剩余 40%', low: true })})`); prog('8 秒后恢复'); await wait(8000)
+      pet(`setQuota(${J(id)}, ${J({ text: '測試 剩餘 3% ｜ 本週 剩餘 40%', low: true })})`); prog('8 秒後恢復'); await wait(8000)
       pet(`setQuota(${J(id)}, ${J(saved)})`); prog('') } },
-  { id: 'reset', name: 'Codex 额度提前 reset', only: (c, id) => id === 'gpt', exp: '额度在预定重置前突然恢复 → <b>reset</b>：举着重置卡难得地笑出来 + 彩纸，约 6.5 秒；之后恢复真实额度',
+  { id: 'reset', name: 'Codex 額度提前 reset', only: (c, id) => id === 'gpt', exp: '額度在預定重置前突然恢復 → <b>reset</b>：舉著重置卡難得地笑出來 + 彩紙，約 6.5 秒；之後恢復真實額度',
     run: async (id) => { const s = await petStatus(), saved = s.quota[id] ?? null, now = Date.now() / 1000
-      const q = u => ({ text: `测试 本周 剩余 ${100 - u}%`, low: false, windows: [{ label: '本周', used: u, reset: now + 400000 }] })
+      const q = u => ({ text: `測試 本週 剩餘 ${100 - u}%`, low: false, windows: [{ label: '本週', used: u, reset: now + 400000 }] })
       pet(`setQuota('gpt', ${J(q(70))})`); await wait(500); pet(`setQuota('gpt', ${J(q(3))})`); await wait(8000); pet(`setQuota('gpt', ${J(saved)})`) } },
-  { id: 'resets', name: 'Codex 重置提醒（7 档）', only: (c, id) => id === 'gpt', exp: '不联网，用假数据依次问她「会重置吗？」：先<b>查手机</b>，再按档回答——<b>官方已宣布</b>（摇铃，额度下方多一行「🔔 官方已宣布重置」）→ <b>刚重置过</b>（庆祝，额度下方「✨ 2 小时前刚重置过」）→ <b>85%</b>（期待）→ <b>50%</b>（半信半疑）→ <b>10%</b>（摇头）→ <b>没风声</b>（摇头，说上次是几天前）→ <b>连不上</b>（摇头）。每档约 10 秒，演完恢复真实设置',
+  { id: 'resets', name: 'Codex 重置提醒（7 檔）', only: (c, id) => id === 'gpt', exp: '不聯網，用假資料依次問她「會重置嗎？」：先<b>查手機</b>，再按檔回答——<b>官方已宣佈</b>（搖鈴，額度下方多一行「🔔 官方已宣佈重置」）→ <b>剛重置過</b>（慶祝，額度下方「✨ 2 小時前剛重置過」）→ <b>85%</b>（期待）→ <b>50%</b>（半信半疑）→ <b>10%</b>（搖頭）→ <b>沒風聲</b>（搖頭，說上次是幾天前）→ <b>連不上</b>（搖頭）。每檔約 10 秒，演完恢復真實設定',
     run: async (id, prog) => {
       const iso = ms => new Date(Date.now() + ms).toISOString()
       const src = { type: 'x_post', author: 'thsottiaux', url: 'https://x.com' }
       const watch = chance => ({ level: chance >= 70 ? 'strong' : 'elevated', reset_chance_percent: chance, forecast_window: 'within 24h', observed_at: iso(-3600e3), expires_at: iso(86400e3), text: '', source: src })
       const data = (extra = {}) => ({ data: { latest_reset: null, scheduled_reset: null, active_watch: null, stats: { total: 61, last_reset_at: iso(-1.4 * 86400e3), days_since_last: 1.4, avg_interval_days: 6.5 }, ...extra }, meta: { api_version: 'v1' } })
       const tiers = [
-        ['官方已宣布', data({ scheduled_reset: { id: 'dev', status: 'scheduled', reset_type: 'regular', announced_at: iso(-600e3), scheduled_for: iso(20 * 3600e3), text: '', source: src } })],
-        ['刚重置过', data({ latest_reset: { id: 'dev-r', reset_type: 'regular', announced_at: iso(-2 * 3600e3), text: '', source: src } })],
+        ['官方已宣佈', data({ scheduled_reset: { id: 'dev', status: 'scheduled', reset_type: 'regular', announced_at: iso(-600e3), scheduled_for: iso(20 * 3600e3), text: '', source: src } })],
+        ['剛重置過', data({ latest_reset: { id: 'dev-r', reset_type: 'regular', announced_at: iso(-2 * 3600e3), text: '', source: src } })],
         ['85%', data({ active_watch: watch(85) })], ['50%', data({ active_watch: watch(50) })], ['10%', data({ active_watch: watch(10) })],
-        ['没风声', data()], ['连不上', null],
+        ['沒風聲', data()], ['連不上', null],
       ]
       for (const [name, d] of tiers) { prog(name); pet(`devResetsPlay(${J(d)})`); await wait(10500) }
       pet('devResetsDone()'); prog('') } },
-  { id: 'peak', name: '峰谷换装', only: (c, id) => !!window.PeakHours?.RULES[id], exp: '把时间挪到下一个工作日 <b>8:59:50</b>：额度下的时间条竖线跳到 9 点前，10 秒后进入<b>高峰</b>——设置里选了「高峰穿」的话冒一团烟换上、说一句；再挪到 <b>11:59:50</b>，进入<b>空闲</b>换「空闲穿」的那件。没在设置里选衣服就只看时间条。不改你的设置，演完换回原来的衣服',
+  { id: 'peak', name: '峰谷換裝', only: (c, id) => !!window.PeakHours?.RULES[id], exp: '把時間挪到下一個工作日 <b>8:59:50</b>：額度下的時間條豎線跳到 9 點前，10 秒後進入<b>高峰</b>——設定裡選了「高峰穿」的話冒一團煙換上、說一句；再挪到 <b>11:59:50</b>，進入<b>空閒</b>換「空閒穿」的那件。沒在設定裡選衣服就只看時間條。不改你的設定，演完換回原來的衣服',
     run: async (id, prog) => {
       const day = 86400e3, bj = 8 * 3600e3, mid = Math.floor((Date.now() + bj) / day) * day - bj
       let d = 1; while (![1, 2, 3, 4, 5].includes(new Date(mid + d * day + bj).getUTCDay())) d++
       const at = h => mid + d * day + h * 3600e3 - 10e3
       prog('高峰前 10 秒'); pet(`devPeakPlay(${at(9)})`); await wait(16000)
-      prog('空闲前 10 秒'); pet(`devPeakPlay(${at(12)})`); await wait(16000)
+      prog('空閒前 10 秒'); pet(`devPeakPlay(${at(12)})`); await wait(16000)
       pet('devPeakDone()'); prog('') } },
-  { id: 'feast', name: 'DeepSeek 充值', only: (c, id) => id === 'deepseek', exp: '余额变多 → <b>feast</b>：抱着比脑袋还大的饭碗开吃 + 彩纸；之后恢复真实余额',
+  { id: 'feast', name: 'DeepSeek 充值', only: (c, id) => id === 'deepseek', exp: '餘額變多 → <b>feast</b>：抱著比腦袋還大的飯碗開吃 + 彩紙；之後恢復真實餘額',
     run: async (id) => { const s = await petStatus(), saved = s.quota[id] ?? null
-      pet(`setQuota('deepseek', ${J({ text: '余额 ¥6.00', low: false, balance: 6 })})`); await wait(500)
-      pet(`setQuota('deepseek', ${J({ text: '余额 ¥26.00', low: false, balance: 26 })})`); await wait(8000); pet(`setQuota('deepseek', ${J(saved)})`) } },
-  { id: 'egg', name: '彩蛋', only: (c, id) => Object.values(manifest.characters).some(e => e.egg && e.host === id), exp: '「噗」一下变成 cos 她的 DeepSeek：跳出来 → 装模作样（一直等）→ <b>你单击桌宠</b> → 被识破 → 溜走 → 变回原角色。不点的话 40 秒后她自己溜走',
-    run: async (id, prog) => { pet('playEgg(true)'); prog('现在去单击桌宠试试') } },
-  { id: 'touch', name: '摸头 / 戳一下', exp: '<b>摸头</b>（爱心往上飘）→ 4 秒后<b>戳一下</b>（头边弹出「!」；DeepSeek 是生气）',
+      pet(`setQuota('deepseek', ${J({ text: '餘額 ¥6.00', low: false, balance: 6 })})`); await wait(500)
+      pet(`setQuota('deepseek', ${J({ text: '餘額 ¥26.00', low: false, balance: 26 })})`); await wait(8000); pet(`setQuota('deepseek', ${J(saved)})`) } },
+  { id: 'egg', name: '彩蛋', only: (c, id) => Object.values(manifest.characters).some(e => e.egg && e.host === id), exp: '「噗」一下變成 cos 她的 DeepSeek：跳出來 → 裝模作樣（一直等）→ <b>你單擊桌寵</b> → 被識破 → 溜走 → 變回原角色。不點的話 40 秒後她自己溜走',
+    run: async (id, prog) => { pet('playEgg(true)'); prog('現在去單擊桌寵試試') } },
+  { id: 'touch', name: '摸頭 / 戳一下', exp: '<b>摸頭</b>（愛心往上飄）→ 4 秒後<b>戳一下</b>（頭邊彈出「!」；DeepSeek 是生氣）',
     run: async (id) => { pet("handleClick('pat')"); await wait(4500); pet("handleClick('poke')") } },
-  { id: 'sleep', name: '睡着，再叫醒', exp: '<b>睡着</b>（月亮 + Zz）→ 4 秒后摸她 → <b>打哈欠</b>「唔…你回来啦」→ 平时',
+  { id: 'sleep', name: '睡著，再叫醒', exp: '<b>睡著</b>（月亮 + Zz）→ 4 秒後摸她 → <b>打哈欠</b>「唔…你回來啦」→ 平時',
     run: async (id) => { pet("setPose('sleeping'); say(pick(linesOf('sleeping') || ['']))"); await wait(4500); pet("handleClick('pat')") } },
-  { id: 'idleacts', name: '闲置小动作', exp: '依次演她闲着时会做的动作（专属的 + 哼歌、伸懒腰、打哈欠），每个约 4.5 秒',
+  { id: 'idleacts', name: '閒置小動作', exp: '依次演她閒著時會做的動作（專屬的 + 哼歌、伸懶腰、打哈欠），每個約 4.5 秒',
     run: async (id, prog) => { const c = manifest.characters[id]
       const acts = [...(c.idleActions || []).filter(a => c.poses[a]), 'hum', 'stretch', 'yawn']
       for (const a of acts) { prog(a); pet(`if (!TRANSIENT[${J(a)}]) TRANSIENT[${J(a)}] = 4000; show(${J(a)}, true)`); await wait(4500) } prog('') } },
-  { id: 'blink', name: '眨眼', only: c => c.blink, exp: '平时姿态下眨 3 次眼：只有眼睛闭上，头发和身体<b>不能跳动</b>',
+  { id: 'blink', name: '眨眼', only: c => c.blink, exp: '平時姿態下眨 3 次眼：只有眼睛閉上，頭髮和身體<b>不能跳動</b>',
     run: async (id) => { const c = manifest.characters[id]
       pet(`devShow(${J(id)}, 'idle', '', ${J(c.blinkBase)}, 8000)`); await wait(1200)
       for (let i = 0; i < 3; i++) { pet("$('blink').classList.add('on'); setTimeout(() => $('blink').classList.remove('on'), 140)"); await wait(1200) } } },
-  { id: 'switch', name: '切换角色', exp: '依次换成每个角色：「噗」的烟雾 + 淡入，不能闪、不能两个角色叠在一起，最后回到选中的角色',
+  { id: 'switch', name: '切換角色', exp: '依次換成每個角色：「噗」的煙霧 + 淡入，不能閃、不能兩個角色疊在一起，最後回到選中的角色',
     run: async (id) => { for (const o of Object.keys(manifest.characters).filter(k => !manifest.characters[k].egg)) { pet(`setCharacter(${J(o)})`); await wait(2200) } pet(`setCharacter(${J(id)})`) } },
 ]
 let running = null
 function renderScenes() {
   const box = $('sceneList'); box.innerHTML = ''
   const c = manifest.characters[sel]
-  if (c.egg) { box.innerHTML = '<p class="hint">彩蛋角色没有单独的场景，选她的本体角色，用「彩蛋」场景来测。</p>'; return }
+  if (c.egg) { box.innerHTML = '<p class="hint">彩蛋角色沒有單獨的場景，選她的本體角色，用「彩蛋」場景來測。</p>'; return }
   for (const sc of SCENES.filter(s => !s.only || s.only(c, sel))) {
     const key = `scene:${sel}:${sc.id}`
     const el = document.createElement('div'); el.className = 'scene'
-    el.innerHTML = `<div><h4>${sc.name}</h4><div class="exp">预期：${sc.exp}</div></div><div class="side"><div class="row"><button class="primary go">▶ 运行</button><span class="prog"></span></div></div>`
+    el.innerHTML = `<div><h4>${sc.name}</h4><div class="exp">預期：${sc.exp}</div></div><div class="side"><div class="row"><button class="primary go">▶ 執行</button><span class="prog"></span></div></div>`
     const prog = t => { el.querySelector('.prog').textContent = t }
     el.querySelector('.go').onclick = async () => {
       if (running) return
-      running = sc.id; prog('运行中…')
-      try { await begin(sel); await sc.run(sel, prog) } finally { running = null; if (el.querySelector('.prog').textContent === '运行中…') prog('') }
+      running = sc.id; prog('執行中…')
+      try { await begin(sel); await sc.run(sel, prog) } finally { running = null; if (el.querySelector('.prog').textContent === '執行中…') prog('') }
     }
     el.querySelector('.side').append(markUI(key, el))
     box.append(el)
   }
 }
 
-// ---- 实时事件 ----
+// ---- 即時事件 ----
 function logEvent(id, kind, data, paused) {
   const tr = document.createElement('tr')
   const t = new Date(), pad = n => String(n).padStart(2, '0')
-  tr.innerHTML = `<td>${pad(t.getHours())}:${pad(t.getMinutes())}:${pad(t.getSeconds())}</td><td>${manifest.characters[id]?.name || id}</td><td>${kind === 'state' ? '状态' : '额度'}</td>
-    <td><code>${kind === 'state' ? `<b>${data.pose}</b> · ${data.event || ''}${data.tool ? ' · ' + data.tool : ''}${data.after ? ' · 捎带 ' + data.after : ''}` : (data?.text || J(data))}</code></td>
-    <td>${paused ? '<span class="pill fb">已暂停</span>' : '<span class="pill ok">已交给桌宠</span>'}</td>`
+  tr.innerHTML = `<td>${pad(t.getHours())}:${pad(t.getMinutes())}:${pad(t.getSeconds())}</td><td>${manifest.characters[id]?.name || id}</td><td>${kind === 'state' ? '狀態' : '額度'}</td>
+    <td><code>${kind === 'state' ? `<b>${data.pose}</b> · ${data.event || ''}${data.tool ? ' · ' + data.tool : ''}${data.after ? ' · 捎帶 ' + data.after : ''}` : (data?.text || J(data))}</code></td>
+    <td>${paused ? '<span class="pill fb">已暫停</span>' : '<span class="pill ok">已交給桌寵</span>'}</td>`
   $('log').prepend(tr)
   while ($('log').children.length > 300) $('log').lastChild.remove()
 }
 
-// ---- 桌宠状态 ----
+// ---- 桌寵狀態 ----
 function onPetStatus(s) {
   status = s; fallback = s.fallback || fallback
   statusWaiters.splice(0).forEach(r => r(s))
   const c = manifest.characters[s.charId]
-  $('status').innerHTML = `当前 <b>${c?.name || s.charId || '—'}</b> · 姿态 <b>${s.pose || '—'}</b> · 图 <code>${s.image || '—'}</code>`
-    + (s.usesFallback ? ' <span class="pill fb">缺图，正在用顶替图</span>' : '')
+  $('status').innerHTML = `當前 <b>${c?.name || s.charId || '—'}</b> · 姿態 <b>${s.pose || '—'}</b> · 圖 <code>${s.image || '—'}</code>`
+    + (s.usesFallback ? ' <span class="pill fb">缺圖，正在用頂替圖</span>' : '')
     + (s.fx ? ` · 特效 <span class="pill">${s.fx}</span>` : '')
-    + (s.egg ? ` · <span class="pill fb">彩蛋中${s.egg.waiting ? '，等你点她' : ''}</span>` : '')
+    + (s.egg ? ` · <span class="pill fb">彩蛋中${s.egg.waiting ? '，等你點她' : ''}</span>` : '')
     + (s.held ? ' · <span class="pill">保持中</span>' : '')
-    + (s.bubble ? ` · 气泡「${s.bubble}」` : '')
+    + (s.bubble ? ` · 氣泡「${s.bubble}」` : '')
 }
 setInterval(() => post({ cmd: 'status' }), 700)
 
-// ---- 反馈 ----
+// ---- 反饋 ----
 function allKeys() {
   const keys = []
   for (const [id, c] of Object.entries(manifest.characters)) {
-    for (const p of posesOf(id)) (c.poses[p] || [null]).forEach((u, i) => keys.push({ key: `pose:${id}:${p}:${i}`, label: `${c.name} · ${u ? fileOf(u) : p + '（缺图）'}` }))
-    if (!c.egg) for (const sc of SCENES.filter(s => !s.only || s.only(c, id))) keys.push({ key: `scene:${id}:${sc.id}`, label: `${c.name} · 场景「${sc.name}」` })
+    for (const p of posesOf(id)) (c.poses[p] || [null]).forEach((u, i) => keys.push({ key: `pose:${id}:${p}:${i}`, label: `${c.name} · ${u ? fileOf(u) : p + '（缺圖）'}` }))
+    if (!c.egg) for (const sc of SCENES.filter(s => !s.only || s.only(c, id))) keys.push({ key: `scene:${id}:${sc.id}`, label: `${c.name} · 場景「${sc.name}」` })
   }
   return keys
 }
@@ -422,21 +422,21 @@ function renderReport() {
   $('badCount').textContent = bad.length
   const now = new Date()
   $('report').value = [
-    `# CrossPet 开发者反馈`, ``, `- 版本：${appInfo.version || '?'}`, `- 时间：${now.toLocaleString('zh-CN')}`,
-    `- 统计：有问题 ${bad.length} · 正常 ${ok.length} · 还没看 ${keys.length - bad.length - ok.length}`, ``,
-    `## 有问题`, ``, ...(bad.length ? bad.map(k => `- **${k.label}**（\`${k.key}\`）：${marks[k.key].note || '（没写原因）'}`) : ['（无）']), ``,
-    `## 正常`, ``, ...(ok.length ? ok.map(k => `- ${k.label}${marks[k.key].note ? '：' + marks[k.key].note : ''}`) : ['（无）']), ``,
+    `# CrossPet 開發者反饋`, ``, `- 版本：${appInfo.version || '?'}`, `- 時間：${now.toLocaleString('zh-CN')}`,
+    `- 統計：有問題 ${bad.length} · 正常 ${ok.length} · 還沒看 ${keys.length - bad.length - ok.length}`, ``,
+    `## 有問題`, ``, ...(bad.length ? bad.map(k => `- **${k.label}**（\`${k.key}\`）：${marks[k.key].note || '（沒寫原因）'}`) : ['（無）']), ``,
+    `## 正常`, ``, ...(ok.length ? ok.map(k => `- ${k.label}${marks[k.key].note ? '：' + marks[k.key].note : ''}`) : ['（無）']), ``,
   ].join('\n')
   if (manifest && sel) renderChars()
 }
 $('save').onclick = () => post({ cmd: 'save', text: $('report').value })
 $('reveal').onclick = () => post({ cmd: 'reveal' })
-$('clearMarks').onclick = () => { if (confirm('清空所有 ✓ / ✗ 标记和备注？')) { marks = {}; saveMarks(); renderGrid(); renderScenes() } }
-function onSaved(path) { $('savedTo').textContent = '已保存到 ' + path + '，也复制到了剪贴板' }
+$('clearMarks').onclick = () => { if (confirm('清空所有 ✓ / ✗ 標記和備註？')) { marks = {}; saveMarks(); renderGrid(); renderScenes() } }
+function onSaved(path) { $('savedTo').textContent = '已儲存到 ' + path + '，也複製到了剪貼簿' }
 
-// ---- 顶部按钮 / 标签页 ----
+// ---- 頂部按鈕 / 標籤頁 ----
 let paused = true
-$('pause').onclick = () => { paused = !paused; post({ cmd: 'pause', on: paused }); $('pause').classList.toggle('on', paused); $('pause').textContent = paused ? '⏸ 暂停真实 AI 事件' : '▶ 真实 AI 事件照常' }
+$('pause').onclick = () => { paused = !paused; post({ cmd: 'pause', on: paused }); $('pause').classList.toggle('on', paused); $('pause').textContent = paused ? '⏸ 暫停真實 AI 事件' : '▶ 真實 AI 事件照常' }
 $('release').onclick = () => { tiles[playingIdx]?.el.classList.remove('playing'); playingIdx = -1; pet('devRelease()') }
 $('reloadPet').onclick = () => post({ cmd: 'reload' })
 document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
@@ -444,7 +444,7 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
   document.querySelectorAll('section').forEach(s => s.classList.toggle('sel', s.id === b.dataset.tab))
 })
 
-// ---- 由 App 调用 ----
+// ---- 由 App 呼叫 ----
 function setAppInfo(info) { appInfo = info; $('ver').textContent = 'v' + info.version }
 function boot(m) {
   manifest = m

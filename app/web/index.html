@@ -2,16 +2,16 @@
 <html><head><meta charset="utf-8">
 <style>
 @property --aura { syntax: '<color>'; inherits: true; initial-value: #ffd9b0; }
-/* --k：文字区域（气泡、名牌、额度）相对人物再放大多少，外壳调 setSizes 设；锁着时 1 */
+/* --k：文字區域（氣泡、名牌、額度）相對人物再放大多少，外殼調 setSizes 設；鎖著時 1 */
 :root { --aura: #ffd9b0; --aura-o: .35; --k: 1; }
 html, body { margin: 0; background: transparent; overflow: hidden; -webkit-user-select: none; cursor: default;
   font-family: -apple-system, "PingFang SC", sans-serif; }
-/* 从下往上排：底栏（名牌 + 额度）固定高度贴着窗口底边，人物在它上面，气泡从人物头顶往上长。
-   这样名牌开关、额度有几行、台词有多长，人物都不挪位置，额度也不会被长台词挤出窗口
-   （Windows 上微软雅黑行高大，之前开着名牌、台词折两三行时额度会被挤出去） */
+/* 從下往上排：底欄（名牌 + 額度）固定高度貼著視窗底邊，人物在它上面，氣泡從人物頭頂往上長。
+   這樣名牌開關、額度有幾行、臺詞有多長，人物都不挪位置，額度也不會被長臺詞擠出視窗
+   （Windows 上微軟雅黑行高大，之前開著名牌、臺詞折兩三行時額度會被擠出去） */
 #wrap { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100vh; }
 #wrap > * { flex-shrink: 0; }
-/* 底栏最小高度按 max(1, k)：字比人小时不缩，人物不往下掉 */
+/* 底欄最小高度按 max(1, k)：字比人小時不縮，人物不往下掉 */
 #foot { min-height: calc(62px * max(1, var(--k))); flex-shrink: 0; display: flex; flex-direction: column; align-items: center; }
 #bubble { position: relative; z-index: 3; margin-bottom: calc(-10px * var(--k)); max-width: calc(228px * var(--k)); min-height: calc(18px * var(--k));
   margin-top: calc(4px * var(--k)); padding: calc(5px * var(--k)) calc(11px * var(--k)); border-radius: calc(12px * var(--k));
@@ -19,7 +19,7 @@ html, body { margin: 0; background: transparent; overflow: hidden; -webkit-user-
   font-size: calc(13px * var(--k)); line-height: 1.35; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,.12);
   transition: opacity .3s, transform .3s; }
 #bubble.hide { opacity: 0; transform: translateY(4px); }
-/* 更新后的「新功能」卡片：放在气泡的位置（她头顶，挂在 #stage 上沿、和气泡一样往下压 10），不占排版、不改窗口大小 */
+/* 更新後的「新功能」卡片：放在氣泡的位置（她頭頂，掛在 #stage 上沿、和氣泡一樣往下壓 10），不佔排版、不改視窗大小 */
 #newsCard { position: absolute; z-index: 4; left: 50%; bottom: calc(100% - 10px * var(--k)); transform: translateX(-50%); width: max-content; max-width: calc(228px * var(--k));
   padding: calc(4px * var(--k)) calc(11px * var(--k)) calc(2px * var(--k)); border-radius: calc(12px * var(--k)); background: rgba(255,255,255,.97);
   border: calc(1.5px * var(--k)) solid var(--accent, #e0b48a); color: #4a2418; font-size: calc(13px * var(--k)); line-height: 1.3; text-align: center;
@@ -35,25 +35,25 @@ html, body { margin: 0; background: transparent; overflow: hidden; -webkit-user-
   background: radial-gradient(circle closest-side, var(--aura) 0%, color-mix(in srgb, var(--aura) 45%, transparent) 45%, transparent 100%);
   transition: --aura 0.8s, opacity .8s; animation: pulse 3s ease-in-out infinite; }
 @keyframes pulse { 50% { transform: scale(1.04); } }
-/* 背景光晕：浅色背景上是柔和的氛围，深色背景上会变成一圈发亮的圆盘（像佛光）。
-   html 上的 aura-on / aura-off 由宿主按右键菜单的选择设；都没有（自动）时跟着系统深浅色，深色模式下不显示 */
+/* 背景光暈：淺色背景上是柔和的氛圍，深色背景上會變成一圈發亮的圓盤（像佛光）。
+   html 上的 aura-on / aura-off 由宿主按右鍵選單的選擇設；都沒有（自動）時跟著系統深淺色，深色模式下不顯示 */
 html.aura-off #aura, html.aura-off .aura-rings { display: none; }
 @media (prefers-color-scheme: dark) { html:not(.aura-on) #aura, html:not(.aura-on) .aura-rings { display: none; } }
 #shadow { position: absolute; left: 50%; bottom: 7px; width: 110px; height: 10px; margin-left: -55px;
   border-radius: 50%; background: rgba(0,0,0,.13); }
 #body { position: absolute; left: 17.8%; top: 21.1%; width: 64.5%; height: 75%; transform-origin: 50% 100%; }
-/* 立绘按高度占满人物框；比框宽的（张开翅膀、带小帮手、抱大碗……）往左右多伸出去，最多到整个舞台宽，
-   而不是整体缩小——这样所有姿态里人物一样高 */
+/* 立繪按高度佔滿人物框；比框寬的（張開翅膀、帶小幫手、抱大碗……）往左右多伸出去，最多到整個舞臺寬，
+   而不是整體縮小——這樣所有姿態里人物一樣高 */
 #body img { position: absolute; top: 0; bottom: 0; left: -27.5%; width: 155%; height: 100%; object-fit: contain; object-position: 50% 100%;
   opacity: 0; transition: opacity .35s ease; }
 #body img.on { opacity: 1; }
 #body img#blink { transition: none; }
 #fx { position: absolute; inset: 0; transition: opacity .3s; pointer-events: none; }
-/* 闲着久了：身边的特效淡出（见「特效省电」） */
+/* 閒著久了：身邊的特效淡出（見「特效省電」） */
 #fx.rest { opacity: 0; transition: opacity 1.2s; }
-/* 看不见（被挡住、锁屏）：所有动画暂停 */
+/* 看不見（被擋住、鎖屏）：所有動畫暫停 */
 html.frozen *, html.frozen *::before, html.frozen *::after { animation-play-state: paused !important; }
-/* 多会话：每个正在干活的对话一张小卡片，放在桌宠两侧 / 四个角 */
+/* 多會話：每個正在幹活的對話一張小卡片，放在桌寵兩側 / 四個角 */
 #cards { position: absolute; inset: 0; pointer-events: none; }
 .scard { position: absolute; width: 66px; height: 56px; transition: left .35s ease, top .35s ease, opacity .35s ease, transform .35s ease; opacity: 0; transform: scale(.6); }
 .scard.on { opacity: .72; transform: scale(.92); }
@@ -69,11 +69,11 @@ html.frozen *, html.frozen *::before, html.frozen *::after { animation-play-stat
 #more { position: absolute; right: 2px; bottom: 6px; padding: 1px 7px; border-radius: 9px; background: rgba(255,255,255,.9); color: #4a2418;
   font: bold 11px/16px sans-serif; box-shadow: 0 1px 3px rgba(0,0,0,.15); opacity: 0; transition: opacity .3s; }
 #more.on { opacity: 1; }
-/* 贴边：缩在屏幕边上时只露半个身子（扒着边缘的立绘，没画时用平常的），额度、名牌、气泡、特效都藏起来 */
+/* 貼邊：縮在螢幕邊上時只露半個身子（扒著邊緣的立繪，沒畫時用平常的），額度、名牌、氣泡、特效都藏起來 */
 html.tucked #bubble, html.tucked #fx, html.tucked #cards, html.tucked #aura, html.tucked #shadow { visibility: hidden; }
-/* 名牌、额度在最底下：直接拿出版面（只隐藏的话，透明窗口偶尔少擦它们底边那一行，缩进去那一下闪一条横线） */
-html.tucked #caption, html.tucked #quota { display: none !important; }   /* important：额度条、合并显示的 #quota.bars / .agg 写了 display: grid，选择器更具体，会盖过这条 */
-/* 有贴边立绘时：立绘贴着窗口那条边放，切口就是窗口的边、也就是屏幕边缘。贴边 / 探出来两张换图时窗口不用动，原地淡入淡出 */
+/* 名牌、額度在最底下：直接拿出版面（只隱藏的話，透明視窗偶爾少擦它們底邊那一行，縮排去那一下閃一條橫線） */
+html.tucked #caption, html.tucked #quota { display: none !important; }   /* important：額度條、合併顯示的 #quota.bars / .agg 寫了 display: grid，選擇器更具體，會蓋過這條 */
+/* 有貼邊立繪時：立繪貼著視窗那條邊放，切口就是視窗的邊、也就是螢幕邊緣。貼邊 / 探出來兩張換圖時視窗不用動，原地淡入淡出 */
 html.tucked-art.tucked-left #wrap { align-items: flex-start; }
 html.tucked-art.tucked-right #wrap { align-items: flex-end; }
 html.tucked-art #body { left: 0; width: 100%; }
@@ -101,26 +101,26 @@ html.no-name #caption { display: none; }
 #quota:empty { display: none; }
 #quota div { white-space: nowrap; }
 #quota.low { color: #c0392b; background: rgba(255,236,236,.92); }
-#quota .notice { color: #6b4a3a; font-weight: 600; }   /* 重置提醒那一行：不跟着额度紧张变红 */
-/* 额度条样式（quota-bars.js）：每个额度一行——名字、条、剩余百分比、重置时间；条按剩余分三档变色 */
+#quota .notice { color: #6b4a3a; font-weight: 600; }   /* 重置提醒那一行：不跟著額度緊張變紅 */
+/* 額度條樣式（quota-bars.js）：每個額度一行——名字、條、剩餘百分比、重置時間；條按剩餘分三檔變色 */
 #quota.bars:not(:empty) { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; text-align: left; min-width: calc(170px * var(--k)); }
-#quota .qbar { display: contents; white-space: nowrap; }   /* 一行四格：名字、条、百分比、时间，各行对齐成表 */
-#quota.bars > div:not(.qbar) { grid-column: 1 / -1; }   /* 文字行（余额）、重置提醒、峰谷条、备注占满一行 */
+#quota .qbar { display: contents; white-space: nowrap; }   /* 一行四格：名字、條、百分比、時間，各行對齊成表 */
+#quota.bars > div:not(.qbar) { grid-column: 1 / -1; }   /* 文字行（餘額）、重置提醒、峰谷條、備註佔滿一行 */
 #quota .ql { padding-right: calc(4px * var(--k)); white-space: nowrap; }
 #quota .qtrack { min-width: calc(30px * var(--k)); height: calc(5px * var(--k)); border-radius: calc(3px * var(--k)); background: #e4dcd6; overflow: hidden; }
 #quota .qtrack i { display: block; height: 100%; border-radius: inherit; background: var(--bar); }
 #quota .qp { padding-left: calc(4px * var(--k)); font-weight: 700; color: var(--bar); text-align: right; white-space: nowrap; }
 #quota .qt { padding-left: calc(4px * var(--k)); font-size: calc(8.5px * var(--k)); color: #a8958a; white-space: nowrap; }
-#quota .qc.qbarcell { display: flex; align-items: center; gap: calc(3px * var(--k)); }   /* 合并显示里的短条格子 */
+#quota .qc.qbarcell { display: flex; align-items: center; gap: calc(3px * var(--k)); }   /* 合併顯示裡的短條格子 */
 #quota .qc.qbarcell .ql { padding-right: 0; }
 #quota .qc.qbarcell .qtrack { width: calc(34px * var(--k)); min-width: 0; flex: none; }
-#quota.tight .qc.qbarcell .qtrack { width: calc(20px * var(--k)); }   /* 四家都开、并成三格时放不下：条短一点 */
+#quota.tight .qc.qbarcell .qtrack { width: calc(20px * var(--k)); }   /* 四家都開、併成三格時放不下：條短一點 */
 #quota .qc.qbarcell .qp { padding-left: 0; }
 #quota .ok { --bar: #4f7fd8; }
 #quota .mid { --bar: #e0902f; }
 #quota .low { --bar: #c0392b; }
 #quota .qnote { font-size: calc(8.5px * var(--k)); color: #a8958a; }
-/* 峰谷时段（设置里选款式）。时间条：一天 24 小时，红 = 高峰、绿 = 空闲，竖线 = 现在（北京时间）；颜色要够深，浅色桌面上也看得清 */
+/* 峰谷時段（設定裡選款式）。時間條：一天 24 小時，紅 = 高峰、綠 = 空閒，豎線 = 現在（北京時間）；顏色要夠深，淺色桌面上也看得清 */
 #quota .peak { padding: calc(2px * var(--k)) 0 0; }
 #quota .peakbar { position: relative; width: calc(150px * var(--k)); height: calc(6px * var(--k)); margin: 0 auto; border-radius: calc(3px * var(--k)); overflow: hidden; background: #7cc493; box-shadow: inset 0 0 0 calc(.5px * var(--k)) rgba(74,36,24,.35); }
 #quota .peakbar i { position: absolute; top: 0; bottom: 0; }
@@ -133,24 +133,24 @@ html.no-name #caption { display: none; }
 #quota .peakticks span { position: absolute; top: 0; transform: translateX(-50%); }
 #quota .peakticks span:first-child { transform: none; }
 #quota .peakticks span:last-child { transform: translateX(-100%); }
-/* 文字款：一行「● 高峰」或「● 空闲」 */
+/* 文字款：一行「● 高峰」或「● 空閒」 */
 #quota .peaktext { font-weight: 600; }
 #quota .peaktext.peak-on { color: #dc5f51; }
 #quota .peaktext.valley-on { color: #4aa265; }
 #quota .peaktext::before { content: ''; display: inline-block; width: calc(7px * var(--k)); height: calc(7px * var(--k)); margin-right: calc(4px * var(--k)); border-radius: 50%; background: currentColor; vertical-align: calc(.5px * var(--k)); }
-/* 额度合并显示：一家 AI 一行，名字一列、每个额度窗口一列（quota-aggregate.js），只有紧张的百分比变红 */
+/* 額度合併顯示：一家 AI 一行，名字一列、每個額度視窗一列（quota-aggregate.js），只有緊張的百分比變紅 */
 #quota.agg:not(:empty) { display: grid; justify-content: center; text-align: left; font-variant-numeric: tabular-nums; }
 #quota .qn { white-space: nowrap; padding-right: calc(7px * var(--k)); font-weight: 600; }
 #quota .qc { white-space: nowrap; padding: 0 calc(6px * var(--k)); }
 #quota .qn + .qc { padding-left: 0; }
 #quota .qc + .qc { border-left: 1px solid rgba(107,74,58,.25); }
 #quota .qc .low { color: #c0392b; font-weight: 700; }
-/* 四家都有时 4 行要塞进底栏（#foot 的 62px 预算里额度小窗最多约 43px），人物才不会被顶上去；字放大时预算也按 k 放大 */
+/* 四家都有時 4 行要塞進底欄（#foot 的 62px 預算裡額度小窗最多約 43px），人物才不會被頂上去；字放大時預算也按 k 放大 */
 #quota.tight { font-size: calc(9px * var(--k)); line-height: 1.1; }
 #quota.tight .qc { padding: 0 calc(4px * var(--k)); }
 #quota.tight .qn { padding-right: calc(5px * var(--k)); }
 
-/* 身体动作：切换时用 animation 平滑接上 */
+/* 身體動作：切換時用 animation 平滑接上 */
 .m-bob   { animation: bob 3.2s ease-in-out infinite; }
 .m-hop   { animation: bob-big .8s ease-in-out infinite; }
 .m-jump  { animation: jump .7s ease-in-out infinite; }
@@ -160,11 +160,11 @@ html.no-name #caption { display: none; }
 .m-slow  { animation: bob-tiny 4.5s ease-in-out infinite; }
 .m-float { animation: float 4.2s ease-in-out infinite; }
 .m-shake { animation: shake 1.4s ease-in-out infinite; }
-/* 红温：浑身发抖、泛红光；被甩晕：东倒西歪 */
+/* 紅溫：渾身發抖、泛紅光；被甩暈：東倒西歪 */
 .m-angry { animation: angry .14s linear infinite; }
 .m-angry img { filter: drop-shadow(0 0 7px rgba(255, 60, 30, .75)) saturate(1.15); }
 .m-dizzy { animation: dizzy 1.1s ease-in-out infinite; }
-/* 多会话时被甩：小卡片东倒西歪 */
+/* 多會話時被甩：小卡片東倒西歪 */
 #cards.shaken .scard { animation: card-wobble .22s ease-in-out 4 alternate; }
 #cards.shaken .scard:nth-child(even) { animation-direction: alternate-reverse; }
 @keyframes card-wobble { from { transform: scale(.92) translate(-5px, 2px) rotate(-16deg); } to { transform: scale(.92) translate(5px, -3px) rotate(16deg); } }
@@ -185,7 +185,7 @@ html.no-name #caption { display: none; }
 @keyframes squish { 50% { transform: scale(.96, 1.05); } }
 @keyframes gift { 0% { transform: translateY(3%) scale(1.05,.93); } 45% { transform: translateY(-9%) scale(.97,1.04); } 100% { transform: none; } }
 @keyframes jolt { 0% { transform: translate(0,0) rotate(0); } 25% { transform: translate(-3%, -4%) rotate(-4deg) scale(.97,1.04); } 60% { transform: translate(1%, 0) rotate(1.5deg); } 100% { transform: none; } }
-/* 从别的窗口后面浮到最上层（显示层级「跟着 AI」）：先藏起来，换完层级再淡入、轻轻上浮，不要一下子盖上来 */
+/* 從別的視窗後面浮到最上層（顯示層級「跟著 AI」）：先藏起來，換完層級再淡入、輕輕上浮，不要一下子蓋上來 */
 #wrap.sunk { opacity: 0; }
 #wrap.surface { animation: surface .45s cubic-bezier(.2,.8,.2,1); }
 @keyframes surface { from { opacity: 0; transform: translateY(5%) scale(.97); } to { opacity: 1; transform: none; } }
@@ -204,8 +204,8 @@ html.no-name #caption { display: none; }
   <div id="foot"><div id="caption"></div><div id="quota"></div></div>
 </div>
 <script>
-// 立绘加载失败：告诉 Windows 外壳记进日志（反馈里能看出是哪张图）。macOS 上没有这个通道，不做任何事
-// 同时记下最近 5 次失败的文件名（只要文件名），反馈时 diagnoseDisplay 交出去
+// 立繪載入失敗：告訴 Windows 外殼記進日誌（反饋裡能看出是哪張圖）。macOS 上沒有這個通道，不做任何事
+// 同時記下最近 5 次失敗的檔名（只要檔名），反饋時 diagnoseDisplay 交出去
 var imageErrors = []
 addEventListener('error', e => {
   if (!(e.target && e.target.tagName === 'IMG' && e.target.src)) return
@@ -226,16 +226,16 @@ addEventListener('error', e => {
 <script src="whats-new.js"></script>
 <script src="peak-hours.js"></script>
 <script>
-// CrossPet 画面：由 CrossPet.app（Swift 外壳）调用这几个函数
-//   init(manifest)          角色清单（characters/*/character.json + 立绘）
-//   setCharacter(id)        切换角色（按前台应用自动切，或右键菜单）
-//   applyCharState(id, s)   某个 AI 的工作状态（各接入写的 <id>-state.json）
-//   setQuota(id, q)         某个 AI 的额度 / 余额（<id>-quota.json；GPT 走 setCodexQuota，问 Codex 服务）
-//   setQuotaAggregate(on)   额度小窗合并显示各家 AI 的额度（设置里的开关，默认关）
-//   setQuotaStyle(s)        额度怎么显示：'text' 文字（默认）/ 'bars' 额度条（quota-bars.js）
-//   setPeakStyle(s)         额度栏怎么显示峰谷时段：'bar' 时间条（默认）/ 'text' 一行文字 / 'off'（只对 peak-hours.js 里有规则的角色）
-//   setPeakSkins(map)       按时段换衣服的设置 { 角色: { peak: 皮肤, valley: 皮肤 } }（'' = 原版，没写 = 不换）
-//   handleClick(kind)       单击 = pat（摸摸头），右键菜单「戳一下」= poke
+// CrossPet 畫面：由 CrossPet.app（Swift 外殼）呼叫這幾個函式
+//   init(manifest)          角色清單（characters/*/character.json + 立繪）
+//   setCharacter(id)        切換角色（按前臺應用自動切，或右鍵選單）
+//   applyCharState(id, s)   某個 AI 的工作狀態（各接入寫的 <id>-state.json）
+//   setQuota(id, q)         某個 AI 的額度 / 餘額（<id>-quota.json；GPT 走 setCodexQuota，問 Codex 服務）
+//   setQuotaAggregate(on)   額度小窗合併顯示各家 AI 的額度（設定裡的開關，預設關）
+//   setQuotaStyle(s)        額度怎麼顯示：'text' 文字（預設）/ 'bars' 額度條（quota-bars.js）
+//   setPeakStyle(s)         額度欄怎麼顯示峰谷時段：'bar' 時間條（預設）/ 'text' 一行文字 / 'off'（只對 peak-hours.js 裡有規則的角色）
+//   setPeakSkins(map)       按時段換衣服的設定 { 角色: { peak: 皮膚, valley: 皮膚 } }（'' = 原版，沒寫 = 不換）
+//   handleClick(kind)       單擊 = pat（摸摸頭），右鍵選單「戳一下」= poke
 //   playEgg(force)          彩蛋
 
 const MOTION = {
@@ -243,34 +243,34 @@ const MOTION = {
   searching: 'm-sway', delegating: 'm-sway', happy: 'm-jump', proud: 'm-hop', oops: 'm-shake', surprised: 'm-jolt',
   pat: 'm-sway', sleeping: 'm-slow', tired: 'm-slow', hum: 'm-sway', stretch: 'm-squish', yawn: 'm-squish', drawing: 'm-rock',
   pop: 'm-hop', pretend: 'm-bob', caught: 'm-shake', bye: 'm-dash',
-  // 角色专属姿态（没列出的默认轻轻浮动）
+  // 角色專屬姿態（沒列出的預設輕輕浮動）
   deepthink: 'm-slow', swim: 'm-sway', eat: 'm-bob', slack: 'm-slow', pout: 'm-jolt',
   reset: 'm-jump', feast: 'm-bob', compact: 'm-squish', sorry: 'm-slow', clawd: 'm-sway', float: 'm-float',
   asking: 'm-hop', update: 'm-gift',
-  // 甩她 / 红温
+  // 甩她 / 紅溫
   annoyed: 'm-rock', puffed: 'm-jolt', redhot: 'm-angry', sulk: 'm-slow', dizzy: 'm-dizzy', coaxed: 'm-sway', forgiven: 'm-hop',
-  // 按时段 / 节日打招呼
+  // 按時段 / 節日打招呼
   greet_morning: 'm-hop', greet_noon: 'm-bob', greet_afternoon: 'm-sway', greet_evening: 'm-sway', greet_night: 'm-slow', greet_dawn: 'm-slow',
   fest_halloween: 'm-gift', fest_christmas: 'm-gift', fest_newyear: 'm-jump', fest_spring: 'm-gift', fest_lantern: 'm-gift',
   fest_dragonboat: 'm-gift', fest_midautumn: 'm-gift', fest_national: 'm-hop',
 }
 const LOCAL_LINES = {
-  idle: ['……', '在呢'], pat: ['嘿嘿', '（蹭蹭）'], surprised: ['诶？！'], hum: ['♪～'], stretch: ['伸个懒腰～'],
-  yawn: ['哈啊……'], sleeping: ['zZz'], tired: ['有点累了…'],
-  peakStart: ['高峰到了，换身衣服干活～'], valleyStart: ['空闲时段，半价啦～换身轻松的'],   // 按时段换衣服（皮肤可以自己写）
+  idle: ['……', '在呢'], pat: ['嘿嘿', '（蹭蹭）'], surprised: ['欸？！'], hum: ['♪～'], stretch: ['伸個懶腰～'],
+  yawn: ['哈啊……'], sleeping: ['zZz'], tired: ['有點累了…'],
+  peakStart: ['高峰到了，換身衣服幹活～'], valleyStart: ['空閒時段，半價啦～換身輕鬆的'],   // 按時段換衣服（皮膚可以自己寫）
 }
-Object.assign(LOCAL_LINES, CodexResets.LINES)   // 重置提醒的默认台词（角色自己写了同名键就用角色的）
-// 新加的姿态还没画立绘时，先用哪张顶上
+Object.assign(LOCAL_LINES, CodexResets.LINES)   // 重置提醒的預設臺詞（角色自己寫了同名鍵就用角色的）
+// 新加的姿態還沒畫立繪時，先用哪張頂上
 const POSE_FALLBACK = { compact: 'writing', reset: 'happy', feast: 'eat', sorry: 'listening', asking: 'listening', update: 'happy', bye: 'happy',
-  reset_check: 'thinking', reset_bell: 'reset', reset_hope: 'happy', reset_maybe: 'hum', reset_nope: 'sulk',   // Codex 重置提醒（见 codex-resets.js）
+  reset_check: 'thinking', reset_bell: 'reset', reset_hope: 'happy', reset_maybe: 'hum', reset_nope: 'sulk',   // Codex 重置提醒（見 codex-resets.js）
   busy_left: 'thinking', busy_right: 'thinking', swamped_left: 'busy_left', swamped_right: 'busy_right', edge_left: 'idle', edge_right: 'idle', edge_left_peek: 'edge_left', edge_right_peek: 'edge_right',
   annoyed: 'pout', puffed: 'pout', redhot: 'pout', sulk: 'pout', pout: 'surprised', dizzy: 'oops', coaxed: 'pat', forgiven: 'happy' }
 const TRANSIENT = { happy: 5000, proud: 6000, oops: 4000, surprised: 3000, pat: 4000, hum: 4000, stretch: 3200, yawn: 3000,
   annoyed: 4500, puffed: 5000, dizzy: 3000, coaxed: 3500, forgiven: 5000 }
 for (const p of Object.keys(MOTION)) if (p.startsWith('greet_')) TRANSIENT[p] = 5500; else if (p.startsWith('fest_')) TRANSIENT[p] = 6500
-const DWELL = 2500              // 每个状态至少停留这么久，太快的切换合并成最后一个
-const BACK_TO_THINKING = 1500   // 工具做完后等这么久没有新工具，才回到「思考」
-const LISTEN_TO_THINKING = 1800 // 收到消息先「听」，稍后自动转「思考」
+const DWELL = 2500              // 每個狀態至少停留這麼久，太快的切換合併成最後一個
+const BACK_TO_THINKING = 1500   // 工具做完後等這麼久沒有新工具，才回到「思考」
+const LISTEN_TO_THINKING = 1800 // 收到訊息先「聽」，稍後自動轉「思考」
 const SLEEP_AFTER = 10 * 60 * 1000
 
 const $ = id => document.getElementById(id)
@@ -278,8 +278,8 @@ const pick = list => list[Math.floor(Math.random() * list.length)]
 let manifest = { characters: {} }
 let charId = null, pose = null, poseSince = 0, currentUrl = '', swappedAt = 0
 let active = document.getElementById('a'), spare = document.getElementById('b')
-let tucked = null   // 贴边缩着：'left' / 'right'（见「贴边」）
-let tuckedPeek = false   // 缩着时鼠标移上来：探出来、好奇地看着你
+let tucked = null   // 貼邊縮著：'left' / 'right'（見「貼邊」）
+let tuckedPeek = false   // 縮著時滑鼠移上來：探出來、好奇地看著你
 let shownAt = 0, pending = null, thinkTimer = null, revertTimer = null
 let characterGeneration = 0, characterTimer = null, characterTarget = null
 function characterTimeout(fn, ms, owner = charId, generation = characterGeneration) {
@@ -289,28 +289,28 @@ let lastActive = Date.now()
 const charState = {}, quota = {}, seenTool = {}, lastTrouble = {}
 
 const char = () => manifest.characters[charId]
-// 当前角色是不是也在响应 id 这个 AI 的事件（character.json 的 reactTo；代码里叫“代演 standIn”，见 stand-in.js）：
-// 是的话它的状态 / 多会话 / 庆祝也由她来演
+// 當前角色是不是也在響應 id 這個 AI 的事件（character.json 的 reactTo；程式碼裡叫“代演 standIn”，見 stand-in.js）：
+// 是的話它的狀態 / 多會話 / 慶祝也由她來演
 const standsIn = id => StandIn.covers(manifest?.characters?.[charId]?.reactTo, charId, id)
 const linesOf = p => (char()?.lines && char().lines[p]) || LOCAL_LINES[p]
 function framesFor(p) {
   const c = char(); if (!c) return []
-  for (let q = p, i = 0; q && i < 4; q = POSE_FALLBACK[q], i++) if (c.poses[q]) return c.poses[q]   // 没画的顺着替补往下找
+  for (let q = p, i = 0; q && i < 4; q = POSE_FALLBACK[q], i++) if (c.poses[q]) return c.poses[q]   // 沒畫的順著替補往下找
   return c.poses.idle || c.poses.default || []
 }
 
-// ---- 画面 ----
-// 没有眨眼图时去掉地址：设成空字符串，浏览器会拿网页自己的地址去当图片加载，日志里多一条误导人的「立绘加载失败: …/index.html」
+// ---- 畫面 ----
+// 沒有眨眼圖時去掉地址：設成空字串，瀏覽器會拿網頁自己的地址去當圖片載入，日誌裡多一條誤導人的「立繪載入失敗: …/index.html」
 function setBlinkSrc(u) { if (u) $('blink').src = u; else $('blink').removeAttribute('src') }
-// 两张图轮流交叉淡入：新图加载好之后再盖上来，旧图淡出，不会出现空白。
-// 每次换图都清掉旧的 onload，回调里再核对一次身份，避免过期回调把两张图的前后顺序搅乱。
+// 兩張圖輪流交叉淡入：新圖載入好之後再蓋上來，舊圖淡出，不會出現空白。
+// 每次換圖都清掉舊的 onload，回撥裡再核對一次身份，避免過期回撥把兩張圖的前後順序攪亂。
 const imgA = $('a'), imgB = $('b')
 function showImage(url, instant) {
   if (!url || url === currentUrl) return
   currentUrl = url
   swappedAt = Date.now()
   imgA.onload = imgB.onload = null
-  if (instant) {  // 换角色时舞台是隐藏的，直接换图，不要和上一个角色叠在一起
+  if (instant) {  // 換角色時舞臺是隱藏的，直接換圖，不要和上一個角色疊在一起
     spare.classList.remove('on'); spare.removeAttribute('src')
     active.src = url; active.classList.add('on')
     return
@@ -325,7 +325,7 @@ function showImage(url, instant) {
   }
   next.src = url
 }
-// 兜底：任何时候都保证正好有一张图在显示
+// 兜底：任何時候都保證正好有一張圖在顯示
 setInterval(() => {
   if (active === spare) spare = active === imgA ? imgB : imgA
   if (!active.classList.contains('on') && !spare.classList.contains('on')) {
@@ -334,12 +334,12 @@ setInterval(() => {
   }
 }, 2000)
 
-// instant：同一个姿态里只是数字变了（比如更新进度），直接换掉，不淡出淡入
+// instant：同一個姿態裡只是數字變了（比如更新進度），直接換掉，不淡出淡入
 function setFx(p, instant) {
   const fx = $('fx'), owner = charId, poseAt = p, generation = characterGeneration
   const render = () => {
     if (owner !== charId || generation !== characterGeneration || pose !== poseAt || multi) return
-    // 角色可以在 character.json 的 fx 里把某个姿态的特效换成 effects.js 里的其他特效，比如 DeepSeek 思考时冒泡泡
+    // 角色可以在 character.json 的 fx 裡把某個姿態的特效換成 effects.js 裡的其他特效，比如 DeepSeek 思考時冒泡泡
     const named = char()?.fx?.[p]
     const inner = !window.CrossFx ? '' : named && CrossFx.named?.[named] ? CrossFx.named[named] : CrossFx.surroundings(p)
     fx.innerHTML = inner ? `<svg viewBox="0 0 ${CrossFx.CW} ${CrossFx.CH}" xmlns="http://www.w3.org/2000/svg">${inner}</svg>` : ''
@@ -350,7 +350,7 @@ function setFx(p, instant) {
   setTimeout(render, 220)
 }
 function setPose(p, instant) {
-  if (tucked) p = `edge_${tucked}${tuckedPeek ? '_peek' : ''}`   // 缩在边上：一直扒着，别的动作等她出来再演
+  if (tucked) p = `edge_${tucked}${tuckedPeek ? '_peek' : ''}`   // 縮在邊上：一直扒著，別的動作等她出來再演
   if (p === pose) return
   pose = p; poseSince = Date.now()
   const frames = framesFor(p)
@@ -362,26 +362,26 @@ function setPose(p, instant) {
   document.documentElement.style.setProperty('--aura-o', Math.min(.75, aura[1] * 1.4))
   setFx(p)
 }
-// 名牌上的名字：设置里可以关掉（额度照常显示）
+// 名牌上的名字：設定裡可以關掉（額度照常顯示）
 function setShowName(on) { document.documentElement.classList.toggle('no-name', !on) }
-// 文字大小（设置里和人物大小分开调）：外壳交来人物大小、文字大小、锁没锁；这里定好文字区域放大多少（--k），
-// 把画布尺寸交回外壳去设窗口（窗口 = 画布 × 人物大小）。规则在 text-size.js；锁着时 k = 1，和以前一样
+// 文字大小（設定裡和人物大小分開調）：外殼交來人物大小、文字大小、鎖沒鎖；這裡定好文字區域放大多少（--k），
+// 把畫布尺寸交回外殼去設視窗（視窗 = 畫布 × 人物大小）。規則在 text-size.js；鎖著時 k = 1，和以前一樣
 function setSizes(size, textSize, linked) {
   const L = TextSize.layout(size, TextSize.effectiveText(size, textSize, linked))
   document.documentElement.style.setProperty('--k', String(L.k))
   return JSON.stringify({ w: L.w, h: L.h, foot: L.foot })
 }
-// 背景光晕：'auto'（跟着系统深浅色）/ 'on' / 'off'，由宿主调用
+// 背景光暈：'auto'（跟著系統深淺色）/ 'on' / 'off'，由宿主呼叫
 function setAuraMode(mode) {
   const c = document.documentElement.classList
   c.toggle('aura-on', mode === 'on')
   c.toggle('aura-off', mode === 'off')
 }
-// 能点到的区域（网页像素，[x, y, 宽, 高]）：桌宠本体、气泡、名牌、额度。窗口其余透明的地方让点击穿过去，
-// 点到后面的窗口（窗口比桌宠大，是给动作、气泡留的空间）
+// 能點到的區域（網頁畫素，[x, y, 寬, 高]）：桌寵本體、氣泡、名牌、額度。視窗其餘透明的地方讓點選穿過去，
+// 點到後面的視窗（視窗比桌寵大，是給動作、氣泡留的空間）
 function hitRects() {
   const out = []
-  if (tucked) {   // 缩在边上：只有露出来的那截能点 / 能让她探出来
+  if (tucked) {   // 縮在邊上：只有露出來的那截能點 / 能讓她探出來
     const b = shownRect()
     return JSON.stringify(b ? [[b.left - 4, b.top - 4, b.width + 8, b.height + 8].map(Math.round)] : [])
   }
@@ -402,16 +402,16 @@ function surface() {
   w.classList.remove('sunk', 'surface'); void w.offsetWidth; w.classList.add('surface')
   setTimeout(() => w.classList.remove('surface'), 500)
 }
-// 手动退出前的告别：这句话钉住，退出前不让别的台词或清空盖掉
+// 手動退出前的告別：這句話釘住，退出前不讓別的臺詞或清空蓋掉
 let farewellLine = null
-// 从菜单退出：挥手道别（没画 bye 立绘的先用 happy），最后一秒转身走开。
-// line 为空时说一句她自己的道别台词；ms 是外壳多久之后退出
+// 從選單退出：揮手道別（沒畫 bye 立繪的先用 happy），最後一秒轉身走開。
+// line 為空時說一句她自己的道別臺詞；ms 是外殼多久之後退出
 function farewell(line, ms = 2000) {
   if (multi) { const m = multi; multi = null; clearInterval(m.flipTimer); clearTimeout(m.recheck); clearTimeout(m.chatter); clearTimeout(m.sayTimer); for (const c of m.cards.values()) c.el.remove(); $('more').classList.remove('on') }
   if (!egg) {
     clearTimeout(thinkTimer); clearTimeout(stuckTimer); updatingNow = false
     show('bye', true)
-    $('body').className = 'm-bob'   // 先挥着手轻轻晃，别一上来就走（bye 的动作是彩蛋访客的「走开」）
+    $('body').className = 'm-bob'   // 先揮著手輕輕晃，別一上來就走（bye 的動作是彩蛋訪客的「走開」）
     setTimeout(() => { $('body').className = 'm-leave' }, Math.max(0, ms - 1100))
   }
   farewellLine = line || pick(linesOf('bye') || ['']) || ''
@@ -424,20 +424,20 @@ function say(line) {
   b.textContent = line
   b.classList.remove('hide')
 }
-// ---- Codex 重置提醒（设置里默认关；数据来自第三方网站 codex-resets.com，判断见 codex-resets.js）----
-// 只对 GPT 生效：官方提前宣布了重置，额度下方多一行；右键「会重置吗？」（外壳调 askReset）她按预测分档回答；
-// 出现新的强预测 / 新宣布，她闲着时主动说一次。连不上那个网站时安静失败（国内网络常见）
+// ---- Codex 重置提醒（設定裡預設關；資料來自第三方網站 codex-resets.com，判斷見 codex-resets.js）----
+// 只對 GPT 生效：官方提前宣佈了重置，額度下方多一行；右鍵「會重置嗎？」（外殼調 askReset）她按預測分檔回答；
+// 出現新的強預測 / 新宣佈，她閒著時主動說一次。連不上那個網站時安靜失敗（國內網路常見）
 const RESETS_URL = 'https://codex-resets.com/api/v1/status'
 let resetsOn = false, resetsData = null, resetsAt = 0, resetsTimer = null, codexResetSeenAt = 0, resetsWaiting = false
-let devResetsSaved = null   // 开发者控制台预演中：预演前的真实开关（见 devResetsPlay）
+let devResetsSaved = null   // 開發者控制台預演中：預演前的真實開關（見 devResetsPlay）
 function setCodexResets(on) {
   resetsOn = !!on
   clearTimeout(resetsTimer)
   if (!resetsOn) { resetsData = null; resetsAt = 0; renderQuota(); return }
   pollResets()
 }
-// 查一次：成功更新 resetsData。返回 { ok: 这次查到了没有, wait: 下次多久后再查（毫秒）}。
-// 失败时保留上次查到的（额度下方那一行、主动提醒照用：官方宣布不会因为断网就失效），但问她时照实说连不上
+// 查一次：成功更新 resetsData。返回 { ok: 這次查到了沒有, wait: 下次多久後再查（毫秒）}。
+// 失敗時保留上次查到的（額度下方那一行、主動提醒照用：官方宣佈不會因為斷網就失效），但問她時照實說連不上
 async function fetchResets() {
   const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 10000)
   const fail = { ok: false, wait: 10 * 60 * 1000 }
@@ -447,7 +447,7 @@ async function fetchResets() {
     if (!r.ok) return fail
     const d = CodexResets.parse(await r.json())
     if (!d) return fail
-    // 查的途中关了开关、或开发者控制台正在用假数据预演（开始预演前发出的查询这时才回来）：不写回
+    // 查的途中關了開關、或開發者控制台正在用假資料預演（開始預演前發出的查詢這時才回來）：不寫回
     if (resetsOn && !devResetsSaved) { resetsData = d; resetsAt = Date.now() }
     return { ok: true, wait: 30 * 60 * 1000 }
   } catch { return fail } finally { clearTimeout(timer) }
@@ -455,10 +455,10 @@ async function fetchResets() {
 async function pollResets() {
   clearTimeout(resetsTimer)
   const { wait } = await fetchResets()
-  if (!resetsOn || devResetsSaved) return   // 关了，或正在预演（演完 devResetsDone 会重新开始查）
+  if (!resetsOn || devResetsSaved) return   // 關了，或正在預演（演完 devResetsDone 會重新開始查）
   renderQuota()
   announceReset()
-  clearTimeout(resetsTimer)   // 查的途中问她时可能已经续过一个定时：只留一个
+  clearTimeout(resetsTimer)   // 查的途中問她時可能已經續過一個定時：只留一個
   resetsTimer = setTimeout(pollResets, wait)
 }
 function resetsTold(add) {
@@ -467,11 +467,11 @@ function resetsTold(add) {
   if (add) { list = [...list.filter(x => x !== add), add].slice(-50); try { localStorage.setItem('crosspet-resets-told', JSON.stringify(list)) } catch {} }
   return list
 }
-// 挑一句台词填空：句子里用到的数据（概率、窗口……）这次没有，就只挑不含它的句子（角色的都不行就退回默认句，见 usableLines）
+// 挑一句臺詞填空：句子裡用到的資料（機率、視窗……）這次沒有，就只挑不含它的句子（角色的都不行就退回預設句，見 usableLines）
 function pickLine(key, vars) {
   return CodexResets.fill(pick(CodexResets.usableLines(linesOf(key), key, vars)), vars)
 }
-// data：按哪份数据回答（null = 连不上那个网站）
+// data：按哪份資料回答（null = 連不上那個網站）
 function tellReset(data = resetsData) {
   const a = CodexResets.answer(data, Date.now() / 1000, codexResetSeenAt)
   show(a.pose, true)
@@ -479,24 +479,24 @@ function tellReset(data = resetsData) {
   clearTimeout(revertTimer)
   revertTimer = characterTimeout(() => { setPose(restPose()); say('') }, 8000)
 }
-// 右键「会重置吗？」：先想一下，每次都现查（是你点的、不常点，查一次不费事）；这次没查到就照实说连不上，不拿旧结果顶替
+// 右鍵「會重置嗎？」：先想一下，每次都現查（是你點的、不常點，查一次不費事）；這次沒查到就照實說連不上，不拿舊結果頂替
 async function askReset() {
   if (!resetsOn || charId !== 'gpt' || egg || characterTimer) return
   const generation = characterGeneration
   clearTimeout(revertTimer)
-  show('reset_check', true)   // 刷手机查一下（没画就是 thinking）
+  show('reset_check', true)   // 刷手機查一下（沒畫就是 thinking）
   say(pick(linesOf('thinking') || ['……']))
   const started = Date.now()
   let ok = true
-  if (!devResetsSaved) {   // 开发者控制台预演：用它给的假数据，不联网
+  if (!devResetsSaved) {   // 開發者控制台預演：用它給的假資料，不聯網
     const r = await fetchResets()
     ok = r.ok
-    if (resetsOn) { clearTimeout(resetsTimer); resetsTimer = setTimeout(pollResets, r.wait); renderQuota() }   // 问的途中关了开关：不再续上定时
+    if (resetsOn) { clearTimeout(resetsTimer); resetsTimer = setTimeout(pollResets, r.wait); renderQuota() }   // 問的途中關了開關：不再續上定時
   }
-  await new Promise(r => setTimeout(r, Math.max(0, 1200 - (Date.now() - started))))   // 至少想 1.2 秒：一下子就查完、或一下子就连不上时也看得见她在想
+  await new Promise(r => setTimeout(r, Math.max(0, 1200 - (Date.now() - started))))   // 至少想 1.2 秒：一下子就查完、或一下子就連不上時也看得見她在想
   if (charId === 'gpt' && generation === characterGeneration && !egg && !characterTimer) tellReset(ok ? resetsData : null)
 }
-// 主动说一次：只在她是 GPT、闲着时说；不是 GPT 就等 setCharacter 切到 GPT 时再调
+// 主動說一次：只在她是 GPT、閒著時說；不是 GPT 就等 setCharacter 切到 GPT 時再調
 function announceReset() {
   if (!resetsOn || charId !== 'gpt' || resetsWaiting) return
   const a = CodexResets.toAnnounce(resetsData, Date.now() / 1000, codexResetSeenAt, resetsTold())
@@ -504,10 +504,10 @@ function announceReset() {
   resetsWaiting = true
   let tries = 0
   const attempt = () => {
-    // 等的途中过期了、宣布已经执行了：不说了
+    // 等的途中過期了、宣佈已經執行了：不說了
     if (!resetsOn || charId !== 'gpt' || $('stage').classList.contains('swap') || CodexResets.toAnnounce(resetsData, Date.now() / 1000, codexResetSeenAt, resetsTold())?.id !== a.id) { resetsWaiting = false; return }
-    // 闲着才说：额度紧张时她的待机样子是 tired、闲久了会睡着，这时也算闲着（重置的消息这时最有用）；
-    // tired / sleeping 时气泡里一直挂着「额度快用完了」「zZz」这种待机台词，可以直接盖过去，不用等它收起
+    // 閒著才說：額度緊張時她的待機樣子是 tired、閒久了會睡著，這時也算閒著（重置的訊息這時最有用）；
+    // tired / sleeping 時氣泡裡一直掛著「額度快用完了」「zZz」這種待機臺詞，可以直接蓋過去，不用等它收起
     const resting = pose === 'idle' || pose === 'tired' || pose === 'sleeping'
     const quiet = $('bubble').classList.contains('hide') || pose !== 'idle'
     if (resting && quiet && !egg && aiActivity() !== 'work') {
@@ -517,7 +517,7 @@ function announceReset() {
   }
   setTimeout(attempt, 3000)
 }
-// 开发者控制台「重置提醒」场景：不联网，用假数据演一档（data 是接口原样的 JSON，null = 连不上）；devResetsDone 恢复真实的
+// 開發者控制台「重置提醒」場景：不聯網，用假資料演一檔（data 是介面原樣的 JSON，null = 連不上）；devResetsDone 恢復真實的
 function devResetsPlay(data) {
   if (!devResetsSaved) devResetsSaved = { on: resetsOn }
   resetsOn = true; clearTimeout(resetsTimer)
@@ -529,7 +529,7 @@ function devResetsDone() {
   const was = devResetsSaved.on; devResetsSaved = null
   resetsOn = false; setCodexResets(was)
 }
-// 额度下方那一行（只在官方宣布、还没执行时有）
+// 額度下方那一行（只在官方宣佈、還沒執行時有）
 function appendResetNotice(el) {
   if (!resetsOn || charId !== 'gpt') return
   const t = CodexResets.notice(resetsData, codexResetSeenAt, Date.now() / 1000)
@@ -537,12 +537,12 @@ function appendResetNotice(el) {
   const line = document.createElement('div')
   line.className = 'notice'
   line.textContent = t
-  if (el.classList.contains('agg')) line.style.gridColumn = '1 / -1'   // 合并显示时是表格：这一行横跨整张表，放在最下面
+  if (el.classList.contains('agg')) line.style.gridColumn = '1 / -1'   // 合併顯示時是表格：這一行橫跨整張表，放在最下面
   el.appendChild(line)
 }
-// ---- 峰谷时段（peak-hours.js）：额度栏下面画今天的时间条，或者一行文字；按时段换衣服见 checkPeakOutfits ----
+// ---- 峰谷時段（peak-hours.js）：額度欄下面畫今天的時間條，或者一行文字；按時段換衣服見 checkPeakOutfits ----
 let peakStyle = 'bar', devPeakShift = 0
-const peakNow = () => Date.now() + devPeakShift   // 开发者控制台「峰谷换装」场景会把时间挪到切换点前
+const peakNow = () => Date.now() + devPeakShift   // 開發者控制台「峰谷換裝」場景會把時間挪到切換點前
 let quotaStyle = 'text'
 function setQuotaStyle(s) { quotaStyle = s === 'bars' ? 'bars' : 'text'; renderQuota() }
 function setPeakStyle(s) { peakStyle = ['bar', 'text', 'off'].includes(s) ? s : 'bar'; renderQuota() }
@@ -556,7 +556,7 @@ function appendPeakBar(el) {
     if (el.classList.contains('agg')) line.style.gridColumn = '1 / -1'
     el.appendChild(line)
     const k = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--k')) || 1
-    if ($('foot').offsetHeight > 62 * Math.max(1, k) + 0.5) line.remove()   // 底栏高度预算，同下面时间条
+    if ($('foot').offsetHeight > 62 * Math.max(1, k) + 0.5) line.remove()   // 底欄高度預算，同下面時間條
     return
   }
   const box = document.createElement('div')
@@ -574,15 +574,15 @@ function appendPeakBar(el) {
   for (const h of PeakHours.ticks(rule)) { const t = document.createElement('span'); t.textContent = h; t.style.left = pct(h * 60); ticks.appendChild(t) }
   box.title = rule.label
   box.append(wrap, ticks)
-  if (el.classList.contains('agg')) box.style.gridColumn = '1 / -1'   // 合并显示时横跨整张表，放在最下面
+  if (el.classList.contains('agg')) box.style.gridColumn = '1 / -1'   // 合併顯示時橫跨整張表，放在最下面
   el.appendChild(box)
-  // 底栏（#foot）有高度预算，超了人物会被顶上去：放不下先去掉刻度，还放不下（合并显示四家、多行额度）就不画
+  // 底欄（#foot）有高度預算，超了人物會被頂上去：放不下先去掉刻度，還放不下（合併顯示四家、多行額度）就不畫
   const k = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--k')) || 1
   const over = () => $('foot').offsetHeight > 62 * Math.max(1, k) + 0.5
   if (over()) ticks.remove()
   if (over()) box.remove()
 }
-// 每分钟（对齐到整分）挪一次时间条上的竖线；按时段换衣服也在这里看
+// 每分鐘（對齊到整分）挪一次時間條上的豎線；按時段換衣服也在這裡看
 let peakTimer = null
 function peakTick() {
   clearTimeout(peakTimer)
@@ -591,25 +591,25 @@ function peakTick() {
   checkPeakOutfits()
 }
 
-// ---- 按时段换衣服（设置里「高峰穿 / 空闲穿」）----
-// 进入新的一段（高峰 ↔ 空闲）时按设置换；同一段里你手动换的不换回去（记号存在本机）。
-// 正在显示她：闲着才换——外壳换好立绘调 refreshLook，那里冒一团烟换上，再说一句换装台词；忙着就等下一分钟再看。
-// 没在显示她：悄悄换好。启动时进入了新的一段：换好，不演不说
+// ---- 按時段換衣服（設定裡「高峰穿 / 空閒穿」）----
+// 進入新的一段（高峰 ↔ 空閒）時按設定換；同一段裡你手動換的不換回去（記號存在本機）。
+// 正在顯示她：閒著才換——外殼換好立繪調 refreshLook，那裡冒一團煙換上，再說一句換裝臺詞；忙著就等下一分鐘再看。
+// 沒在顯示她：悄悄換好。啟動時進入了新的一段：換好，不演不說
 let peakSkins = null, outfitLine = null, outfitSayTimer = null, devPeakApplied = null
-const peakPend = {}   // 忙着没换成的：{ 角色: { key, skin: 挂起时她穿的 } }——挂起期间你手动换了，这一段就听你的
+const peakPend = {}   // 忙著沒換成的：{ 角色: { key, skin: 掛起時她穿的 } }——掛起期間你手動換了，這一段就聽你的
 function peakApplied(id, key) {
-  if (devPeakApplied) { if (key !== undefined) devPeakApplied[id] = key; return devPeakApplied[id] ?? null }   // 开发者控制台演的记在内存里，不动真的记号
+  if (devPeakApplied) { if (key !== undefined) devPeakApplied[id] = key; return devPeakApplied[id] ?? null }   // 開發者控制台演的記在記憶體裡，不動真的記號
   let m = {}
   try { m = JSON.parse(localStorage.getItem('crosspet-peak-applied')) || {} } catch {}
   if (key !== undefined) { m[id] = key; try { localStorage.setItem('crosspet-peak-applied', JSON.stringify(m)) } catch {} }
   return m[id] ?? null
 }
-// 外壳在网页加载完、设置变化时调。改设置不马上换：先把每个角色记成「这一段已经处理过」，等下一段
+// 外殼在網頁載入完、設定變化時調。改設定不馬上換：先把每個角色記成「這一段已經處理過」，等下一段
 function setPeakSkins(map) {
   const startup = peakSkins === null
   peakSkins = map && typeof map === 'object' ? map : {}
   if (!startup) for (const id of Object.keys(PeakHours.RULES)) peakApplied(id, PeakHours.decide(PeakHours.RULES[id], peakNow(), null, null).key)
-  // 启动时等角色恢复好（setCharacter 要 0.33 秒才定下来）再看：太早发 wear，外壳重推 init 时网页以为还没有角色、换成了第一个
+  // 啟動時等角色恢復好（setCharacter 要 0.33 秒才定下來）再看：太早發 wear，外殼重推 init 時網頁以為還沒有角色、換成了第一個
   if (startup) setTimeout(() => checkPeakOutfits(true), 1500); else checkPeakOutfits()
 }
 function peakBusy() {
@@ -621,12 +621,12 @@ function checkPeakOutfits(startup) {
     const c = manifest.characters[id]
     if (!c) continue
     const d = PeakHours.decide(rule, peakNow(), peakSkins[id], peakApplied(id))
-    if (d.skin === null) { if (d.key !== peakApplied(id)) peakApplied(id, d.key); continue }   // 这一段没设要穿什么
-    if ((c.skin || '') === d.skin) { peakApplied(id, d.key); continue }   // 已经穿着了
+    if (d.skin === null) { if (d.key !== peakApplied(id)) peakApplied(id, d.key); continue }   // 這一段沒設要穿什麼
+    if ((c.skin || '') === d.skin) { peakApplied(id, d.key); continue }   // 已經穿著了
     const showing = id === charId && !startup
     const pend = peakPend[id]
-    if (pend?.key === d.key && (c.skin || '') !== pend.skin) { delete peakPend[id]; peakApplied(id, d.key); continue }   // 等的时候你手动换了
-    if (showing && peakBusy()) { if (pend?.key !== d.key) peakPend[id] = { key: d.key, skin: c.skin || '' }; continue }   // 忙着：下一分钟再看（那时时段变了就按新的）
+    if (pend?.key === d.key && (c.skin || '') !== pend.skin) { delete peakPend[id]; peakApplied(id, d.key); continue }   // 等的時候你手動換了
+    if (showing && peakBusy()) { if (pend?.key !== d.key) peakPend[id] = { key: d.key, skin: c.skin || '' }; continue }   // 忙著：下一分鐘再看（那時時段變了就按新的）
     delete peakPend[id]
     peakApplied(id, d.key)
     if (showing) { outfitLine = { id, skin: d.skin, key: d.kind === 'peak' ? 'peakStart' : 'valleyStart', at: Date.now() } }
@@ -634,14 +634,14 @@ function checkPeakOutfits(startup) {
   }
 }
 peakTick()
-// 开发者控制台「峰谷换装」场景：把时间挪到 at（毫秒时间戳，切换点前几秒），用真实的「高峰穿 / 空闲穿」设置演；
-// 记号放内存（不动真的），devPeakDone 恢复时间、换回原来的衣服
+// 開發者控制台「峰谷換裝」場景：把時間挪到 at（毫秒時間戳，切換點前幾秒），用真實的「高峰穿 / 空閒穿」設定演；
+// 記號放記憶體（不動真的），devPeakDone 恢復時間、換回原來的衣服
 let devPeakSaved = null
 function devPeakPlay(at) {
   if (!devPeakSaved) devPeakSaved = { id: charId, worn: manifest.characters[charId]?.skin || '' }
   devPeakApplied = devPeakApplied || {}
   devPeakShift = at - Date.now()
-  if (PeakHours.RULES[charId]) devPeakApplied[charId] = PeakHours.decide(PeakHours.RULES[charId], peakNow(), null, null).key   // 当前这一段算处理过，等切换点
+  if (PeakHours.RULES[charId]) devPeakApplied[charId] = PeakHours.decide(PeakHours.RULES[charId], peakNow(), null, null).key   // 當前這一段算處理過，等切換點
   peakTick()
 }
 function devPeakDone() {
@@ -652,16 +652,16 @@ function devPeakDone() {
   peakTick()
 }
 
-// 额度聚合（设置里「合并显示各家额度」，默认关）：小窗把各家 AI 的额度排成几行，前面标名字；
-// 关着时只显示当前角色自己的额度。外壳在设置变化 / 启动时调 setQuotaAggregate
+// 額度聚合（設定裡「合併顯示各家額度」，預設關）：小窗把各家 AI 的額度排成幾行，前面標名字；
+// 關著時只顯示當前角色自己的額度。外殼在設定變化 / 啟動時調 setQuotaAggregate
 let quotaAggregate = false
 function setQuotaAggregate(on) { quotaAggregate = !!on; renderQuota() }
 function renderQuota() {
   const el = $('quota')
   el.style.gridTemplateColumns = ''
   if (egg) { el.replaceChildren(); el.className = ''; return }
-  // 写了 reactTo（代演）的角色，即使没开「合并显示各家额度」，小窗也列出她响应的那几家
-  // （不然她自己没有额度，小窗一直是空的）
+  // 寫了 reactTo（代演）的角色，即使沒開「合併顯示各家額度」，小窗也列出她響應的那幾家
+  // （不然她自己沒有額度，小窗一直是空的）
   const reactTo = manifest?.characters?.[charId]?.reactTo
   if (quotaAggregate || reactTo) {
     let ids = Object.keys(manifest?.characters || {}).filter(id => !manifest.characters[id].egg)
@@ -675,14 +675,14 @@ function renderQuota() {
   const bars = quotaStyle === 'bars' && QuotaBars.of(q, Date.now() / 1000)
   if (bars) {
     QuotaBars.render(el, bars)
-    el.className = 'bars'   // 不加 low：快用完的那一行自己变红，整块不变红底
+    el.className = 'bars'   // 不加 low：快用完的那一行自己變紅，整塊不變紅底
     appendResetNotice(el)
     appendPeakBar(el)
-    // 底栏高度预算（同 appendPeakBar）：额度条加上重置提醒、峰谷条还是放不下，就这一次按文字画，人物不被顶上去
+    // 底欄高度預算（同 appendPeakBar）：額度條加上重置提醒、峰谷條還是放不下，就這一次按文字畫，人物不被頂上去
     const k = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--k')) || 1
     if ($('foot').offsetHeight <= 62 * Math.max(1, k) + 0.5) return
   }
-  // 多个额度窗口 / 额度池用「｜」隔开，每个占一行，不在半中间折行
+  // 多個額度視窗 / 額度池用「｜」隔開，每個佔一行，不在半中間折行
   el.replaceChildren(...(q?.text || '').split(/\s*｜\s*/).filter(Boolean).map(t => {
     const line = document.createElement('div'); line.textContent = t; return line
   }))
@@ -690,15 +690,15 @@ function renderQuota() {
   appendResetNotice(el)
   appendPeakBar(el)
 }
-// 临时动作（打招呼、开心、被摸头……）演完回到哪：AI 还在干活 / 等你回答就回到那个样子，
-// 不然一条要跑好几分钟的命令中途她演了个招呼，之后一直没有新事件，就会站着不动
+// 臨時動作（打招呼、開心、被摸頭……）演完回到哪：AI 還在幹活 / 等你回答就回到那個樣子，
+// 不然一條要跑好幾分鐘的命令中途她演了個招呼，之後一直沒有新事件，就會站著不動
 function restPose() {
   if (aiActivity()) { const p = charState[charId].pose; return p === 'listening' ? 'thinking' : p }
   return quota[charId]?.low ? 'tired' : 'idle'
 }
-// 这个角色有没有某个姿态的专属立绘
+// 這個角色有沒有某個姿態的專屬立繪
 const hasPose = p => !!char()?.poses?.[p]
-// 角色外观相关的 CSS 变量：气泡边框、读书时飘的字符颜色
+// 角色外觀相關的 CSS 變數：氣泡邊框、讀書時飄的字元顏色
 function applyLook(c) {
   const root = document.documentElement.style
   root.setProperty('--accent', c.accent || '#e0b48a')
@@ -706,10 +706,10 @@ function applyLook(c) {
   root.setProperty('--glyph-stroke', c.glyph?.stroke || 'none')
 }
 
-// 换到某个状态：遵守最短停留；短暂状态过后回到常态（闲着 / 额度紧张时累了）
+// 換到某個狀態：遵守最短停留；短暫狀態過後回到常態（閒著 / 額度緊張時累了）
 function show(p, urgent) {
-  if (updatingNow || farewellLine !== null) return   // 正在更新（一直举着礼物）/ 正在道别：AI 的工作事件先不打断
-  if (p === 'idle') p = restPose()   // AI 发来「闲着」（比如 DSH 新会话）时也要看额度：快用完了就是累 / 饿的样子
+  if (updatingNow || farewellLine !== null) return   // 正在更新（一直舉著禮物）/ 正在道別：AI 的工作事件先不打斷
+  if (p === 'idle') p = restPose()   // AI 發來「閒著」（比如 DSH 新會話）時也要看額度：快用完了就是累 / 餓的樣子
   const wait = shownAt + DWELL - Date.now()
   clearTimeout(pending)
   if (!urgent && wait > 0) { pending = characterTimeout(() => show(p, true), wait); return }
@@ -723,20 +723,20 @@ function show(p, urgent) {
   if (TRANSIENT[p]) revertTimer = characterTimeout(() => { setPose(restPose()); say('') }, TRANSIENT[p])
 }
 
-// ---- 由 Swift 调用 ----
+// ---- 由 Swift 呼叫 ----
 function init(m) {
   manifest = m
   for (const c of Object.values(m.characters))
-    for (const list of Object.values(c.poses)) for (const u of list) { const i = new Image(); i.onerror = () => window.chrome?.webview?.postMessage({ imageError: u }); i.src = u }   // 预加载失败也报（页面里的监听收不到）
-  // 没有当前角色时取 id 排序后的第一个：macOS 的清单是 Swift 字典序列化出来的，key 顺序每次启动都不同（Windows 本来就是排好序的）
-  // 正在换角色、要换上的那个还在新清单里：让它换完（换衣服时外壳会重新 init）
+    for (const list of Object.values(c.poses)) for (const u of list) { const i = new Image(); i.onerror = () => window.chrome?.webview?.postMessage({ imageError: u }); i.src = u }   // 預載入失敗也報（頁面裡的監聽收不到）
+  // 沒有當前角色時取 id 排序後的第一個：macOS 的清單是 Swift 字典序列化出來的，key 順序每次啟動都不同（Windows 本來就是排好序的）
+  // 正在換角色、要換上的那個還在新清單裡：讓它換完（換衣服時外殼會重新 init）
   if (characterTarget && manifest.characters[characterTarget]) return
   if (characterTarget) { ++characterGeneration; clearTimeout(characterTimer); characterTimer = null; characterTarget = null; $('stage').classList.remove('swap') }
   if (!charId || !manifest.characters[charId]) setCharacter(Object.keys(m.characters).sort().find(k => !m.characters[k].egg), true)
   else { $('caption').textContent = char().name }
 }
 
-// 登场台词冷却：同一个角色 30 分钟内只打一次招呼，在几个 AI 的 App 之间来回切时不用每次都听「XX 来了」
+// 登場臺詞冷卻：同一個角色 30 分鐘內只打一次招呼，在幾個 AI 的 App 之間來回切時不用每次都聽「XX 來了」
 const GREET_COOLDOWN = 30 * 60 * 1000
 const greetedAt = {}
 function greetDue(id) {
@@ -751,8 +751,8 @@ function setCharacter(id, quiet) {
   if (id === charId && !characterTimer) return
   const generation = ++characterGeneration
   clearTimeout(characterTimer)
-  // 上一个角色还没跑完的定时动作（听完转思考、工具结束回思考、排队等着换的动作、演完回待机）全部作废：
-  // 不然会落到换上来的角色身上——她明明闲着，却突然开始思考 / 写东西（PR #26 @KQYaili 报的「串台」）
+  // 上一個角色還沒跑完的定時動作（聽完轉思考、工具結束回思考、排隊等著換的動作、演完回待機）全部作廢：
+  // 不然會落到換上來的角色身上——她明明閒著，卻突然開始思考 / 寫東西（PR #26 @KQYaili 報的「串臺」）
   const dropTimers = () => { clearTimeout(thinkTimer); clearTimeout(pending); clearTimeout(revertTimer); clearTimeout(stuckTimer) }
   const endMulti = () => {
     if (!multi) return
@@ -763,7 +763,7 @@ function setCharacter(id, quiet) {
   dropTimers()
   characterTarget = id
   endMulti()
-  characterTimeout(refreshMulti, 700, id, generation)   // 换过去的角色如果也有好几个对话在干活，接着演
+  characterTimeout(refreshMulti, 700, id, generation)   // 換過去的角色如果也有好幾個對話在幹活，接著演
   characterTimeout(preloadEdges, 900, id, generation)
   const stage = $('stage')
   const p = $('poof'); p.classList.remove('go'); void p.offsetWidth; p.classList.add('go')
@@ -773,7 +773,7 @@ function setCharacter(id, quiet) {
     characterTimer = null
     characterTarget = null
     if (!manifest.characters[id]) { $('stage').classList.remove('swap'); return }
-    dropTimers()   // 冒烟这 0.33 秒里，上一个角色的事件可能又排了新的
+    dropTimers()   // 冒煙這 0.33 秒裡，上一個角色的事件可能又排了新的
     endMulti()
     lastActive = Date.now()
     charId = id; pose = null; currentUrl = ''; shownAt = 0
@@ -784,25 +784,25 @@ function setCharacter(id, quiet) {
     const s = charState[id]
     const busy = s && Date.now() / 1000 - s.ts < 60 && !TRANSIENT[s.pose] && s.pose !== 'idle'
     setPose(busy ? s.pose : restPose(), true)
-    if (busy) watchStuck()   // 接着演她自己的活：卡住兜底按她自己的时间重新算
+    if (busy) watchStuck()   // 接著演她自己的活：卡住兜底按她自己的時間重新算
     if (busy && s.pose === 'listening') thinkTimer = characterTimeout(() => show('thinking'), LISTEN_TO_THINKING)
-    // 这个时段 / 节日还没打过招呼：演专属的登场动作；打过了就用平常那句（30 分钟冷却）
+    // 這個時段 / 節日還沒打過招呼：演專屬的登場動作；打過了就用平常那句（30 分鐘冷卻）
     if (quiet) say('')
-    else if (!timeGreet(id, busy)) say(greetDue(id) ? (c.greeting || `${c.name} 在这儿～`) : '')
+    else if (!timeGreet(id, busy)) say(greetDue(id) ? (c.greeting || `${c.name} 在這兒～`) : '')
     renderQuota()
-    if (id === 'gpt') characterTimeout(announceReset, 2000)   // 不是 GPT 时攒下的重置提醒，切过来再说
+    if (id === 'gpt') characterTimeout(announceReset, 2000)   // 不是 GPT 時攢下的重置提醒，切過來再說
     const pend = pendingCelebration[id]
     if (pend && Date.now() - pend.at < 10 * 60 * 1000) characterTimeout(() => celebrate(id, pend.ev), 1200)
-    // 新立绘加载好再淡入，避免先看到空白
+    // 新立繪載入好再淡入，避免先看到空白
     const reveal = () => stage.classList.remove('swap')
     if (active.complete && spare.complete) characterTimeout(reveal, 60); else characterTimeout(reveal, 160)
   }, 330)
 }
 
-// ---- 按时段 / 节日打招呼 ----
-// 每个角色在每个时段（早上、中午、下午、晚上、深夜、凌晨）第一次见面时演一次专属动作；节日当天第一次见面换成节日装扮。
-// 打过招呼的记在本机（localStorage），重启 App 不会重复。没画立绘的角色只说台词；连台词都没有就用平常那句。
-// 农历节日的公历日期（春节、元宵、端午、中秋），用 lunardate 算好写死，2036 年之后需要补
+// ---- 按時段 / 節日打招呼 ----
+// 每個角色在每個時段（早上、中午、下午、晚上、深夜、凌晨）第一次見面時演一次專屬動作；節日當天第一次見面換成節日裝扮。
+// 打過招呼的記在本機（localStorage），重啟 App 不會重複。沒畫立繪的角色只說臺詞；連臺詞都沒有就用平常那句。
+// 農曆節日的公曆日期（春節、元宵、端午、中秋），用 lunardate 算好寫死，2036 年之後需要補
 const LUNAR = {
   2026: ['02-17', '03-03', '06-19', '09-25'], 2027: ['02-06', '02-20', '06-09', '09-15'], 2028: ['01-26', '02-09', '05-28', '10-03'],
   2029: ['02-13', '02-27', '06-16', '09-22'], 2030: ['02-03', '02-17', '06-05', '09-12'], 2031: ['01-23', '02-06', '06-24', '10-01'],
@@ -817,7 +817,7 @@ function timeSlot(d) {
 }
 function festivalOf(d) {
   const y = d.getFullYear(), md = ymd(d).slice(5), [spring, lantern, dragonboat, midautumn] = LUNAR[y] || []
-  // 单日的节日优先（中秋偶尔落在国庆假期里）
+  // 單日的節日優先（中秋偶爾落在國慶假期裡）
   if (md === lantern) return 'lantern'
   if (md === dragonboat) return 'dragonboat'
   if (md === midautumn) return 'midautumn'
@@ -837,12 +837,12 @@ function greetMemory(update) {
   if (update) { update(m); try { localStorage.setItem('crosspet-greeted', JSON.stringify(m)) } catch {} }
   return m
 }
-// 返回 true = 打过招呼了（演了专属动作或说了专属台词）
+// 返回 true = 打過招呼了（演了專屬動作或說了專屬臺詞）
 function timeGreet(id, busy) {
   const c = manifest.characters[id]
   if (!c || c.egg) return false
   const now = new Date(), fest = festivalOf(now), slot = timeSlot(now)
-  const day = ymd(new Date(now - 5 * 3600000))   // 凌晨 5 点前还算前一天：深夜 23–2 点是同一个时段
+  const day = ymd(new Date(now - 5 * 3600000))   // 凌晨 5 點前還算前一天：深夜 23–2 點是同一個時段
   const slotKey = `slot:${day}:${slot}`, festKey = `fest:${ymd(now)}:${fest}`
   const done = greetMemory()[id] || []
   const has = p => !!(c.poses?.[p] || c.lines?.[p])
@@ -853,19 +853,19 @@ function timeGreet(id, busy) {
   greetMemory(m => { m[id] = [...(m[id] || []).filter(k => k.includes(day) || k.includes(ymd(now))), slotKey, ...(fest ? [festKey] : [])] })
   greetedAt[id] = Date.now()
   const line = pick(c.lines?.[p] || [c.greeting || ''])
-  if (!busy && c.poses?.[p]) { show(p, true); say(line) }   // 正在干活时不打断，只说一句
+  if (!busy && c.poses?.[p]) { show(p, true); say(line) }   // 正在幹活時不打斷，只說一句
   else say(line)
   return true
 }
-// 一直开着的时候，进入新的时段 / 节日也打个招呼：只在闲着、最近有人在（没睡着）的时候
+// 一直開著的時候，進入新的時段 / 節日也打個招呼：只在閒著、最近有人在（沒睡著）的時候
 setInterval(() => {
   if (!charId || egg || devHeld() || devActive || updatingNow || char()?.egg) return
   if ((pose !== 'idle' && pose !== 'tired') || Date.now() - lastActive > SLEEP_AFTER) return
   timeGreet(charId, false)
 }, 60000)
 
-// 正在下载 / 安装新版本：一直举着礼物，右上角小窗按真实进度走，气泡显示百分比。由宿主调用；
-// 装好后新版会自己重新打开，所以不用收尾；更新失败时宿主调 endUpdate() 回到常态
+// 正在下載 / 安裝新版本：一直舉著禮物，右上角小窗按真實進度走，氣泡顯示百分比。由宿主呼叫；
+// 裝好後新版會自己重新開啟，所以不用收尾；更新失敗時宿主調 endUpdate() 回到常態
 let updatingNow = false
 function setUpdateProgress(pct, line) {
   updatingNow = true
@@ -884,26 +884,26 @@ function endUpdate() {
   setPose(restPose()); say('')
 }
 
-// 有新版本：演几秒「收到礼物」（没画 update 立绘时用 happy），气泡一直留着，等下次说别的话再换掉
+// 有新版本：演幾秒「收到禮物」（沒畫 update 立繪時用 happy），氣泡一直留著，等下次說別的話再換掉
 function notifyUpdate(tag) {
   if (egg) return
   show('update', true)
-  say(`有新版本 ${tag} 啦～右键菜单里点「更新」就好`)
+  say(`有新版本 ${tag} 啦～右鍵選單裡點「更新」就好`)
   clearTimeout(revertTimer)
   revertTimer = characterTimeout(() => setPose(restPose()), 6500)
 }
 
-// ---- 贴边 ----
-// 外壳把她拖到屏幕左 / 右边缘时调 setTucked('left' / 'right')，跑出来时 setTucked(null)。
-// dockCut 告诉外壳「切口」在窗口里的横坐标（网页像素）：贴边立绘是画面边框从她身上切过去，切口就是立绘那条边；
-// 没画贴边立绘时用平常的立绘，切口在她身体正中，屏幕边缘挡住一半
-// peek：鼠标移到露出来的那截上时换成探出来更多、好奇地看着你的那张（edge_*_peek），切口照样对齐屏幕边缘
+// ---- 貼邊 ----
+// 外殼把她拖到螢幕左 / 右邊緣時調 setTucked('left' / 'right')，跑出來時 setTucked(null)。
+// dockCut 告訴外殼「切口」在視窗裡的橫座標（網頁畫素）：貼邊立繪是畫面邊框從她身上切過去，切口就是立繪那條邊；
+// 沒畫貼邊立繪時用平常的立繪，切口在她身體正中，螢幕邊緣擋住一半
+// peek：滑鼠移到露出來的那截上時換成探出來更多、好奇地看著你的那張（edge_*_peek），切口照樣對齊螢幕邊緣
 function setTucked(side, peek = false) {
   if (side === tucked && !!peek === tuckedPeek) return
-  // 「新功能」卡片开着时缩回边上：卡片挂在屏幕边、点不到——先收起，等她再出来、闲着的时候重新弹
+  // 「新功能」卡片開著時縮回邊上：卡片掛在螢幕邊、點不到——先收起，等她再出來、閒著的時候重新彈
   if (side && !$('newsCard').classList.contains('hidden')) { hideNews(); queueNews(newsShown, 20000) }
-  // 演彩蛋时被拖到边上：彩蛋直接收场、换回原角色再缩进去——彩蛋角色没有贴边立绘，缩着又演不了下一步，
-  // 会一直停在那张图上直到超时；外壳这时量到的切口也是彩蛋的，记在原角色名下，之后贴边位置一直偏
+  // 演彩蛋時被拖到邊上：彩蛋直接收場、換回原角色再縮排去——彩蛋角色沒有貼邊立繪，縮著又演不了下一步，
+  // 會一直停在那張圖上直到超時；外殼這時量到的切口也是彩蛋的，記在原角色名下，之後貼邊位置一直偏
   if (side && egg) quitEggNow()
   const was = tucked, edge = side || was
   preloadEdges()
@@ -919,16 +919,16 @@ function setTucked(side, peek = false) {
   slideFrom(before, edge)
   if (!!side !== !!was) { repaintNow(); repaintSoon() }
 }
-// 透明窗口里藏起额度、名牌时，WebKit 偶尔少擦一行像素（页面有缩放时重绘范围取整），留下一条横线：
-// 过渡结束后让整页重新画一遍（切到独立图层再切回来）
+// 透明視窗裡藏起額度、名牌時，WebKit 偶爾少擦一行畫素（頁面有縮放時重繪範圍取整），留下一條橫線：
+// 過渡結束後讓整頁重新畫一遍（切到獨立圖層再切回來）
 function repaintNow() {
   const b = document.body
   b.style.transform = 'translateZ(0)'
   setTimeout(() => { b.style.transform = '' }, 60)
 }
 function repaintSoon() { setTimeout(repaintNow, 450) }
-// 换图前后她的位置不一样（贴着窗口边 ↔ 窗口中间）：先把舞台挪回原来的位置，再 0.3 秒滑过去，不要一下子跳
-// （不用 requestAnimationFrame：窗口在后台、刚从全屏回来时它可能不触发）
+// 換圖前後她的位置不一樣（貼著視窗邊 ↔ 視窗中間）：先把舞臺挪回原來的位置，再 0.3 秒滑過去，不要一下子跳
+// （不用 requestAnimationFrame：視窗在後臺、剛從全屏回來時它可能不觸發）
 function slideFrom(before, edge) {
   const stage = $('stage'), img = active
   const run = () => {
@@ -943,17 +943,17 @@ function slideFrom(before, edge) {
     stage.style.transform = ''
     setTimeout(() => { stage.style.transition = '' }, 350)
   }
-  if (img.complete && img.naturalWidth) run()   // 新图已经解码好（预加载过）：马上量
+  if (img.complete && img.naturalWidth) run()   // 新圖已經解碼好（預載入過）：馬上量
   else img.addEventListener('load', run, { once: true })
 }
-// 贴边、探出来、待机的图先载入好：换图时不会有一两帧空白（闪一下）
+// 貼邊、探出來、待機的圖先載入好：換圖時不會有一兩幀空白（閃一下）
 let preloaded = null
 function preloadEdges() {
   if (preloaded === charId) return
   preloaded = charId
   for (const p of ['edge_left', 'edge_right', 'edge_left_peek', 'edge_right_peek', 'idle', 'tired']) for (const u of framesFor(p)) { const i = new Image(); i.src = u }
 }
-// 正在显示的立绘实际画出来的范围（object-fit: contain，按 object-position 对齐）
+// 正在顯示的立繪實際畫出來的範圍（object-fit: contain，按 object-position 對齊）
 function shownRect() {
   const img = active, r = img.getBoundingClientRect(), nw = img.naturalWidth, nh = img.naturalHeight
   if (!nw || !nh) return null
@@ -968,22 +968,22 @@ function dockCut(side) {
   return Math.round(side === 'left' ? b.left : b.left + b.width)
 }
 
-// 刚更新完重新打开：开心一下告诉你现在是新版本（等登场招呼演完再说）
-// 刚更新完（外壳检测到这次打开的版本比上次新）：这版有新功能就在头顶弹一张卡片「这次多了 N 个新功能」（去看看 / 知道了），
-// 没有（纯修 bug 的版本）就照旧说一句。last：上次的版本（跳过几版的合在一起算）。文案和判断在 whats-new.js
+// 剛更新完重新開啟：開心一下告訴你現在是新版本（等登場招呼演完再說）
+// 剛更新完（外殼檢測到這次開啟的版本比上次新）：這版有新功能就在頭頂彈一張卡片「這次多了 N 個新功能」（去看看 / 知道了），
+// 沒有（純修 bug 的版本）就照舊說一句。last：上次的版本（跳過幾版的合在一起算）。文案和判斷在 whats-new.js
 function justUpdated(version, last) {
   const n = window.WhatsNew ? WhatsNew.since(WhatsNew.LIST, last, version).length : 0
   if (!n) {
     setTimeout(() => {
       if (egg || farewellLine !== null) return
       show('happy', true)
-      say(`更新好啦～现在是 ${version}`)
+      say(`更新好啦～現在是 ${version}`)
     }, 6000)
     return
   }
   queueNews(n, 6000)
 }
-// 等她闲下来再弹：不在彩蛋、AI 没在干活、没在道别 / 更新、没缩在边上；等不到就过一会儿再看，最多等 10 分钟（设置里的小红点还在）
+// 等她閒下來再彈：不在彩蛋、AI 沒在幹活、沒在道別 / 更新、沒縮在邊上；等不到就過一會兒再看，最多等 10 分鐘（設定裡的小紅點還在）
 function queueNews(n, first) {
   let tries = 0
   const attempt = () => {
@@ -996,35 +996,35 @@ function queueNews(n, first) {
 let newsTimer = null, newsShown = 0
 function showNews(n) {
   newsShown = n
-  $('newsText').textContent = `更新好啦～这次多了 ${n} 个新功能`
+  $('newsText').textContent = `更新好啦～這次多了 ${n} 個新功能`
   show('happy', true)
-  say('')   // 放在 show 后面：show 会说一句开心的台词（「完成！」之类），留在卡片底下，卡片一收起就露出来
+  say('')   // 放在 show 後面：show 會說一句開心的臺詞（「完成！」之類），留在卡片底下，卡片一收起就露出來
   $('newsCard').classList.remove('hidden')
   clearTimeout(newsTimer)
-  newsTimer = setTimeout(hideNews, 30000)   // 不点也会自己收起
+  newsTimer = setTimeout(hideNews, 30000)   // 不點也會自己收起
 }
 function hideNews() { clearTimeout(newsTimer); $('newsCard').classList.add('hidden') }
-// 网页 → 外壳：macOS 走 pet 消息通道，Windows 走 WebView2 的 postMessage
+// 網頁 → 外殼：macOS 走 pet 訊息通道，Windows 走 WebView2 的 postMessage
 function toShell(msg) {
   try { if (window.chrome?.webview) window.chrome.webview.postMessage(msg); else window.webkit?.messageHandlers?.pet?.postMessage(msg) } catch {}
 }
 
-// Claude 的配置被别的工具改掉了（比如 CC Switch 3.x 切换服务商会整个重写 settings.json），外壳已经接回去了：说一声
+// Claude 的配置被別的工具改掉了（比如 CC Switch 3.x 切換服務商會整個重寫 settings.json），外殼已經接回去了：說一聲
 function configHealed() {
   if (egg || farewellLine !== null) return
-  const line = 'Claude 配置被改掉了，已接回～新会话生效'
+  const line = 'Claude 配置被改掉了，已接回～新會話生效'
   say(line)
   setTimeout(() => { if ($('bubble').textContent === line) say('') }, 9000)
 }
 
-// 换了衣服（皮肤）：外壳重新 init 过立绘清单后调它，正在显示的就是这个角色就重新换上
+// 換了衣服（皮膚）：外殼重新 init 過立繪清單後調它，正在顯示的就是這個角色就重新換上
 function refreshLook(id) {
   const ol = outfitLine; outfitLine = null
   if (charId !== id || egg || (characterTarget && characterTarget !== id)) return
   charId = null; preloaded = null
   setCharacter(id, true)
-  // 按时段换的衣服：换好（setCharacter 里冒烟、换图约 0.4 秒）再说换装台词——台词按换上之后的衣服取；
-  // 换上的不是要的那件（外壳没换成、这期间你手动换了别的）就不说
+  // 按時段換的衣服：換好（setCharacter 裡冒煙、換圖約 0.4 秒）再說換裝臺詞——臺詞按換上之後的衣服取；
+  // 換上的不是要的那件（外殼沒換成、這期間你手動換了別的）就不說
   if (ol?.id === id && Date.now() - ol.at < 8000 && (manifest.characters[id]?.skin || '') === ol.skin) {
     const key = ol.key
     characterTimeout(() => { if (charId === id && !egg) { const line = pick(linesOf(key) || ['']); say(line); clearTimeout(outfitSayTimer); outfitSayTimer = characterTimeout(() => { if ($('bubble').textContent === line) say('') }, 6000) } }, 700, id)
@@ -1037,9 +1037,9 @@ function setName(id, name) {
   if (id === charId) $('caption').textContent = name
 }
 
-// 兜底：干活的样子（思考、读写、跑命令……）停了这么久没有任何新事件，就当这一轮已经停了，回去待机。
-// 有的 AI 被你中途打断时不发「结束」（Claude Code 标准钩子、Gemini CLI……），不然她会一直停在思考。
-// 「等你回答」不算：那是在等你，本来就可能很久
+// 兜底：幹活的樣子（思考、讀寫、跑命令……）停了這麼久沒有任何新事件，就當這一輪已經停了，回去待機。
+// 有的 AI 被你中途打斷時不發「結束」（Claude Code 標準鉤子、Gemini CLI……），不然她會一直停在思考。
+// 「等你回答」不算：那是在等你，本來就可能很久
 const STUCK_AFTER = 3 * 60 * 1000
 const NOT_WORKING = new Set(['idle', 'sleeping', 'asking', 'tired', 'hungry', 'happy', 'proud', 'oops', 'surprised'])
 let stuckTimer = null
@@ -1053,13 +1053,13 @@ function watchStuck() {
   }, STUCK_AFTER)
 }
 
-// ---- 特效省电 ----
-// 实测（M 系列 Mac）：身边的 SVG 特效（星星、思考云、小卡片）是耗电大头，SVG 自己的时钟跑时整个桌宠占一个核的 16%～19%，
-// 停掉特效只剩 1.5%；人物浮动、光晕是 CSS 变换，几乎不花钱。所以只管特效：
-// - 暂停 SVG 自己的时钟，跟着屏幕刷新按帧推进（#fx、多会话卡片都算）：平时 60 帧（干活时约 11%），省电模式 30 帧（约 8%）。
-//   15 帧时画笔、终端里的字明显一顿一顿，用户反馈过，所以省电模式也不再往下压
-// - 闲着（待机 / 累 / 睡着）超过 30 秒（省电模式 10 秒）：特效淡出并停下；睡着的 zZz 保留，每秒 5 帧
-// - 窗口看不见（被挡住、锁屏、屏幕休眠）：外壳调 setPageHidden(true)，全部暂停
+// ---- 特效省電 ----
+// 實測（M 系列 Mac）：身邊的 SVG 特效（星星、思考雲、小卡片）是耗電大頭，SVG 自己的時鐘跑時整個桌寵佔一個核的 16%～19%，
+// 停掉特效只剩 1.5%；人物浮動、光暈是 CSS 變換，幾乎不花錢。所以只管特效：
+// - 暫停 SVG 自己的時鐘，跟著螢幕重新整理按幀推進（#fx、多會話卡片都算）：平時 60 幀（幹活時約 11%），省電模式 30 幀（約 8%）。
+//   15 幀時畫筆、終端裡的字明顯一頓一頓，使用者反饋過，所以省電模式也不再往下壓
+// - 閒著（待機 / 累 / 睡著）超過 30 秒（省電模式 10 秒）：特效淡出並停下；睡著的 zZz 保留，每秒 5 幀
+// - 視窗看不見（被擋住、鎖屏、螢幕休眠）：外殼調 setPageHidden(true)，全部暫停
 const RESTING = new Set(['idle', 'tired', 'sleeping'])
 let powerSave = false, fxResting = false, pageHidden = false, fxClock = null, fxFps = 0, restTimer = null
 function fxTick() {
@@ -1067,9 +1067,9 @@ function fxTick() {
   for (const s of document.querySelectorAll('#fx svg, #cards svg')) {
     if (s._fxT === undefined) { s.pauseAnimations(); s._fxT = s.getCurrentTime(); s._fxS = now }
     else if (!s.animationsPaused()) {
-      // 窗口藏起来再露出来（macOS 切换桌面、被挡住又露出）时，WebKit 会自己把暂停的 SVG 动画重新开起来：
-      // 它自己的时钟和这里按帧拨的时间交替生效，终端里的字一帧在一帧不见、zZz 错位（#9 @SkywingJam 发现并录屏对照）。
-      // 重新停住，从上一帧的时间接着走（也不跨过藏起来的那段）
+      // 視窗藏起來再露出來（macOS 切換桌面、被擋住又露出）時，WebKit 會自己把暫停的 SVG 動畫重新開起來：
+      // 它自己的時鐘和這裡按幀撥的時間交替生效，終端裡的字一幀在一幀不見、zZz 錯位（#9 @SkywingJam 發現並錄屏對照）。
+      // 重新停住，從上一幀的時間接著走（也不跨過藏起來的那段）
       s.pauseAnimations(); s._fxT = s._fxLast ?? s.getCurrentTime(); s._fxS = now
     }
     s._fxLast = s._fxT + (now - s._fxS) / 1000
@@ -1081,15 +1081,15 @@ function applyFxRate() {
   $('fx').classList.toggle('rest', fxResting && pose !== 'sleeping' && !pageHidden)
   document.documentElement.classList.toggle('frozen', pageHidden)
   if (fps === fxFps && (fps === 0 || fxClock)) return
-  // 停过表（藏起来、闲着歇了）再开：从停下时的那一帧接着走，不一下子跳过停着的那段
+  // 停過表（藏起來、閒著歇了）再開：從停下時的那一幀接著走，不一下子跳過停著的那段
   if (fxFps <= 0 && fps > 0) { const now = performance.now(); for (const s of document.querySelectorAll('#fx svg, #cards svg')) if (s._fxLast !== undefined) { s._fxT = s._fxLast; s._fxS = now } }
   fxFps = fps
   clearInterval(fxClock); fxClock = null
-  fxTick()   // 新出现的先接管（停住自己的时钟）
+  fxTick()   // 新出現的先接管（停住自己的時鐘）
   if (fps > 0) {
-    // 跟着屏幕刷新出帧（隔几帧出一帧），节拍均匀；单用定时器和屏幕刷新对不齐，一帧停得长一帧停得短，移动的文字、画笔看着一抖一抖
+    // 跟著螢幕刷新出幀（隔幾幀出一幀），節拍均勻；單用定時器和螢幕重新整理對不齊，一幀停得長一幀停得短，移動的文字、畫筆看著一抖一抖
     if (!fxRaf) fxRaf = requestAnimationFrame(fxLoop)
-    // 兜底：窗口在后台、刚从全屏回来时 requestAnimationFrame 可能不触发，这时按定时器走
+    // 兜底：視窗在後臺、剛從全屏回來時 requestAnimationFrame 可能不觸發，這時按定時器走
     fxClock = setInterval(() => {
       if (performance.now() - fxLast > 250) { fxLast = performance.now(); fxTick(); if (!fxRaf) fxRaf = requestAnimationFrame(fxLoop) }
     }, 1000 / Math.min(fps, 10))
@@ -1102,7 +1102,7 @@ function fxLoop(t) {
   if (t - fxLast >= 1000 / fxFps - 4) { fxLast = t; fxTick() }
   fxRaf = requestAnimationFrame(fxLoop)
 }
-// 新画上去的特效马上接管，别先按 60 帧跑一下
+// 新畫上去的特效馬上接管，別先按 60 幀跑一下
 new MutationObserver(() => fxTick()).observe(document.getElementById('stage'), { childList: true, subtree: true })
 function noteRest(p) {
   clearTimeout(restTimer)
@@ -1113,14 +1113,14 @@ function setPowerSave(on) { powerSave = !!on; fxFps = -1; noteRest(pose); applyF
 function setPageHidden(h) { pageHidden = !!h; applyFxRate() }
 applyFxRate()
 
-// ---- 多会话：同一个 AI 好几个对话同时在干活 ----
-// 外壳把 <角色>-sessions.json（{会话id: {pose, event, ts}}）交过来。两个以上同时在干活时她「手忙脚乱」：
-// 左右两帧来回切（busy_left / busy_right；三个以上换更崩溃的 swamped_*），每个对话一张小卡片演它正在做的事，
-// 她转向哪边，哪边的卡片就亮。干完的卡片打绿勾、出错的变红抖一下，停几秒后消失；有对话在等你回答时她换成「等你回答」
-const sessions = {}         // 角色 → {会话id: {pose, event, ts}}
-const SESSION_DONE_SHOW = 4  // 干完 / 出错的卡片停几秒
-const SESSION_FLIP = 1500    // 左右两帧多久换一次
-let multi = null             // 正在演：{ side, flipTimer, cards: Map(会话id → {el, pose, shownAt, pending}), order: [会话id] }
+// ---- 多會話：同一個 AI 好幾個對話同時在幹活 ----
+// 外殼把 <角色>-sessions.json（{會話id: {pose, event, ts}}）交過來。兩個以上同時在幹活時她「手忙腳亂」：
+// 左右兩幀來回切（busy_left / busy_right；三個以上換更崩潰的 swamped_*），每個對話一張小卡片演它正在做的事，
+// 她轉向哪邊，哪邊的卡片就亮。幹完的卡片打綠勾、出錯的變紅抖一下，停幾秒後消失；有對話在等你回答時她換成「等你回答」
+const sessions = {}         // 角色 → {會話id: {pose, event, ts}}
+const SESSION_DONE_SHOW = 4  // 幹完 / 出錯的卡片停幾秒
+const SESSION_FLIP = 1500    // 左右兩幀多久換一次
+let multi = null             // 正在演：{ side, flipTimer, cards: Map(會話id → {el, pose, shownAt, pending}), order: [會話id] }
 
 function setSessions(id, map) {
   if (id === 'current') id = charId
@@ -1133,9 +1133,9 @@ function sessionKind(e, now) {
   if (e.pose === 'happy' || e.pose === 'proud') return age < SESSION_DONE_SHOW ? 'done' : null
   if ((e.pose === 'oops' || e.pose === 'surprised') && e.event === 'Stop') return age < SESSION_DONE_SHOW ? 'error' : null
   if (e.pose === 'idle' || e.pose === 'sleeping') return null
-  return age < STUCK_AFTER / 1000 ? 'work' : null   // 一轮中途某个工具出错：还在干活，只是卡片变红
+  return age < STUCK_AFTER / 1000 ? 'work' : null   // 一輪中途某個工具出錯：還在幹活，只是卡片變紅
 }
-// 当前角色要演的会话：她自己的，加上她响应的各家 AI 的（会话 id 各家不重复，直接合在一起）
+// 當前角色要演的會話：她自己的，加上她響應的各家 AI 的（會話 id 各家不重複，直接合在一起）
 function currentSessions() {
   const out = { ...(sessions[charId] || {}) }
   for (const [host, map] of Object.entries(sessions)) if (standsIn(host)) Object.assign(out, map)
@@ -1146,11 +1146,11 @@ function refreshMulti() {
   const live = Object.entries(map).map(([sid, e]) => [sid, e, sessionKind(e, now)]).filter(x => x[2])
   const busy = live.filter(x => x[2] === 'work' || x[2] === 'ask').length
   if (!multi && (busy < 2 || egg || farewellLine !== null || updatingNow)) return
-  // 只剩一个（或没有）对话在干活：等干完 / 出错的卡片演完（几秒），她就恢复成平常一个对话的样子
+  // 只剩一個（或沒有）對話在幹活：等幹完 / 出錯的卡片演完（幾秒），她就恢復成平常一個對話的樣子
   if (multi && busy < 2 && !live.some(x => x[2] === 'done' || x[2] === 'error')) return endMulti()
   if (!multi) startMulti()
   lastActive = Date.now()
-  // 卡片顺序固定（先来的在前），不会跳来跳去；最多 4 张，多的显示「+N」
+  // 卡片順序固定（先來的在前），不會跳來跳去；最多 4 張，多的顯示「+N」
   for (const [sid] of live) if (!multi.order.includes(sid)) multi.order.push(sid)
   multi.order = multi.order.filter(sid => live.some(x => x[0] === sid))
   const shown = multi.order.slice(0, 4)
@@ -1181,10 +1181,10 @@ function refreshMulti() {
   multi.busy = busy
   multi.asking = live.some(x => x[2] === 'ask')
   multiPose()
-  // 干完的卡片过几秒自己消失：到时候再看一遍
+  // 幹完的卡片過幾秒自己消失：到時候再看一遍
   clearTimeout(multi.recheck); multi.recheck = setTimeout(refreshMulti, 1000)
 }
-// 卡片换内容：同一张卡片至少停 1.2 秒，快的工具不会闪
+// 卡片換內容：同一張卡片至少停 1.2 秒，快的工具不會閃
 function setCardPose(c, p) {
   if (c.pose === p) return
   clearTimeout(c.pending)
@@ -1194,7 +1194,7 @@ function setCardPose(c, p) {
   const svg = c.el.querySelector('svg')
   svg.setAttribute('viewBox', `0 0 ${CrossFx.CW} ${CrossFx.CH}`)
   svg.innerHTML = CrossFx.cardProp(p)
-  try {   // 只留道具本身：按它实际占的范围裁。沿路径移动的小东西（画画的笔刷）原点在画布角上，量的时候先藏起来
+  try {   // 只留道具本身：按它實際佔的範圍裁。沿路徑移動的小東西（畫畫的筆刷）原點在畫布角上，量的時候先藏起來
     const moving = [...svg.querySelectorAll('animateMotion')].map(a => a.parentNode)
     moving.forEach(n => n.setAttribute('display', 'none'))
     const b = svg.getBBox(), pad = 8
@@ -1203,7 +1203,7 @@ function setCardPose(c, p) {
   } catch {}
   flipCard(c)
 }
-// 思考云是画在她右上方的，小尾巴朝左下指向她：卡片在她左边时左右翻过来，小尾巴才朝着她（有字的卡片不翻）
+// 思考雲是畫在她右上方的，小尾巴朝左下指向她：卡片在她左邊時左右翻過來，小尾巴才朝著她（有字的卡片不翻）
 function flipCard(c) {
   const cloud = c.pose && CrossFx.cardProp(c.pose) === CrossFx.cardProp('thinking')
   c.el.querySelector('svg').style.transform = cloud && c.side === 'left' ? 'scaleX(-1)' : ''
@@ -1215,8 +1215,8 @@ function startMulti() {
   multi.flipTimer = setInterval(() => { if (multi && !multi.asking) { multi.side = multi.side === 'left' ? 'right' : 'left'; multiPose() } }, SESSION_FLIP)
   chatterLater()
 }
-// 多会话的台词：刚手忙脚乱时、升级成太忙时、有对话开始等你回答时各说一句（台词在 character.json 的 busy / swamped / asking），4 秒后收起
-// 一直忙着的时候（比如好几个 Codex 对话跑很久）：隔 35～55 秒再嘟囔一句，不然开头那句说完就一直不吭声
+// 多會話的臺詞：剛手忙腳亂時、升級成太忙時、有對話開始等你回答時各說一句（臺詞在 character.json 的 busy / swamped / asking），4 秒後收起
+// 一直忙著的時候（比如好幾個 Codex 對話跑很久）：隔 35～55 秒再嘟囔一句，不然開頭那句說完就一直不吭聲
 function chatterLater() {
   if (!multi) return
   clearTimeout(multi.chatter)
@@ -1236,7 +1236,7 @@ function multiSay(kind) {
 function multiPose() {
   if (!multi) return
   const level = multi.asking ? 'asking' : multi.busy >= 3 ? 'swamped' : 'busy'
-  if (level !== multi.said && (level !== 'busy' || !multi.said)) multiSay(level)   // 从太忙降回两个时不再说
+  if (level !== multi.said && (level !== 'busy' || !multi.said)) multiSay(level)   // 從太忙降回兩個時不再說
   multi.said = level
   if (multi.asking) { if (pose !== 'asking') { setPose('asking'); $('fx').classList.add('hide') } }
   else {
@@ -1252,20 +1252,20 @@ function endMulti() {
   $('more').classList.remove('on')
   multi = null
   shownAt = 0
-  // 回到只剩的那一个对话的样子（没有就是待机）
+  // 回到只剩的那一個對話的樣子（沒有就是待機）
   const left = Object.values(currentSessions()).filter(e => sessionKind(e, Date.now() / 1000) === 'work' || sessionKind(e, Date.now() / 1000) === 'ask')
   show(left.length ? left[0].pose : 'idle', true)
   watchStuck()
 }
 
-// 收到状态后怎么处理的（反馈「AI 干活时她没反应」用）：最近 40 条，只有角色、事件名、姿态和结论，由 diagnoseDisplay 交出去。
-// 结论：shown 演了 / not-current 不是当前角色（只记下状态）/ egg 正在演彩蛋 / multi 正在演多会话 / shaking 正被甩着 / no-pose 没有姿态
+// 收到狀態後怎麼處理的（反饋「AI 幹活時她沒反應」用）：最近 40 條，只有角色、事件名、姿態和結論，由 diagnoseDisplay 交出去。
+// 結論：shown 演了 / not-current 不是當前角色（只記下狀態）/ egg 正在演彩蛋 / multi 正在演多會話 / shaking 正被甩著 / no-pose 沒有姿態
 const petVerdicts = []
 function noteVerdict(id, s, verdict) {
   petVerdicts.push({ t: Math.round(Date.now() / 1000), id, ev: s?.event || '', pose: s?.pose || '', verdict })
   if (petVerdicts.length > 40) petVerdicts.shift()
 }
-// 反馈时外壳调一次：她现在显示成什么样（只有名字和开关，不含路径）
+// 反饋時外殼調一次：她現在顯示成什麼樣（只有名字和開關，不含路徑）
 function diagnoseDisplay() {
   const file = img => decodeURIComponent((img.getAttribute('src') || '').split(/[?#]/)[0].split('/').pop())
   return {
@@ -1277,23 +1277,23 @@ function diagnoseDisplay() {
   }
 }
 function applyCharState(id, s) {
-  if (id === 'current') id = charId   // 多模型宿主里没有对应角色的模型（WorkBuddy 的混元、Kimi……）：由当前角色来演
-  const own = id                      // 事件原本属于哪家 AI：先按它记下状态，切回那家的角色时看到的才是最新的
+  if (id === 'current') id = charId   // 多模型宿主裡沒有對應角色的模型（WorkBuddy 的混元、Kimi……）：由當前角色來演
+  const own = id                      // 事件原本屬於哪家 AI：先按它記下狀態，切回那家的角色時看到的才是最新的
   charState[own] = s
-  if (standsIn(id)) id = charId       // 代演（reactTo）：别家 AI 的状态当成她自己的（多个会话同时干活时，由 refreshMulti 合并）
+  if (standsIn(id)) id = charId       // 代演（reactTo）：別家 AI 的狀態當成她自己的（多個會話同時幹活時，由 refreshMulti 合併）
   charState[id] = s
   if (egg) { noteVerdict(own, s, 'egg'); if (egg.host === own && s.pose && s.pose !== 'idle') endEgg(); return }
   if (id !== charId || !s.pose) { noteVerdict(own, s, s.pose ? 'not-current' : 'no-pose'); return }
   lastActive = Date.now()
-  if (multi) { noteVerdict(own, s, 'multi'); return }   // 正在演多会话：她的样子由各对话的状态决定（refreshMulti），这里不动
+  if (multi) { noteVerdict(own, s, 'multi'); return }   // 正在演多會話：她的樣子由各對話的狀態決定（refreshMulti），這裡不動
   if (Date.now() < shakingUntil && s.event !== 'Stop') { noteVerdict(own, s, 'shaking'); return }
-  noteVerdict(own, s, 'shown')   // 正被甩着：先只记下状态，甩停了 resumeWork 回到最新的活上（不然晕和干活来回闪）
+  noteVerdict(own, s, 'shown')   // 正被甩著：先只記下狀態，甩停了 resumeWork 回到最新的活上（不然暈和幹活來回閃）
   clearTimeout(thinkTimer)
   watchStuck()
   const ev = s.event || ''
   if (s.pose === 'oops' || (ev === 'Stop' && s.pose === 'surprised')) lastTrouble[id] = Date.now()
-  else if (ev === 'Stop' && (s.pose === 'happy' || s.pose === 'proud')) lastTrouble[id] = 0  // 最后顺利完成了，不算
-  // 工具动作被紧跟着的「思考」盖掉时，状态里会捎带上它（after）：没演过的话先演，停够了再思考
+  else if (ev === 'Stop' && (s.pose === 'happy' || s.pose === 'proud')) lastTrouble[id] = 0  // 最後順利完成了，不算
+  // 工具動作被緊跟著的「思考」蓋掉時，狀態裡會捎帶上它（after）：沒演過的話先演，停夠了再思考
   if (ev === 'PreToolUse' || ev === 'BeforeTool') seenTool[id] = s.ts
   if (s.after && s.afterTs !== seenTool[id]) {
     seenTool[id] = s.afterTs
@@ -1305,7 +1305,7 @@ function applyCharState(id, s) {
     if (s.pose === 'oops') show('oops')
     else thinkTimer = characterTimeout(() => show('thinking'), BACK_TO_THINKING)
   } else if (ev === 'UserPromptSubmit' || ev === 'BeforeAgent') {
-    // 刚出错 / 被打断后你又发了消息（多半是在纠正她）：有 correctedPose 的角色先认个错
+    // 剛出錯 / 被打斷後你又發了訊息（多半是在糾正她）：有 correctedPose 的角色先認個錯
     // （Claude 的「You're absolutely right!」）
     const sorry = char()?.correctedPose
     if (sorry && Date.now() - (lastTrouble[id] || 0) < 3 * 60 * 1000) {
@@ -1317,12 +1317,12 @@ function applyCharState(id, s) {
     show('listening', true)
     thinkTimer = characterTimeout(() => show('thinking'), LISTEN_TO_THINKING)
   } else if (ev === 'Stop' && pendingCelebration[id]?.afterWork && !sulking && !angerLevel(angerNow())) {
-    // 干活途中额度刷新了（重置卡 / 换套餐 / 充值）：干完不演普通的开心，演 reset / 吃饭
+    // 幹活途中額度重新整理了（重置卡 / 換套餐 / 充值）：幹完不演普通的開心，演 reset / 吃飯
     clearTimeout(pending)
     shownAt = 0
     celebrate(id, pendingCelebration[id].ev)
   } else if (ev === 'Stop' && (s.pose === 'happy' || s.pose === 'proud') && !sulking && angerLevel(angerNow())) {
-    // 干活时被甩、憋着的火还没消：干完不庆祝，直接按火气生气，说「干活时被你晃」的那套台词（秋后算账）
+    // 幹活時被甩、憋著的火還沒消：幹完不慶祝，直接按火氣生氣，說「幹活時被你晃」的那套臺詞（秋後算賬）
     clearTimeout(shakeEndTimer)
     react('work')
   } else {
@@ -1330,10 +1330,10 @@ function applyCharState(id, s) {
   }
 }
 
-// ---- 额度里的「社区梗」时刻 ----
-// GPT：某个额度窗口在预定重置时间之前突然恢复一大截（官方 reset / 重置卡）→ reset
-// DeepSeek：余额比上次多了（充值）→ feast 大口吃白饭
-// 上次的数值记在本机（localStorage），App 重启后也能比较；没有专属立绘时用 happy / eat 顶上
+// ---- 額度裡的「社群梗」時刻 ----
+// GPT：某個額度視窗在預定重置時間之前突然恢復一大截（官方 reset / 重置卡）→ reset
+// DeepSeek：餘額比上次多了（充值）→ feast 大口吃白飯
+// 上次的數值記在本機（localStorage），App 重啟後也能比較；沒有專屬立繪時用 happy / eat 頂上
 const CELEBRATE = { reset: ['reset', 'happy'], feast: ['feast', 'eat'] }
 const pendingCelebration = {}
 function quotaMemory(update) {
@@ -1342,7 +1342,7 @@ function quotaMemory(update) {
   if (update) { update(m); try { localStorage.setItem('crosspet-quota-memory', JSON.stringify(m)) } catch {} }
   return m
 }
-// 多少算「充值了」：人民币 0.5，美元按差不多的钱算 0.07
+// 多少算「充值了」：人民幣 0.5，美元按差不多的錢算 0.07
 const FEAST_STEP = { CNY: 0.5, USD: 0.07 }
 function feastByCurrency(prev, now) {
   if (!prev || typeof prev !== 'object') return false
@@ -1361,8 +1361,8 @@ function quotaEvent(id, q) {
       m[id] = { ...prev, windows: q.windows }
     }
     if (q.balances && typeof q.balances === 'object') {
-      // 按币种分别比（#10）：人民币、美元都可能有，只是顺序变了或币种不同不算充值；某个币种多了才算。
-      // 上次没有按币种的记录（刚从老版本升级）：只记下来，不比，免得拿美元和人民币的数字相减
+      // 按幣種分別比（#10）：人民幣、美元都可能有，只是順序變了或幣種不同不算充值；某個幣種多了才算。
+      // 上次沒有按幣種的記錄（剛從老版本升級）：只記下來，不比，免得拿美元和人民幣的數字相減
       if (feastByCurrency(prev.balances, q.balances)) ev = 'feast'
       m[id] = { ...(m[id] || prev), balances: q.balances, balance: q.balance }
       return
@@ -1376,9 +1376,9 @@ function quotaEvent(id, q) {
   return ev
 }
 function celebrate(id, ev) {
-  if (standsIn(id)) id = charId   // 代演（reactTo）：她响应的 AI 额度刷新了，她来演
-  if (id !== charId || egg || characterTimer) { pendingCelebration[id] = { ev, at: Date.now() }; return }  // 正在换成别人：等切回她时再演
-  // 正在干活：额度记录是 AI 回复的半路写下的，这时演会被紧跟着的干活动作盖掉，看不见——留到这一轮干完（Stop）再演
+  if (standsIn(id)) id = charId   // 代演（reactTo）：她響應的 AI 額度重新整理了，她來演
+  if (id !== charId || egg || characterTimer) { pendingCelebration[id] = { ev, at: Date.now() }; return }  // 正在換成別人：等切回她時再演
+  // 正在幹活：額度記錄是 AI 回覆的半路寫下的，這時演會被緊跟著的幹活動作蓋掉，看不見——留到這一輪幹完（Stop）再演
   if (aiActivity() === 'work') { pendingCelebration[id] = { ev, at: Date.now(), afterWork: true }; return }
   delete pendingCelebration[id]
   const [own, fallback] = CELEBRATE[ev]
@@ -1389,28 +1389,28 @@ function celebrate(id, ev) {
   revertTimer = characterTimeout(() => { setPose(restPose()); say('') }, 6500)
 }
 
-// GPT 额度：外壳交来问 Codex 服务得到的原始额度（见 codex-quota.js），排好版再走 setQuota
+// GPT 額度：外殼交來問 Codex 服務得到的原始額度（見 codex-quota.js），排好版再走 setQuota
 function setCodexQuota(p) { setQuota('gpt', p ? CodexQuota.view(p, Date.now() / 1000) : null) }
 function setQuota(id, q) {
   const wasLow = quota[id]?.low
   quota[id] = q
   const ev = quotaEvent(id, q)
-  // 官方宣布之后真的重置了：额度下方那一行收起。开发者控制台演「额度提前 reset」用的是假额度，不算（不然真实的宣布会被当成已经执行了）
+  // 官方宣佈之後真的重置了：額度下方那一行收起。開發者控制台演「額度提前 reset」用的是假額度，不算（不然真實的宣佈會被當成已經執行了）
   if (ev === 'reset' && id === 'gpt' && !devActive) codexResetSeenAt = Date.now() / 1000
   if (ev) celebrate(id, ev)
   if (egg) return
-  if (id === charId || quotaAggregate || standsIn(id)) renderQuota()   // 聚合 / 代演时别家额度变了也要重画
+  if (id === charId || quotaAggregate || standsIn(id)) renderQuota()   // 聚合 / 代演時別家額度變了也要重畫
   if (id !== charId) return
   if (q?.low && pose === 'idle') { setPose('tired'); if (!wasLow) say(pick(linesOf('tired') || [''])) }
   if (!q?.low && pose === 'tired') setPose('idle')
 }
 
-// x、y：外壳交来的点击位置（网页坐标，已经除掉人物大小的缩放）；不带坐标时和以前一样
+// x、y：外殼交來的點選位置（網頁座標，已經除掉人物大小的縮放）；不帶座標時和以前一樣
 function handleClick(kind, x, y) {
   const card = $('newsCard')
   if (x != null && y != null && !card.classList.contains('hidden')) {
     const r = card.getBoundingClientRect()
-    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {   // 点在卡片上：按钮照按钮办，空白处什么都不做（不摸头）
+    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {   // 點在卡片上：按鈕照按鈕辦，空白處什麼都不做（不摸頭）
       const action = document.elementFromPoint(x, y)?.closest('[data-action]')?.dataset.action
       if (action === 'news-open') { hideNews(); toShell({ openSettings: 'news' }) }
       else if (action === 'news-close') hideNews()
@@ -1420,20 +1420,20 @@ function handleClick(kind, x, y) {
   if (egg) { catchEgg(); return }
   lastActive = Date.now()
   if (kind === 'pat' && Math.random() < EGG_CLICK_CHANCE && playEgg(true)) return
-  if (pose === 'sleeping') { show('yawn', true); say('唔…你回来啦'); return }
-  if (kind === 'pat' && (sulking || angerNow() >= 20)) { coaxHer(); return }   // 生着气的时候摸她 = 哄她
+  if (pose === 'sleeping') { show('yawn', true); say('唔…你回來啦'); return }
+  if (kind === 'pat' && (sulking || angerNow() >= 20)) { coaxHer(); return }   // 生著氣的時候摸她 = 哄她
   const pokePose = char()?.pokePose && hasPose(char().pokePose) ? char().pokePose : 'surprised'
   show(kind === 'poke' ? pokePose : 'pat', true)
 }
 
-// ---- 甩她 / 红温 ----
-// 按住她快速来回甩，红温值往上加（甩 1 秒左右不耐烦，3～4 秒红温）：
-// 20 不耐烦（annoyed）→ 45 鼓脸（puffed）→ 75 红温（redhot，冒蒸汽、发抖），红温后背过身去赌气（sulk）。
-// 生气时摸她就是哄（coaxed）：赌气时摸三下原谅你（forgiven），没到红温时摸一下降一档。红温值不管它会慢慢降
+// ---- 甩她 / 紅溫 ----
+// 按住她快速來回甩，紅溫值往上加（甩 1 秒左右不耐煩，3～4 秒紅溫）：
+// 20 不耐煩（annoyed）→ 45 鼓臉（puffed）→ 75 紅溫（redhot，冒蒸汽、發抖），紅溫後背過身去賭氣（sulk）。
+// 生氣時摸她就是哄（coaxed）：賭氣時摸三下原諒你（forgiven），沒到紅溫時摸一下降一檔。紅溫值不管它會慢慢降
 let anger = 0, angerAt = Date.now(), sulking = false, coax = 0, sulkTimer = null, shakeEndTimer = null
-// 已经是这个动作时 show 不会换台词：哄她时每下都说一句
+// 已經是這個動作時 show 不會換臺詞：哄她時每下都說一句
 const showSay = p => { const was = pose; show(p, true); if (was === p) say(pick(linesOf(p) || [''])) }
-const ANGER_DECAY = 2   // 每秒降多少（赌气时不降，要哄）
+const ANGER_DECAY = 2   // 每秒降多少（賭氣時不降，要哄）
 function angerNow() {
   anger = Math.max(0, anger - (sulking ? 0 : (Date.now() - angerAt) / 1000 * ANGER_DECAY))
   angerAt = Date.now()
@@ -1442,8 +1442,8 @@ function angerNow() {
 function angerLevel(a) { return a >= 75 ? 'redhot' : a >= 45 ? 'puffed' : a >= 20 ? 'annoyed' : null }
 function addAnger(n) { angerNow(); anger = Math.min(100, anger + n) }
 const angerBlocked = () => egg || tucked || multi || farewellLine !== null || updatingNow || devHeld()
-// 按现在的红温值做反应
-// afterWork：干活时被甩、干完才发作，换成 work 开头的那套台词（workAnnoyed / workPuffed / workRedhot）
+// 按現在的紅溫值做反應
+// afterWork：幹活時被甩、幹完才發作，換成 work 開頭的那套臺詞（workAnnoyed / workPuffed / workRedhot）
 function react(afterWork) {
   if (angerBlocked()) return
   const lv = angerLevel(angerNow())
@@ -1458,40 +1458,40 @@ function react(afterWork) {
   sulkTimer = setTimeout(() => {
     if (!sulking) return
     show('sulk', true)
-    // 赌气太久没人哄：自己慢慢消气（不再说话，回到平常）
+    // 賭氣太久沒人哄：自己慢慢消氣（不再說話，回到平常）
     sulkTimer = setTimeout(() => { if (sulking) { sulking = false; anger = 30; angerAt = Date.now(); show('idle', true) } }, 45000)
   }, 3500)
 }
-// 外壳检测到正在被甩（按住快速来回拖）时隔一会儿调一次；停下来就按红温值反应。
-// AI 正在干活时被甩：晕着抱怨一句，停手就回去干活；火憋着，干完不庆祝、直接按火气生气（见 applyCharState 的 Stop）。
-// 在等你回答：不切走提问的样子，只催你一句。多会话手忙脚乱：小卡片被甩得东倒西歪
+// 外殼檢測到正在被甩（按住快速來回拖）時隔一會兒調一次；停下來就按紅溫值反應。
+// AI 正在幹活時被甩：暈著抱怨一句，停手就回去幹活；火憋著，幹完不慶祝、直接按火氣生氣（見 applyCharState 的 Stop）。
+// 在等你回答：不切走提問的樣子，只催你一句。多會話手忙腳亂：小卡片被甩得東倒西歪
 function shaken() {
   if (egg || tucked || farewellLine !== null || updatingNow || devHeld()) return
   lastActive = Date.now()
   addAnger(7)
-  if (multi) { complain('shakeMulti', ['我已经够乱了！']); wobbleCards(); return }
+  if (multi) { complain('shakeMulti', ['我已經夠亂了！']); wobbleCards(); return }
   const ai = aiActivity()
-  if (ai === 'asking') { complain('shakeAsk', ['别晃啦，快回答我呀！']); return }
-  show('dizzy', true)   // 已经在晕也再调一次：重新计「晕」的 3 秒，一直甩就一直晕，不会中途闪回待机
+  if (ai === 'asking') { complain('shakeAsk', ['別晃啦，快回答我呀！']); return }
+  show('dizzy', true)   // 已經在暈也再調一次：重新計「暈」的 3 秒，一直甩就一直暈，不會中途閃回待機
   clearTimeout(shakeEndTimer)
-  if (ai === 'work') {   // 干活时被甩：晕着抱怨一句，停手就回去干活；火憋着，干完再发
-    complain('shakeWork', ['别晃啦，我在干活呢！'])
+  if (ai === 'work') {   // 幹活時被甩：暈著抱怨一句，停手就回去幹活；火憋著，幹完再發
+    complain('shakeWork', ['別晃啦，我在幹活呢！'])
     shakingUntil = Date.now() + 1200
     shakeEndTimer = setTimeout(resumeWork, 1200)
     return
   }
   shakeEndTimer = setTimeout(react, 900)
 }
-// 甩停了：回到手上的活（AI 最新的那个动作；不换台词，抱怨还留在气泡里）
+// 甩停了：回到手上的活（AI 最新的那個動作；不換臺詞，抱怨還留在氣泡裡）
 function resumeWork() {
   if (aiActivity() !== 'work') return react()
   const p = charState[charId].pose
   setPose(p === 'listening' ? 'thinking' : p)
   shownAt = Date.now()
 }
-// AI 现在在干嘛：'asking'（等你回答）/ 'work'（干活）/ null（闲着）。看 AI 写来的最新状态，太久没动静的不算
-// 插件更新提醒（规则在 plugin-update.js）：外壳启动时把各插件的版本交过来。有要提醒的，等她闲下来说一句，
-// 每次打开桌宠最多说一次（设置页「接入 AI」那一行会一直挂着提醒）。只提醒，不替用户改配置
+// AI 現在在幹嘛：'asking'（等你回答）/ 'work'（幹活）/ null（閒著）。看 AI 寫來的最新狀態，太久沒動靜的不算
+// 外掛更新提醒（規則在 plugin-update.js）：外殼啟動時把各外掛的版本交過來。有要提醒的，等她閒下來說一句，
+// 每次開啟桌寵最多說一次（設定頁「接入 AI」那一行會一直掛著提醒）。只提醒，不替使用者改配置
 let pluginTold = false
 function setPluginUpdates(list) {
   const tip = (list || []).map(p => window.PluginUpdate && PluginUpdate.advice(p)).find(Boolean)
@@ -1499,7 +1499,7 @@ function setPluginUpdates(list) {
   pluginTold = true
   let tries = 0
   const attempt = () => {
-    // 闲着才说：不在干活、没在演彩蛋、没在说别的话；等不到就过一会儿再看，最多等十来分钟
+    // 閒著才說：不在幹活、沒在演彩蛋、沒在說別的話；等不到就過一會兒再看，最多等十來分鐘
     if (pose === 'idle' && !egg && aiActivity() !== 'work' && $('bubble').classList.contains('hide')) { say(tip.say); setTimeout(() => { if ($('bubble').textContent === tip.say) say('') }, 9000); return }
     if (++tries < 30) setTimeout(attempt, 20000)
   }
@@ -1508,11 +1508,11 @@ function setPluginUpdates(list) {
 function aiActivity() {
   const s = charState[charId]
   if (!s?.pose || Date.now() / 1000 - (s.ts || 0) > STUCK_AFTER / 1000) return null
-  if (pose === 'idle' || pose === 'sleeping' || pose === 'tired') return null   // 卡住的状态被兜底送回待机了
+  if (pose === 'idle' || pose === 'sleeping' || pose === 'tired') return null   // 卡住的狀態被兜底送回待機了
   if (s.pose === 'asking') return 'asking'
   return NOT_WORKING.has(s.pose) ? null : 'work'
 }
-// 抱怨一句：同一种 4 秒内只说一次，3.5 秒后收起
+// 抱怨一句：同一種 4 秒內只說一次，3.5 秒後收起
 const complainedAt = {}
 let complainTimer = null, wobbleTimer = null, shakingUntil = 0
 function complain(key, fallback) {
@@ -1525,7 +1525,7 @@ function complain(key, fallback) {
 }
 function wobbleCards() {
   const c = $('cards')
-  c.classList.remove('shaken'); void c.offsetWidth; c.classList.add('shaken')   // 重新触发动画
+  c.classList.remove('shaken'); void c.offsetWidth; c.classList.add('shaken')   // 重新觸發動畫
   clearTimeout(wobbleTimer)
   wobbleTimer = setTimeout(() => c.classList.remove('shaken'), 1000)
 }
@@ -1544,8 +1544,8 @@ function forgive() {
   show('forgiven', true)
 }
 
-// ---- 开发者控制台用（右键「开发者控制台…」）----
-// devShow：演某个角色的某个姿态（可指定某一张图）并保持住，闲置动作、睡觉、自动彩蛋、换图都先停下
+// ---- 開發者控制台用（右鍵「開發者控制台…」）----
+// devShow：演某個角色的某個姿態（可指定某一張圖）並保持住，閒置動作、睡覺、自動彩蛋、換圖都先停下
 let devHoldUntil = 0, devActive = false
 const devHeld = () => Date.now() < devHoldUntil || updatingNow
 function devShow(id, p, line, frameUrl, holdMs = 10 * 60 * 1000) {
@@ -1553,7 +1553,7 @@ function devShow(id, p, line, frameUrl, holdMs = 10 * 60 * 1000) {
   if (egg) { clearEggTimers(); egg = null; charId = null }
   if (charId !== id) {
     const target = manifest.characters[id]
-    if (target?.egg) {  // 彩蛋角色不能直接切换，按彩蛋流程那样换上
+    if (target?.egg) {  // 彩蛋角色不能直接切換，按彩蛋流程那樣換上
       charId = id; pose = null; currentUrl = ''
       applyLook(target); $('caption').textContent = target.name
       document.documentElement.style.setProperty('--aura', target.aura || '#bcd4ff')
@@ -1585,7 +1585,7 @@ function devStatus() {
     frames: frames.length, fallback: POSE_FALLBACK, transient: TRANSIENT }
 }
 
-// ---- 闲着的时候：偶尔哼歌 / 伸懒腰 / 打哈欠，太久没动静就睡 ----
+// ---- 閒著的時候：偶爾哼歌 / 伸懶腰 / 打哈欠，太久沒動靜就睡 ----
 setInterval(() => {
   if (devHeld() || egg || (pose !== 'idle' && pose !== 'tired')) return
   const quiet = Date.now() - lastActive
@@ -1593,30 +1593,30 @@ setInterval(() => {
   if (Math.random() > .42) return
   const builtin = ['hum', 'stretch', ...(quiet > 3 * 60 * 1000 ? ['yawn'] : [])]
   const own = (char()?.idleActions || []).filter(hasPose)
-  const pool = own.length ? [...own, ...own, ...builtin] : builtin  // 有专属动作时优先用专属的
+  const pool = own.length ? [...own, ...own, ...builtin] : builtin  // 有專屬動作時優先用專屬的
   const a = pick(pool)
   if (!TRANSIENT[a]) TRANSIENT[a] = 4000
   show(a, true)
 }, 20000)
 
-// 想得久了换成专属的「深度思考」：character.json 里 longThink: { after: 秒, pose: 姿态 }
+// 想得久了換成專屬的「深度思考」：character.json 裡 longThink: { after: 秒, pose: 姿態 }
 setInterval(() => {
   const lt = char()?.longThink
   if (!lt || devHeld() || egg || pose !== 'thinking' || !hasPose(lt.pose)) return
   if (Date.now() - poseSince > (lt.after || 20) * 1000) show(lt.pose, true)
 }, 1000)
 
-// ---- 彩蛋：角色闲着时，偶尔变成 cos 它的 DeepSeek ----
-// 流程：跳出来 → 装模作样（一直装，等你点她）→ 你点一下 → 被识破 → 溜走 → 变回原角色
+// ---- 彩蛋：角色閒著時，偶爾變成 cos 它的 DeepSeek ----
+// 流程：跳出來 → 裝模作樣（一直裝，等你點她）→ 你點一下 → 被識破 → 溜走 → 變回原角色
 const EGG_POP_MS = 2200, EGG_CAUGHT_MS = 2000, EGG_BYE_MS = 2200
-const EGG_WAIT_MS = 40000           // 一直没人点，她就得意地自己溜走
-const EGG_PRETEND_LINE_MS = 9000    // 装模作样时隔一会儿换句台词
-const EGG_CHANCE_PER_MIN = 1 / 40   // 闲着时每分钟的触发概率，约每小时 1~2 次
-const EGG_CLICK_CHANCE = 0.03       // 点她时也有一点点概率触发
+const EGG_WAIT_MS = 40000           // 一直沒人點，她就得意地自己溜走
+const EGG_PRETEND_LINE_MS = 9000    // 裝模作樣時隔一會兒換句臺詞
+const EGG_CHANCE_PER_MIN = 1 / 40   // 閒著時每分鐘的觸發機率，約每小時 1~2 次
+const EGG_CLICK_CHANCE = 0.03       // 點她時也有一點點機率觸發
 let egg = null  // 正在演：{ host, timers, waiting }
 
-// 来拜访这个角色的彩蛋，按她现在穿的衣服分开：穿原版只出没写 hostSkin 的，穿皮肤只出 hostSkin 是这件的
-// （皮肤有自己的故事，和原版的彩蛋不混；皮肤没有自己的彩蛋就不出）。有好几个就随机挑一个
+// 來拜訪這個角色的彩蛋，按她現在穿的衣服分開：穿原版只出沒寫 hostSkin 的，穿皮膚只出 hostSkin 是這件的
+// （皮膚有自己的故事，和原版的彩蛋不混；皮膚沒有自己的彩蛋就不出）。有好幾個就隨機挑一個
 function eggFor(host) {
   const skin = manifest.characters[host]?.skin || ''
   const ids = Object.entries(manifest.characters).filter(([, c]) => c.egg && c.host === host && (c.hostSkin || '') === skin).map(([k]) => k)
@@ -1634,20 +1634,20 @@ function eggStep(step) {
   document.documentElement.style.setProperty('--aura', char().aura || '#bcd4ff')
 }
 function playEgg(force) {
-  if (egg || tucked || !charId || char()?.egg || $('stage').classList.contains('swap')) return false   // 缩在边上、正在换角色时不演：彩蛋角色没有贴边立绘
+  if (egg || tucked || !charId || char()?.egg || $('stage').classList.contains('swap')) return false   // 縮在邊上、正在換角色時不演：彩蛋角色沒有貼邊立繪
   const eggId = eggFor(charId)
   if (!eggId) return false
   if (!force && pose !== 'idle') return false
   const host = charId
   const mine = egg = { host, timers: [], waiting: false }
-  hideNews()   // 演彩蛋时「新功能」卡片收起
+  hideNews()   // 演彩蛋時「新功能」卡片收起
   clearTimeout(revertTimer); clearTimeout(pending)
   poof(() => {
-    if (egg !== mine) return   // 烟还没散就被收场了（比如刚冒出来就被拖到边上）
+    if (egg !== mine) return   // 煙還沒散就被收場了（比如剛冒出來就被拖到邊上）
     charId = eggId; pose = null; currentUrl = ''
     const c = char()
     document.documentElement.style.setProperty('--accent', c.accent || '#e0b48a')
-    // cos 彩蛋装成别人（「Claude？」）；对手直接上门的彩蛋（DeepSeek × GLM）用自己的名字
+    // cos 彩蛋裝成別人（「Claude？」）；對手直接上門的彩蛋（DeepSeek × GLM）用自己的名字
     $('caption').textContent = c.caption || `${manifest.characters[host].name}？`
     renderQuota()
     setPose('pop', true); document.documentElement.style.setProperty('--aura', c.aura || '#bcd4ff'); say(eggLine('pop'))
@@ -1655,8 +1655,8 @@ function playEgg(force) {
       eggStep('pretend'); say(eggLine('pretend'))
       egg.waiting = true
       egg.timers.push(setInterval(() => say(eggLine('pretend')), EGG_PRETEND_LINE_MS))
-      // 没人点：画了 escape（自己走掉）就用它，没画就用 bye。投喂这类彩蛋的 bye 是两人同框，没人点时不能用
-      egg.timers.push(setTimeout(() => leaveEgg(pick((c.lines && c.lines.escape) || ['没人发现～下次见！']), c.poses?.escape ? 'escape' : 'bye'), EGG_WAIT_MS))
+      // 沒人點：畫了 escape（自己走掉）就用它，沒畫就用 bye。投餵這類彩蛋的 bye 是兩人同框，沒人點時不能用
+      egg.timers.push(setTimeout(() => leaveEgg(pick((c.lines && c.lines.escape) || ['沒人發現～下次見！']), c.poses?.escape ? 'escape' : 'bye'), EGG_WAIT_MS))
     }, EGG_POP_MS))
   })
   return true
@@ -1675,7 +1675,7 @@ function leaveEgg(line, step = 'bye') {
   eggStep(step); say(line)
   egg.timers.push(setTimeout(() => endEgg(), EGG_BYE_MS))
 }
-// 立刻收场，不演 bye、不冒烟：被拖到边上时用
+// 立刻收場，不演 bye、不冒煙：被拖到邊上時用
 function quitEggNow() {
   if (!egg) return
   const host = egg.host
@@ -1704,12 +1704,12 @@ function endEgg() {
     renderQuota()
   })
 }
-// 设置里可以关掉随机彩蛋；右键「召唤彩蛋」不受影响
+// 設定裡可以關掉隨機彩蛋；右鍵「召喚彩蛋」不受影響
 let eggsEnabled = true
 function setEggsEnabled(on) { eggsEnabled = !!on }
 setInterval(() => { if (eggsEnabled && !devHeld() && !devActive && !egg && Math.random() < EGG_CHANCE_PER_MIN) playEgg(false) }, 60000)
 
-// ---- 生动一点：同一状态有多张图时停留久了换一张；有眨眼帧就偶尔眨眼 ----
+// ---- 生動一點：同一狀態有多張圖時停留久了換一張；有眨眼幀就偶爾眨眼 ----
 setInterval(() => {
   const frames = framesFor(pose)
   if (!devHeld() && frames.length > 1 && Date.now() - poseSince > 8000) {
@@ -1720,7 +1720,7 @@ setInterval(() => {
 ;(function blinkLoop() {
   setTimeout(() => {
     const blink = $('blink'), c = char()
-    // 只在显示的正是眨眼帧对应的那张 idle、而且换图淡入已经结束时眨眼，否则会和别的图叠在一起
+    // 只在顯示的正是眨眼幀對應的那張 idle、而且換圖淡入已經結束時眨眼，否則會和別的圖疊在一起
     if (c && c.blink && c.blinkBase && (pose === 'idle' || pose === 'listening') && currentUrl === c.blinkBase
         && active.getAttribute('src') === c.blinkBase && !spare.classList.contains('on') && Date.now() - swappedAt > 600) {
       blink.classList.add('on')

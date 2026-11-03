@@ -3,8 +3,8 @@ using System.Globalization;
 
 namespace CrossPet
 {
-    // 只管异常恢复的持久记账；启动成功并稳定两分钟后由 UI 线程清除。
-    // 不依赖 WPF / WebView2，LogicTests 可以重放连续失败和时间边界。
+    // 只管異常恢復的持久記賬；啟動成功並穩定兩分鐘後由 UI 執行緒清除。
+    // 不依賴 WPF / WebView2，LogicTests 可以重放連續失敗和時間邊界。
     sealed class RenderRestartState
     {
         public const int MaxAttempts = 3;
@@ -27,7 +27,7 @@ namespace CrossPet
             if (parts.Length == 3 && parts[0] == "v2" && int.TryParse(parts[1], out var count) && count >= 1 && count <= MaxAttempts
                 && DateTime.TryParse(parts[2], CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var at) && at.Kind == DateTimeKind.Utc)
                 return new RenderRestartState(count, at);
-            // 旧版文件是本地时间的字符串，旧逻辑也以 mtime 计时；不猜旧字符串的时区。
+            // 舊版檔案是本地時間的字串，舊邏輯也以 mtime 計時；不猜舊字串的時區。
             return new RenderRestartState(1, fileUtc);
         }
     }

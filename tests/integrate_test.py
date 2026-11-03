@@ -16,7 +16,7 @@ integrate = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(integrate)
 
 class IntegrationTests(unittest.TestCase):
-    # 插件版本检查（只读）：自带的 / 装到 Harness 那边的 / Harness 里正在跑的，设置页和桌宠据此提醒用户点「更新」
+    # 外掛版本檢查（只讀）：自帶的 / 裝到 Harness 那邊的 / Harness 里正在跑的，設定頁和桌寵據此提醒使用者點「更新」
     def _plugin_dirs(self, tmp, bundled='1.3.5', installed='1.3.4', running='1.3.2'):
         b = Path(tmp) / 'bundled.js'; b.write_text(f'const PLUGIN_VERSION = "{bundled}";')
         d = Path(tmp) / 'plugin'
@@ -46,7 +46,7 @@ class IntegrationTests(unittest.TestCase):
             integrate.plugin_status(['deepseek'], bundled=b, plugin_dir=d, state_dir=st)
             self.assertEqual(sorted((p, p.stat().st_mtime_ns) for p in Path(tmp).rglob('*')), before)
     def test_codex_programs_skips_desktop_gui_exe(self):
-        # Codex 桌面版的图形界面程序旁边有 resources.pak 等文件：不能当命令行跑 --version（会弹窗口）
+        # Codex 桌面版的圖形介面程式旁邊有 resources.pak 等檔案：不能當命令列跑 --version（會彈視窗）
         with tempfile.TemporaryDirectory() as tmp:
             exe = Path(tmp) / 'codex'
             exe.write_text('#!/bin/sh\necho should-not-run\n'); exe.chmod(0o755)
@@ -59,11 +59,11 @@ class IntegrationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             fake = script
             if os.name == 'nt':
-                # Windows 不能按 shebang 直接执行 .py：用临时 cmd 模拟安装的 Codex 命令。
+                # Windows 不能按 shebang 直接執行 .py：用臨時 cmd 模擬安裝的 Codex 命令。
                 fake = Path(tmp) / 'fake_codex.cmd'
                 fake.write_text(f'@echo off\n"{sys.executable}" "{script}" %*\n', encoding='utf-8')
             else:
-                # Windows 工作树挂载进 WSL 后可能是 CRLF；显式用测试 Python，不依赖 .py 的 shebang。
+                # Windows 工作樹掛載進 WSL 後可能是 CRLF；顯式用測試 Python，不依賴 .py 的 shebang。
                 fake = Path(tmp) / 'fake_codex'
                 fake.write_text('#!/bin/sh\nexec ' + shlex.join([sys.executable, str(script)]) + ' "$@"\n', encoding='utf-8')
                 fake.chmod(0o755)
@@ -88,26 +88,26 @@ class IntegrationTests(unittest.TestCase):
             self.assertEqual(first, integrate.load_json(p))
 
     # ---- Qwen Code ----
-    # 每条事件必须是同一个命令：Windows 上 load_template 靠「命令以 macOS 那串开头」来改写成随包 Python，
-    # 写法稍有出入就改写不到，接上去等于没接
+    # 每條事件必須是同一個命令：Windows 上 load_template 靠「命令以 macOS 那串開頭」來改寫成隨包 Python，
+    # 寫法稍有出入就改寫不到，接上去等於沒接
     def test_qwen_template_uses_one_command_everywhere(self):
         hooks = integrate.load_json(integrate.REPO / 'integrations/qwen/hooks.json')['hooks']
         entries = [c for gs in hooks.values() for g in gs for c in g['hooks']]
         self.assertTrue(entries)
         self.assertEqual({e['command'] for e in entries}, {'python3 "$HOME/Library/Application Support/CrossPet/crosspet-hook.py" qwen'})
         self.assertTrue(all(e['type'] == 'command' for e in entries))
-        # Qwen 的 timeout 是「秒」（Gemini CLI 才是毫秒）：抄 Gemini 模板的 5000 会被当成毫秒兼容值
+        # Qwen 的 timeout 是「秒」（Gemini CLI 才是毫秒）：抄 Gemini 模板的 5000 會被當成毫秒相容值
         self.assertEqual({e['timeout'] for e in entries}, {5})
-    @unittest.skipUnless(os.name == 'nt', '只在 Windows 上改写路径')
+    @unittest.skipUnless(os.name == 'nt', '只在 Windows 上改寫路徑')
     def test_qwen_template_rewritten_on_windows(self):
         hooks = integrate.load_template(integrate.REPO / 'integrations/qwen/hooks.json')['hooks']
         entries = [c for gs in hooks.values() for g in gs for c in g['hooks']]
         self.assertTrue(entries)
         for e in entries:
-            self.assertTrue(e['command'].startswith(integrate.win_arg(Path(sys.executable)) + ' '))  # 换成本机 Python
-            self.assertNotIn('$HOME', e['command'])          # 换成绝对路径
+            self.assertTrue(e['command'].startswith(integrate.win_arg(Path(sys.executable)) + ' '))  # 換成本機 Python
+            self.assertNotIn('$HOME', e['command'])          # 換成絕對路徑
             self.assertIn('crosspet-hook.py', e['command'])
-            self.assertTrue(e['command'].endswith(' qwen'))  # 角色参数不能被改写吃掉
+            self.assertTrue(e['command'].endswith(' qwen'))  # 角色引數不能被改寫吃掉
         self.assertEqual(len({e['command'] for e in entries}), 1)
     def test_qwen_install_is_idempotent_and_reversible(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -117,8 +117,8 @@ class IntegrationTests(unittest.TestCase):
             integrate.merge_hooks(p, integrate.REPO / 'integrations/qwen/hooks.json')
             first = integrate.load_json(p)
             integrate.merge_hooks(p, integrate.REPO / 'integrations/qwen/hooks.json')
-            self.assertEqual(first, integrate.load_json(p))                  # 重复接入不叠加
-            self.assertEqual(first['hooks']['Stop'][0]['hooks'], [other])     # 同一事件下别人的钩子不动
+            self.assertEqual(first, integrate.load_json(p))                  # 重複接入不疊加
+            self.assertEqual(first['hooks']['Stop'][0]['hooks'], [other])     # 同一事件下別人的鉤子不動
             self.assertTrue(integrate.has_hooks(p))
             integrate.remove_hooks(p)
             self.assertEqual(integrate.load_json(p), {'theme': 'dark', 'hooks': {'Stop': [{'hooks': [other]}]}})
@@ -128,7 +128,7 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(integrate.QWEN_SETTINGS.name, 'settings.json')
         self.assertEqual(integrate.QWEN_SETTINGS.parent.name, '.qwen')
     def test_qwen_template_covers_events_the_hook_understands(self):
-        # 模板里的事件名必须都是钩子脚本认得的，否则加了也只会走到兜底分支
+        # 模板裡的事件名必須都是鉤子指令碼認得的，否則加了也只會走到兜底分支
         hook = (integrate.REPO / 'integrations/crosspet-hook.py').read_text(encoding='utf-8')
         for event in integrate.load_json(integrate.REPO / 'integrations/qwen/hooks.json')['hooks']:
             self.assertIn(f'"{event}"', hook, event)
@@ -163,7 +163,7 @@ class CursorIntegrationTests(unittest.TestCase):
         integrate.save_json(self.target, original)
         self.assertTrue(self.run_merge()[0])
         first = integrate.load_json(self.target)
-        # 默认不带角色参数：认不出的模型由当前角色来演
+        # 預設不帶角色引數：認不出的模型由當前角色來演
         self.assertEqual({integrate.cursor_character(entry) for entry in self.ours(first)}, {''})
         self.assertEqual(len(self.ours(first)), 13)
         self.assertTrue(self.run_merge()[0])
@@ -210,7 +210,7 @@ class CursorIntegrationTests(unittest.TestCase):
         before = self.target.read_bytes()
         success, output = self.run_merge()
         self.assertFalse(success)
-        self.assertIn('无法识别', output)
+        self.assertIn('無法識別', output)
         self.assertEqual(self.target.read_bytes(), before)
 
     def test_quoted_unicode_character_and_missing_argument(self):
@@ -259,7 +259,7 @@ class CursorIntegrationTests(unittest.TestCase):
                 self.assertEqual(after, first)
             first = after
 
-# Harness 加的服务商写在文件末尾，也就是我们那段的两行注释中间
+# Harness 加的服務商寫在檔案末尾，也就是我們那段的兩行註釋中間
 DSH_USER = """- insert:
     - id: hello
       name: '@deepseek-ai/hello'
@@ -275,7 +275,7 @@ DSH_OURS_ONLY = "    - id: crosspet\n      name: '@local/dsh-plugin-crosspet'\n"
 
 
 class GrokIntegrationTests(unittest.TestCase):
-    """Grok Build：CrossPet 单独占 ~/.grok/hooks/crosspet.json，接入写它、撤销删它，用户自己的钩子文件不动"""
+    """Grok Build：CrossPet 單獨佔 ~/.grok/hooks/crosspet.json，接入寫它、撤銷刪它，使用者自己的鉤子檔案不動"""
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(prefix='crosspet-grok-integration-')
         self.addCleanup(self.tmp.cleanup)
@@ -290,7 +290,7 @@ class GrokIntegrationTests(unittest.TestCase):
         return out.getvalue()
 
     def test_skips_when_grok_build_is_not_installed(self):
-        self.assertIn('没找到 Grok Build', self.run_target(True))
+        self.assertIn('沒找到 Grok Build', self.run_target(True))
         self.assertFalse(self.grok_home.exists())
         self.assertFalse(integrate.has_grok())
 
@@ -336,7 +336,7 @@ class DeepSeekPatchTests(unittest.TestCase):
         return out.getvalue()
 
     def test_install_never_writes_an_invalid_plugin_version(self):
-        # package.json 的版本号写错，Harness 装别的插件时会被拦住（1.3.8-beta.2 的 "1.3.8.1"）
+        # package.json 的版本號寫錯，Harness 裝別的外掛時會被攔住（1.3.8-beta.2 的 "1.3.8.1"）
         self.run_dsh(True)
         ver = integrate.load_json(integrate.DSH_PLUGIN_DIR / 'package.json')['version']
         self.assertRegex(ver, integrate.SEMVER)
@@ -363,9 +363,9 @@ class DeepSeekPatchTests(unittest.TestCase):
         self.run_dsh(True)
         installed = self.patch.read_text(encoding='utf-8')
         self.assertEqual(installed, DSH_USER + integrate.DSH_BLOCK)
-        # 用户在 Harness 里加了服务商：落在我们两行注释中间
+        # 使用者在 Harness 里加了服務商：落在我們兩行註釋中間
         self.patch.write_text(installed.replace(integrate.DSH_BLOCK_END, DSH_PROVIDER + integrate.DSH_BLOCK_END), encoding='utf-8')
-        self.run_dsh(True)   # 更新时的刷新
+        self.run_dsh(True)   # 更新時的重新整理
         self.run_dsh(True)
         after = self.patch.read_text(encoding='utf-8')
         self.assertEqual(after, DSH_USER + DSH_PROVIDER + integrate.DSH_BLOCK)
@@ -373,14 +373,14 @@ class DeepSeekPatchTests(unittest.TestCase):
         self.assertEqual(self.patch.read_text(encoding='utf-8'), DSH_USER + DSH_PROVIDER)
 
     def test_restore_provider_lost_by_old_version_once(self):
-        # 1.3.0 刷新前留下的备份里，服务商夹在我们两行注释中间；刷新后文件里没了
+        # 1.3.0 重新整理前留下的備份裡，服務商夾在我們兩行註釋中間；重新整理後檔案裡沒了
         bak = self.profile / 'cordis.patch.yml.bak-crosspet-20261010-205029'
         bak.write_text(DSH_USER + integrate.DSH_BLOCK.replace(integrate.DSH_BLOCK_END, DSH_PROVIDER + integrate.DSH_BLOCK_END), encoding='utf-8')
         self.patch.write_text(DSH_USER + integrate.DSH_BLOCK, encoding='utf-8')
         out = self.run_dsh(True)
-        self.assertIn('找回 1 条', out)
+        self.assertIn('找回 1 條', out)
         self.assertEqual(self.patch.read_text(encoding='utf-8'), DSH_USER + DSH_PROVIDER + integrate.DSH_BLOCK)
-        # 只找回一次：之后用户自己删掉的不再加回来
+        # 只找回一次：之後使用者自己刪掉的不再加回來
         self.patch.write_text(DSH_USER + integrate.DSH_BLOCK, encoding='utf-8')
         self.run_dsh(True)
         self.assertEqual(self.patch.read_text(encoding='utf-8'), DSH_USER + integrate.DSH_BLOCK)

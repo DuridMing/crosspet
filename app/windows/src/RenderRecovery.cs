@@ -7,8 +7,8 @@ using System.Windows.Threading;
 
 namespace CrossPet
 {
-    // WPF 合成线程已损坏后，只做文件/进程交接，不能 Close/Dispose WebView2。
-    // net48 的 Environment.Exit 也会运行终结器（#28：HwndHost.Finalize 内的 COM 强转崩溃）。
+    // WPF 合成執行緒已損壞後，只做檔案/程式交接，不能 Close/Dispose WebView2。
+    // net48 的 Environment.Exit 也會執行終結器（#28：HwndHost.Finalize 內的 COM 強轉崩潰）。
     static class RenderRecovery
     {
         static string Mark => Path.Combine(Store.Data, "render-restart.txt");
@@ -25,12 +25,12 @@ namespace CrossPet
             {
                 var state = ReadState();
                 notice = state.Attempts > 0 && state.Recent(DateTime.UtcNow);
-                if (notice) Store.Log($"检测到上次渲染失败记录：已尝试重启 {state.Attempts} 次，等待网页稳定");
+                if (notice) Store.Log($"檢測到上次渲染失敗記錄：已嘗試重啟 {state.Attempts} 次，等待網頁穩定");
             }
-            catch (Exception e) { Store.Log("读取渲染恢复记录失败: " + e.Message); }
+            catch (Exception e) { Store.Log("讀取渲染恢復記錄失敗: " + e.Message); }
         }
 
-        // 返回是否需要提示：每进程只提示一次。必须网页就绪，且 UI 线程继续工作两分钟才算恢复成功。
+        // 返回是否需要提示：每程式只提示一次。必須網頁就緒，且 UI 執行緒繼續工作兩分鐘才算恢復成功。
         public static bool Ready()
         {
             healthyTimer?.Stop();
@@ -38,9 +38,9 @@ namespace CrossPet
             healthyTimer.Tick += (_, __) =>
             {
                 healthyTimer.Stop();
-                if (Volatile.Read(ref restarting) != 0 || !File.Exists(Mark)) return;   // 没出过故障就不写这行（不然每次启动都记一条，排查时误导人）
-                try { File.Delete(Mark); Store.Log("渲染恢复确认：网页已稳定运行 2 分钟，重试计数清零"); }
-                catch (Exception e) { Store.Log("清除渲染恢复记录失败: " + e.Message); }
+                if (Volatile.Read(ref restarting) != 0 || !File.Exists(Mark)) return;   // 沒出過故障就不寫這行（不然每次啟動都記一條，排查時誤導人）
+                try { File.Delete(Mark); Store.Log("渲染恢復確認：網頁已穩定執行 2 分鐘，重試計數清零"); }
+                catch (Exception e) { Store.Log("清除渲染恢復記錄失敗: " + e.Message); }
             };
             healthyTimer.Start();
             var show = notice; notice = false;
@@ -56,32 +56,32 @@ namespace CrossPet
                 var next = ReadState().Next(DateTime.UtcNow);
                 if (next != null)
                 {
-                    // 先落盘再交接；若记录不可写就停止，不能在没有预算保护的情况下无限重启。
+                    // 先落盤再交接；若記錄不可寫就停止，不能在沒有預算保護的情況下無限重啟。
                     var temp = Mark + ".tmp";
                     File.WriteAllText(temp, next.Serialize());
                     if (File.Exists(Mark)) File.Replace(temp, Mark, null); else File.Move(temp, Mark);
-                    Store.Log($"渲染线程挂了，自动重启 CrossPet（第 {next.Attempts}/{RenderRestartState.MaxAttempts} 次）");
+                    Store.Log($"渲染執行緒掛了，自動重啟 CrossPet（第 {next.Attempts}/{RenderRestartState.MaxAttempts} 次）");
                 }
-                else Store.Log("渲染线程连续失败，重试预算已耗尽，停止自动重启并提示手动打开");
+                else Store.Log("渲染執行緒連續失敗，重試預算已耗盡，停止自動重啟並提示手動開啟");
                 var parent = Process.GetCurrentProcess();
-                // 不经过 cmd/start（安装路径可能含空格、& 等）；子进程先等父进程真正退出，再抢单实例锁。
+                // 不經過 cmd/start（安裝路徑可能含空格、& 等）；子程式先等父程式真正退出，再搶單例項鎖。
                 var args = $"--render-restart {parent.Id} {parent.StartTime.ToUniversalTime().Ticks} {(next == null ? "stop" : "retry")}";
                 if (Process.Start(new ProcessStartInfo(Path.Combine(Store.Install, "CrossPet.exe"), args)
                     { UseShellExecute = false, WorkingDirectory = Store.Install }) == null)
-                    throw new InvalidOperationException("未能创建接班进程");
+                    throw new InvalidOperationException("未能建立接班程式");
             }
             catch (Exception e)
             {
-                Store.Log("自动重启失败: " + e.Message);
-                MessageBoxW(IntPtr.Zero, "CrossPet 的画面出了问题，自动重启没有成功。请手动重新打开；若反复发生，请提交反馈。", "CrossPet", 0x10);
+                Store.Log("自動重啟失敗: " + e.Message);
+                MessageBoxW(IntPtr.Zero, "CrossPet 的畫面出了問題，自動重啟沒有成功。請手動重新開啟；若反覆發生，請提交反饋。", "CrossPet", 0x10);
             }
-            // 只终止自身。让内核回收已损坏的进程，跳过 CLR 终结器和 WebView2 COM 清理。
-            // 设置在正常操作时已保存；此处不尝试在坏掉的界面上再次保存/释放控件。
+            // 只終止自身。讓核心回收已損壞的程式，跳過 CLR 終結器和 WebView2 COM 清理。
+            // 設定在正常操作時已儲存；此處不嘗試在壞掉的介面上再次儲存/釋放控制元件。
             TerminateProcess(GetCurrentProcess(), 0);
-            Environment.FailFast("终止损坏的渲染进程失败"); // 极少数内核调用失败时也不能回到托管清理路径。
+            Environment.FailFast("終止損壞的渲染程式失敗"); // 極少數核心呼叫失敗時也不能回到託管清理路徑。
         }
 
-        // 在 Main 进入单实例锁、创建 Application/WebView2 之前执行。
+        // 在 Main 進入單例項鎖、建立 Application/WebView2 之前執行。
         public static bool WaitForParent(string[] args)
         {
             if (args.Length == 0 || args[0] != "--render-restart") return true;
@@ -93,19 +93,19 @@ namespace CrossPet
                 try { parent = Process.GetProcessById(pid); } catch (ArgumentException) { parent = null; }
                 using (parent)
                 {
-                    // PID 可能已被系统复用；只能等待原来那一个进程。
+                    // PID 可能已被系統複用；只能等待原來那一個程式。
                     if (parent != null && parent.StartTime.ToUniversalTime().Ticks == ticks && !parent.WaitForExit(15000))
-                    { Store.Log("渲染恢复接班超时：旧进程未退出，不启动重复实例"); return false; }
+                    { Store.Log("渲染恢復接班超時：舊程式未退出，不啟動重複例項"); return false; }
                 }
             }
-            catch (InvalidOperationException) { /* 在读取时间或等待前刚好退出，单实例锁会在后面继续防重。 */ }
-            catch (Exception e) { Store.Log("渲染恢复接班失败: " + e.Message); return false; }
+            catch (InvalidOperationException) { /* 在讀取時間或等待前剛好退出，單例項鎖會在後面繼續防重。 */ }
+            catch (Exception e) { Store.Log("渲染恢復接班失敗: " + e.Message); return false; }
             if (args[3] == "stop")
             {
-                MessageBoxW(IntPtr.Zero, "CrossPet 的图形组件连续出错，已停止自动重启以免循环。请手动重新打开，并通过托盘提交反馈。设置和角色文件已保留。", "CrossPet", 0x30);
+                MessageBoxW(IntPtr.Zero, "CrossPet 的圖形元件連續出錯，已停止自動重啟以免迴圈。請手動重新開啟，並通過托盤提交反饋。設定和角色檔案已保留。", "CrossPet", 0x30);
                 return false;
             }
-            Store.Log("渲染恢复接班：旧进程已退出，开始重新打开");
+            Store.Log("渲染恢復接班：舊程式已退出，開始重新開啟");
             return true;
         }
 

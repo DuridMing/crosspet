@@ -1,16 +1,16 @@
-"""CrossPet 桌宠联动（Hermes Agent 插件）。
+"""CrossPet 桌寵聯動（Hermes Agent 外掛）。
 
-把 Hermes 的生命周期事件翻译成 CrossPet 钩子脚本认识的事件（Claude Code 那套名字），交给 crosspet-hook.py：
-    on_session_start → SessionStart        pre_llm_call（每轮一次）→ UserPromptSubmit
+把 Hermes 的生命週期事件翻譯成 CrossPet 鉤子指令碼認識的事件（Claude Code 那套名字），交給 crosspet-hook.py：
+    on_session_start → SessionStart        pre_llm_call（每輪一次）→ UserPromptSubmit
     pre_tool_call → PreToolUse             post_tool_call → PostToolUse
     pre_approval_request / on_human_input_request → 等你回答（Notification permission_prompt）
-    post_approval_response / on_human_input_resolved → 回去接着干（PostToolUse）
+    post_approval_response / on_human_input_resolved → 回去接著幹（PostToolUse）
     subagent_start / subagent_stop → SubagentStart / SubagentStop
-    on_session_end（每轮结束）→ Stop；被打断 → Interrupt；出错 → StopFailure
-    agent_loop_stopped（网关里 /stop）→ Interrupt
-子任务（delegate_task 派出去的）自己的事件不算：只演主对话。
-只把事件名、工具名、模型名、会话 id 交给钩子脚本，不传对话内容、命令参数。
-钩子脚本在后台线程里按顺序跑，Hermes 不会等它（pre_tool_call 超时会拦下工具，所以绝不能卡住）。
+    on_session_end（每輪結束）→ Stop；被打斷 → Interrupt；出錯 → StopFailure
+    agent_loop_stopped（閘道器裡 /stop）→ Interrupt
+子任務（delegate_task 派出去的）自己的事件不算：只演主對話。
+只把事件名、工具名、模型名、會話 id 交給鉤子指令碼，不傳對話內容、命令引數。
+鉤子指令碼在後臺執行緒裡按順序跑，Hermes 不會等它（pre_tool_call 超時會攔下工具，所以絕不能卡住）。
 """
 import json
 import os
@@ -24,7 +24,7 @@ _HERE = Path(__file__).resolve().parent
 
 
 def _hook_path() -> str:
-    """接入工具装插件时把钩子脚本的位置写在 crosspet.json；没有就用各平台的默认位置"""
+    """接入工具裝外掛時把鉤子指令碼的位置寫在 crosspet.json；沒有就用各平臺的預設位置"""
     try:
         p = json.loads((_HERE / "crosspet.json").read_text(encoding="utf-8")).get("hook")
         if p:
@@ -37,14 +37,14 @@ def _hook_path() -> str:
 
 
 _queue: "queue.Queue[dict]" = queue.Queue(maxsize=500)
-_children: set = set()   # 子任务的会话 id
-_models: dict = {}       # 会话 id → 模型名（工具事件不带模型名）
+_children: set = set()   # 子任務的會話 id
+_models: dict = {}       # 會話 id → 模型名（工具事件不帶模型名）
 _worker = None
 
 
 def _run():
     hook = _hook_path()
-    flags = 0x08000000 if os.name == "nt" else 0   # CREATE_NO_WINDOW：Windows 上别弹黑框
+    flags = 0x08000000 if os.name == "nt" else 0   # CREATE_NO_WINDOW：Windows 上別彈黑框
     while True:
         event = _queue.get()
         try:
@@ -77,7 +77,7 @@ def _send(name: str, session_id=None, **fields):
 
 
 def _quiet(fn):
-    """回调里出什么错都不能影响 Hermes"""
+    """回撥裡出什麼錯都不能影響 Hermes"""
     def wrapper(**kwargs):
         try:
             fn(**kwargs)
@@ -106,7 +106,7 @@ def pre_tool_call(tool_name=None, session_id=None, **_):
 @_quiet
 def post_tool_call(tool_name=None, session_id=None, result=None, **_):
     failed = False
-    try:   # 工具结果是 JSON 字符串，只看有没有 error / success:false，不传内容
+    try:   # 工具結果是 JSON 字串，只看有沒有 error / success:false，不傳內容
         r = json.loads(result) if isinstance(result, str) else result
         failed = isinstance(r, dict) and (bool(r.get("error")) or r.get("success") is False)
     except Exception:

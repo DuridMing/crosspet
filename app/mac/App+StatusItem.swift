@@ -4,18 +4,18 @@ import ServiceManagement
 import WebKit
 
 extension App {
-    // MARK: 菜单栏图标
-    // Mac 版不在程序坞和 ⌘Tab 里：她被别的窗口挡住（显示层级选了「普通窗口」或「跟着 AI」）、
-    // 被拖到看不见的地方时，从这里找她。左键：叫到最前面；右键：和桌宠右键一样的菜单（和 Windows 的托盘图标对应）
+    // MARK: 選單欄圖示
+    // Mac 版不在程式塢和 ⌘Tab 裡：她被別的視窗擋住（顯示層級選了「普通視窗」或「跟著 AI」）、
+    // 被拖到看不見的地方時，從這裡找她。左鍵：叫到最前面；右鍵：和桌寵右鍵一樣的選單（和 Windows 的托盤圖示對應）
 
     func setupStatusItem() {
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-        item.autosaveName = "CrossPetStatusItem"   // 记住用户按住 ⌘ 拖到的位置
+        item.autosaveName = "CrossPetStatusItem"   // 記住使用者按住 ⌘ 拖到的位置
         if let button = item.button {
             let image = NSImage(systemSymbolName: "pawprint.fill", accessibilityDescription: "CrossPet")
             image?.isTemplate = true
             button.image = image
-            button.toolTip = "CrossPet：单击把她叫到最前面，右键打开菜单"
+            button.toolTip = "CrossPet：單擊把她叫到最前面，右鍵開啟選單"
             button.target = self
             button.action = #selector(statusItemClicked(_:))
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
@@ -26,7 +26,7 @@ extension App {
     @objc func statusItemClicked(_ sender: NSStatusBarButton) {
         let event = NSApp.currentEvent
         if event?.type == .rightMouseUp || event?.modifierFlags.contains(.control) == true {
-            // 临时挂上菜单再「点一下」：菜单从图标正下方弹出，关掉后摘下，免得左键也变成弹菜单
+            // 臨時掛上選單再「點一下」：選單從圖示正下方彈出，關掉後摘下，免得左鍵也變成彈選單
             statusItem?.menu = buildMenu()
             sender.performClick(nil)
             statusItem?.menu = nil
@@ -35,12 +35,12 @@ extension App {
         }
     }
 
-    /// 叫到最前面：在当前屏幕看不见（被拖出屏幕、换了显示器）就先回到右下角
+    /// 叫到最前面：在當前螢幕看不見（被拖出螢幕、換了顯示器）就先回到右下角
     @objc func bringToFront() {
         let visible = NSScreen.screens.contains { $0.visibleFrame.intersects(panel.frame.insetBy(dx: 40, dy: 40)) }
         if !visible { resetPosition() }
         userHidden = false
-        fullscreenOverride = true; hiddenForFullscreen = false   // 你主动叫她：全屏时也出来（切换空间 / 前台程序后再按规则收起来）
+        fullscreenOverride = true; hiddenForFullscreen = false   // 你主動叫她：全屏時也出來（切換空間 / 前臺程式後再按規則收起來）
         panel.orderFrontRegardless()
         js("handleClick('pat')")
     }
@@ -58,7 +58,7 @@ extension App {
     @objc func egg() { js("playEgg(true)") }
     @objc func askReset() { js("askReset()") }
 
-    /// 换衣服（皮肤）：记下来，重新载入立绘；正在显示的就是她的话马上换上
+    /// 換衣服（皮膚）：記下來，重新載入立繪；正在顯示的就是她的話馬上換上
     func wear(_ id: String, _ skin: String) {
         var skins = defaults.dictionary(forKey: "skins") as? [String: String] ?? [:]
         guard (skins[id] ?? "") != skin else { return }
@@ -66,14 +66,14 @@ extension App {
         defaults.set(skins, forKey: "skins")
         loadCharacters()
         js("refreshLook(\(quote(id)))")
-        pushSettings()   // 设置页开着（角色页的衣服卡）时高亮跟着变：按时段自动换衣服也走这里
+        pushSettings()   // 設定頁開著（角色頁的衣服卡）時高亮跟著變：按時段自動換衣服也走這裡
     }
 
     @objc func rename() {
         guard let id = currentId ?? characterIds.first else { return }
         let alert = NSAlert()
-        alert.messageText = "给 \(displayNames[id] ?? id) 改名"
-        alert.informativeText = "留空则恢复默认名字。"
+        alert.messageText = "給 \(displayNames[id] ?? id) 改名"
+        alert.informativeText = "留空則恢復預設名字。"
         let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 220, height: 24))
         field.stringValue = displayNames[id] ?? ""
         alert.accessoryView = field
@@ -95,7 +95,7 @@ extension App {
         if on { refreshAntigravityQuota() } else { js("setQuota('gemini', null)") }
     }
 
-    /// 背景光晕：auto（跟着系统深浅色，深色模式下关）/ on / off
+    /// 背景光暈：auto（跟著系統深淺色，深色模式下關）/ on / off
     var auraMode: String { defaults.string(forKey: "auraMode") ?? "auto" }
     @objc func setAura(_ sender: NSMenuItem) {
         guard let mode = sender.representedObject as? String else { return }
@@ -115,8 +115,8 @@ extension App {
             else { try SMAppService.mainApp.register() }
         } catch {
             let alert = NSAlert()
-            alert.messageText = "设置失败"
-            alert.informativeText = "请把 CrossPet.app 放进「应用程序」文件夹后再试。\n\(error.localizedDescription)"
+            alert.messageText = "設定失敗"
+            alert.informativeText = "請把 CrossPet.app 放進「應用程式」資料夾後再試。\n\(error.localizedDescription)"
             alert.runModal()
         }
     }

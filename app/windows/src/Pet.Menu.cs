@@ -21,7 +21,7 @@ namespace CrossPet
 {
     sealed partial class Pet
     {
-        // ---------------- 菜单 ----------------
+        // ---------------- 選單 ----------------
         void FillMenu(Forms.ContextMenuStrip menu, bool developer)
         {
             menu.Items.Clear();
@@ -29,7 +29,7 @@ namespace CrossPet
             {
                 var i = new Forms.ToolStripMenuItem(text);
                 if (check.HasValue) i.Checked = check.Value;
-                i.Click += (_, __) => { try { click(); } catch (Exception e) { Store.Log("菜单出错: " + e); } };
+                i.Click += (_, __) => { try { click(); } catch (Exception e) { Store.Log("選單出錯: " + e); } };
                 return i;
             }
             void Sep() => menu.Items.Add(new Forms.ToolStripSeparator());
@@ -37,37 +37,37 @@ namespace CrossPet
             if (latestRelease is var (tag, url))
             {
                 if (updateZip != null) menu.Items.Add(Item(updating ? $"⬆️ 正在更新到 {tag}…" : $"⬆️ 更新到 {tag}", () => _ = SelfUpdate()));
-                else menu.Items.Add(Item($"⬆️ 有新版本 {tag}，点这里下载", () => Open(url)));
+                else menu.Items.Add(Item($"⬆️ 有新版本 {tag}，點這裡下載", () => Open(url)));
                 Sep();
             }
-            menu.Items.Add(Item("摸摸头", () => Js("handleClick('pat')")));
+            menu.Items.Add(Item("摸摸頭", () => Js("handleClick('pat')")));
             menu.Items.Add(Item("戳一下", () => Js("handleClick('poke')")));
-            menu.Items.Add(Item("召唤彩蛋", () => Js("playEgg(true)")));
-            if (CodexResets && current == "gpt") menu.Items.Add(Item("会重置吗？", () => Js("askReset()")));   // 只有 GPT 有这个需求
+            menu.Items.Add(Item("召喚彩蛋", () => Js("playEgg(true)")));
+            if (CodexResets && current == "gpt") menu.Items.Add(Item("會重置嗎？", () => Js("askReset()")));   // 只有 GPT 有這個需求
             Sep();
-            // 角色和衣服多了，名单一长串要翻半天：改成打开设置的角色页（卡片墙），看着图选
-            if (Characters().Count > 1) { menu.Items.Add(Item("换角色…", OpenCharacterWindow)); Sep(); }
-            var layer = new Forms.ToolStripMenuItem("显示层级");
-            foreach (var (mode, title) in new[] { ("always", "始终在最上层"), ("ai", "跟着 AI（用 AI 时才浮在最上层）"), ("normal", "普通窗口（不置顶）") })
+            // 角色和衣服多了，名單一長串要翻半天：改成開啟設定的角色頁（卡片牆），看著圖選
+            if (Characters().Count > 1) { menu.Items.Add(Item("換角色…", OpenCharacterWindow)); Sep(); }
+            var layer = new Forms.ToolStripMenuItem("顯示層級");
+            foreach (var (mode, title) in new[] { ("always", "始終在最上層"), ("ai", "跟著 AI（用 AI 時才浮在最上層）"), ("normal", "普通視窗（不置頂）") })
             {
                 var m = mode;
                 layer.DropDownItems.Add(Item(title, () => { Store.Settings["layer"] = m; Store.SaveSettings(); ApplyLayer(); }, LayerMode == m));
             }
             menu.Items.Add(layer);
-            menu.Items.Add(Item("设置…", () => OpenSettings()));
-            menu.Items.Add(Item("反馈问题…", OpenFeedback));
+            menu.Items.Add(Item("設定…", () => OpenSettings()));
+            menu.Items.Add(Item("反饋問題…", OpenFeedback));
             if (developer)
             {
-                menu.Items.Add(Item("开发者控制台…", OpenDev));
-                menu.Items.Add(Item("测试渲染失败并重启…", () =>
+                menu.Items.Add(Item("開發者控制台…", OpenDev));
+                menu.Items.Add(Item("測試渲染失敗並重啟…", () =>
                 {
-                    if (MessageBox.Show("这会主动触发渲染失败的恢复流程，桌宠及设置窗口会关闭，然后尝试自动重开。是否继续？",
-                        "CrossPet 开发测试", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+                    if (MessageBox.Show("這會主動觸發渲染失敗的恢復流程，桌寵及設定視窗會關閉，然後嘗試自動重開。是否繼續？",
+                        "CrossPet 開發測試", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
                         Program.InjectRenderFailure();
                 }));
             }
             menu.Items.Add(Item("回到右下角", Recenter));
-            menu.Items.Add(Item(HotkeyLabel != null ? $"暂时隐藏（{HotkeyLabel}）" : "暂时隐藏", () => SetUserHidden(true)));
+            menu.Items.Add(Item(HotkeyLabel != null ? $"暫時隱藏（{HotkeyLabel}）" : "暫時隱藏", () => SetUserHidden(true)));
             Sep();
             menu.Items.Add(Item("退出 CrossPet", UserQuit));
         }

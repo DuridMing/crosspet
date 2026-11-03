@@ -14,8 +14,8 @@ else:
     import fcntl
     import select
 
-# 每条事件都带 Cursor 里选的模型（model / model_id）：按它换成对应的角色，和 crosspet-hook.py 的多模型宿主一样。
-# 认不出的模型（Cursor 自家的 Composer、Auto……）用接入时指定的角色（命令末尾的参数），没指定就由当前角色来演
+# 每條事件都帶 Cursor 裡選的模型（model / model_id）：按它換成對應的角色，和 crosspet-hook.py 的多模型宿主一樣。
+# 認不出的模型（Cursor 自家的 Composer、Auto……）用接入時指定的角色（命令末尾的引數），沒指定就由當前角色來演
 FALLBACK = sys.argv[1] if len(sys.argv) > 1 else None
 
 # Same folders as crosspet-hook.py and the shells: the macOS pet reads /tmp/crosspet.
@@ -133,7 +133,7 @@ def locked(name='.cursor-bridge.lock'):
 
 
 def character_for_model(model):
-    """和 crosspet-hook.py 的 character_for_model 同一套规则（tests/cursor_bridge_test.py 对拍两边）"""
+    """和 crosspet-hook.py 的 character_for_model 同一套規則（tests/cursor_bridge_test.py 對拍兩邊）"""
     m = str(model).lower()
     if 'glm' in m or 'zhipu' in m or 'chatglm' in m or 'z.ai' in m or 'zai-' in m:
         return 'glm'
@@ -218,14 +218,14 @@ def handle(event):
     model = str(event.get('model_id') or event.get('model') or '')
     mapped = character_for_model(model) if model else None
     if mapped and not installed(mapped):
-        mapped = None   # 对应的角色还没装立绘：当成认不出的模型
+        mapped = None   # 對應的角色還沒裝立繪：當成認不出的模型
     generation = _generation(event.get('generation_id'))
     now = time.time()
     activity = {'pose': 'thinking', 'event': kind, 'tool': '', 'ts': now}
     if kind == 'sessionStart':
         activity.update(pose='idle', event='SessionStart')
     elif kind == 'beforeSubmitPrompt':
-        # 你一按发送就到（其他事件都是做完才来）：没有这条的话，短对话她要等 Cursor 回答完才动
+        # 你一按傳送就到（其他事件都是做完才來）：沒有這條的話，短對話她要等 Cursor 回答完才動
         activity.update(pose='listening', event='UserPromptSubmit')
     elif kind == 'sessionEnd':
         activity.update(pose='idle', event='SessionEnd')
@@ -249,7 +249,7 @@ def handle(event):
         all_sessions = {k: v for k, v in all_sessions.items()
                         if isinstance(v, dict) and isinstance(v.get('state'), dict)}
         before = {v.get('character') or FALLBACK or 'current' for v in all_sessions.values()}
-        # 这条事件没带模型（老版本 Cursor）：沿用这个会话上次的角色
+        # 這條事件沒帶模型（老版本 Cursor）：沿用這個會話上次的角色
         character = mapped or (None if model else all_sessions.get(sid, {}).get('character')) or FALLBACK or 'current'
         sessions = {k: v for k, v in all_sessions.items() if now - v['state'].get('ts', 0) < 600}
         order_path = STATE / 'cursor-bridge-order.json'
@@ -310,7 +310,7 @@ def handle(event):
         atomic(path, sessions)
         for cid in sorted(before | {v.get('character') or FALLBACK or 'current' for v in sessions.values()} | {character}):
             write_cards(cid, sessions, now)
-        # 切到 Cursor 窗口时按它最近用的模型换角色；认不出的写 null，桌宠不换人
+        # 切到 Cursor 視窗時按它最近用的模型換角色；認不出的寫 null，桌寵不換人
         atomic(STATE / 'cursor-host.json', {'character': None if character == 'current' else character,
                                             'model': model, 'source': 'cursor', 'ts': now})
         atomic(STATE / f'{character}-state.json', activity)
@@ -336,7 +336,7 @@ def _write_cards_locked(character, sessions, now):
     cards = {}
     for k, value in sessions.items():
         if (value.get('character') or FALLBACK or 'current') != character:
-            continue   # 这个会话用的是别的模型，卡片在那个角色的文件里
+            continue   # 這個會話用的是別的模型，卡片在那個角色的檔案裡
         state = value['state']
         pose = state.get('after') or state['pose'] if state['pose'] == 'thinking' else state['pose']
         cards[k] = {'pose': pose, 'event': state['event'], 'ts': state['ts']}
@@ -344,8 +344,8 @@ def _write_cards_locked(character, sessions, now):
 
 
 def main():
-    # beforeSubmitPrompt 能拦住消息：回复不合格式 Cursor 会当成「拦下」。所以它和读不懂的事件一律回「放行」，
-    # 其余观察事件照旧回 {}（它们没有输出字段）
+    # beforeSubmitPrompt 能攔住訊息：回覆不合格式 Cursor 會當成「攔下」。所以它和讀不懂的事件一律回「放行」，
+    # 其餘觀察事件照舊回 {}（它們沒有輸出欄位）
     reply = '{"continue": true}'
     try:
         event = read_event()

@@ -4,12 +4,12 @@ import ServiceManagement
 import WebKit
 
 final class DragView: NSView {
-    var onClick: ((NSPoint) -> Void)?   // 点在哪（这个视图的坐标）：网页要知道是不是点在「新功能」卡片的按钮上
+    var onClick: ((NSPoint) -> Void)?   // 點在哪（這個檢視的座標）：網頁要知道是不是點在「新功能」卡片的按鈕上
     var onMenu: ((NSEvent) -> Void)?
     var onDragStart: (() -> Void)?
     var onDragEnd: (() -> Void)?
-    var onShake: (() -> Void)?        // 按住快速来回甩（惹她生气）
-    private var shook = false          // 这次拖动甩过：松手不贴边
+    var onShake: (() -> Void)?        // 按住快速來回甩（惹她生氣）
+    private var shook = false          // 這次拖動甩過：鬆手不貼邊
     private var swingX: CGFloat = 0, swingDir: CGFloat = 0, swings: [Date] = [], shakeSaid = Date.distantPast
     private var downAt: NSPoint = .zero
     private var originAt: NSPoint = .zero
@@ -30,24 +30,24 @@ final class DragView: NSView {
             downAt = p
             shook = false; swingX = p.x; swingDir = 0; swings = []
         }
-        // 甩：横向来回反转方向。记住这个方向上拖到的最远点，从那里往回拖超过 18 点算一次反转，0.9 秒内反转两次以上就算在甩
+        // 甩：橫向來回反轉方向。記住這個方向上拖到的最遠點，從那裡往回拖超過 18 點算一次反轉，0.9 秒內反轉兩次以上就算在甩
         if swingDir == 0 {
             if abs(p.x - swingX) > 18 { swingDir = p.x > swingX ? 1 : -1; swingX = p.x }
         } else if (p.x - swingX) * swingDir > 0 {
-            swingX = p.x   // 同方向继续拖：更新最远点
+            swingX = p.x   // 同方向繼續拖：更新最遠點
         } else if (swingX - p.x) * swingDir > 18 {
             swingDir = -swingDir; swingX = p.x
             swings.append(Date())
             swings = swings.filter { Date().timeIntervalSince($0) < 0.9 }
             if swings.count >= 2, Date().timeIntervalSince(shakeSaid) > 0.3 { shook = true; shakeSaid = Date(); onShake?() }
         }
-        // 自己跟着鼠标挪（不用 performDrag 交给系统：macOS 15 起系统拖到屏幕边缘会弹「窗口分屏」预览、松手还会去动窗口，跟贴边抢位置）
+        // 自己跟著滑鼠挪（不用 performDrag 交給系統：macOS 15 起系統拖到螢幕邊緣會彈「視窗分屏」預覽、鬆手還會去動視窗，跟貼邊搶位置）
         window?.setFrameOrigin(NSPoint(x: originAt.x + p.x - downAt.x, y: originAt.y + p.y - downAt.y))
     }
     override func mouseUp(with event: NSEvent) {
         if dragged {
             if let o = window?.frame.origin { defaults.set([o.x, o.y], forKey: "origin") }
-            if !shook { onDragEnd?() }   // 甩她的时候松手不贴边
+            if !shook { onDragEnd?() }   // 甩她的時候鬆手不貼邊
         } else {
             onClick?(convert(event.locationInWindow, from: nil))
         }

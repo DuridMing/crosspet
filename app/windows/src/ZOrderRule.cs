@@ -2,19 +2,19 @@ namespace CrossPet
 {
     static class ZOrderRule
     {
-        /// <summary>桌面、任务栏（全屏判断也排除它们）</summary>
+        /// <summary>桌面、工作列（全屏判斷也排除它們）</summary>
         public static bool IsShell(string cls) =>
             cls == "Progman" || cls == "WorkerW" || cls == "Shell_TrayWnd" || cls == "Shell_SecondaryTrayWnd";
 
-        /// <summary>取消置顶时要不要插到前台窗口正下方（这样不会盖住你正在用的程序）。
-        /// 只对普通程序窗口这么做：前台是桌面时插到它下面，桌宠就被壁纸整个盖住、哪里都找不到（1.3.7 用户反馈：
-        /// 「跟着 AI」层级下右键几次、换个角色她就不见了，托盘和进程都还在）；前台是 CrossPet 自己的右键菜单、设置窗口时也不插</summary>
+        /// <summary>取消置頂時要不要插到前臺視窗正下方（這樣不會蓋住你正在用的程式）。
+        /// 只對普通程式視窗這麼做：前臺是桌面時插到它下面，桌寵就被桌布整個蓋住、哪裡都找不到（1.3.7 使用者反饋：
+        /// 「跟著 AI」層級下右鍵幾次、換個角色她就不見了，托盤和程式都還在）；前臺是 CrossPet 自己的右鍵選單、設定視窗時也不插</summary>
         public static bool TuckBelow(string frontClass, bool frontIsOurs) =>
             !frontIsOurs && !string.IsNullOrEmpty(frontClass) && !IsShell(frontClass);
 
-        /// <summary>该不该置顶。mode：always / ai / normal；aiActive：AI 程序在前台，或刚干完活、在等你回答。
-        /// 「跟着 AI」时前台是桌面、任务栏也置顶：你没在用任何程序，她挡不着谁；不然按 Win+D 回到桌面时，
-        /// 桌面会把不置顶的她和别的窗口一起盖住，一直不出来（loki 实测：开 Chrome 再 Win+D 她就没了）</summary>
+        /// <summary>該不該置頂。mode：always / ai / normal；aiActive：AI 程式在前臺，或剛乾完活、在等你回答。
+        /// 「跟著 AI」時前臺是桌面、工作列也置頂：你沒在用任何程式，她擋不著誰；不然按 Win+D 回到桌面時，
+        /// 桌面會把不置頂的她和別的視窗一起蓋住，一直不出來（loki 實測：開 Chrome 再 Win+D 她就沒了）</summary>
         public static bool Top(string mode, bool aiActive, bool frontIsShell) =>
             mode == "always" || (mode == "ai" && (aiActive || frontIsShell));
     }

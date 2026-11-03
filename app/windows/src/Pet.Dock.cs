@@ -21,24 +21,24 @@ namespace CrossPet
 {
     sealed partial class Pet
     {
-        // ---------------- 贴边 ----------------
-        // 拖到屏幕左 / 右边缘松手：她缩到屏幕外，只露半个身子扒着边缘（额度、名牌、气泡都藏起来）。
-        // AI 干活时（或在等你回答）自己跑出来，干完过约 10 秒缩回去；鼠标移到露出来的那截上她会探出来一点。
-        // 拖离边缘就不贴了。另一块屏幕接在这边时不算边缘。坐标都是物理像素
+        // ---------------- 貼邊 ----------------
+        // 拖到螢幕左 / 右邊緣鬆手：她縮到螢幕外，只露半個身子扒著邊緣（額度、名牌、氣泡都藏起來）。
+        // AI 幹活時（或在等你回答）自己跑出來，幹完過約 10 秒縮回去；滑鼠移到露出來的那截上她會探出來一點。
+        // 拖離邊緣就不貼了。另一塊螢幕接在這邊時不算邊緣。座標都是物理畫素
         string dock;                 // "left" / "right"
-        bool dockOut, dockHover, dockTucked;   // dockTucked：现在是缩着的样子（之后换探出来不用先挪窗口）
+        bool dockOut, dockHover, dockTucked;   // dockTucked：現在是縮著的樣子（之後換探出來不用先挪視窗）
         DateTime? dockLeaveAt, dockEnterAt;
-        DateTime dockedAt = DateTime.MinValue;   // 刚拖到边上：之前就在进行的工作不算，先缩进去给个反应，AI 有新动作再跑出来
-        readonly Dictionary<string, double> dockCut = new Dictionary<string, double>();   // 切口位置（网页像素），按 边 + 角色 记
-        /// <summary>DeepSeek 余额（默认开）：用别家订阅（OpenCode Go……）跑 DeepSeek 模型时官方账户没钱，她会一直没精神，可以关掉</summary>
-        /// <summary>省电模式（默认关）：特效每秒 15 帧、闲着 10 秒就停（平时 30 帧、30 秒）</summary>
+        DateTime dockedAt = DateTime.MinValue;   // 剛拖到邊上：之前就在進行的工作不算，先縮排去給個反應，AI 有新動作再跑出來
+        readonly Dictionary<string, double> dockCut = new Dictionary<string, double>();   // 切口位置（網頁畫素），按 邊 + 角色 記
+        /// <summary>DeepSeek 餘額（預設開）：用別家訂閱（OpenCode Go……）跑 DeepSeek 模型時官方賬戶沒錢，她會一直沒精神，可以關掉</summary>
+        /// <summary>省電模式（預設關）：特效每秒 15 幀、閒著 10 秒就停（平時 30 幀、30 秒）</summary>
         static bool PowerSave => Store.Settings.TryGetValue("powerSave", out var v) && v is bool b && b;
-        /// <summary>额度合并显示（默认关）：小窗把各家 AI 的额度排成几行，而不是只显示当前角色的。怎么排在网页里（quota-aggregate.js）</summary>
+        /// <summary>額度合併顯示（預設關）：小窗把各家 AI 的額度排成幾行，而不是隻顯示當前角色的。怎麼排在網頁裡（quota-aggregate.js）</summary>
         static bool QuotaAggregate => Store.Flag("quotaAggregate");
-        static string QuotaStyle => Store.Settings.TryGetValue("quotaStyle", out var v) && v is string s && s == "bars" ? "bars" : "text";   // 额度怎么显示：text 文字（默认）/ bars 额度条（网页层 quota-bars.js）
-        static string PeakStyle => Store.Settings.TryGetValue("peakStyle", out var v) && v is string s && (s == "text" || s == "off") ? s : "bar";   // 额度栏怎么显示峰谷时段：bar 时间条（默认）/ text 一行文字 / off（规则在网页层 peak-hours.js）
-        static bool CodexResets => Store.Flag("codexResets");   // Codex 重置提醒（默认关，数据来自 codex-resets.com）
-        /// <summary>按时段换衣服：{ 角色: { peak: 皮肤, valley: 皮肤 } }（"" = 原版，没写 = 不换）。判断在网页层（peak-hours.js），这里只存（和 macOS 的 cleanPeakSkins 一致）</summary>
+        static string QuotaStyle => Store.Settings.TryGetValue("quotaStyle", out var v) && v is string s && s == "bars" ? "bars" : "text";   // 額度怎麼顯示：text 文字（預設）/ bars 額度條（網頁層 quota-bars.js）
+        static string PeakStyle => Store.Settings.TryGetValue("peakStyle", out var v) && v is string s && (s == "text" || s == "off") ? s : "bar";   // 額度欄怎麼顯示峰谷時段：bar 時間條（預設）/ text 一行文字 / off（規則在網頁層 peak-hours.js）
+        static bool CodexResets => Store.Flag("codexResets");   // Codex 重置提醒（預設關，資料來自 codex-resets.com）
+        /// <summary>按時段換衣服：{ 角色: { peak: 皮膚, valley: 皮膚 } }（"" = 原版，沒寫 = 不換）。判斷在網頁層（peak-hours.js），這裡只存（和 macOS 的 cleanPeakSkins 一致）</summary>
         static Dictionary<string, object> CleanPeakSkins(object v)
         {
             var output = new Dictionary<string, object>();
@@ -76,7 +76,7 @@ namespace CrossPet
             int w = r.Right - r.Left, mid = r.Left + w / 2;
             var scr = Forms.Screen.FromHandle(hwnd);
             var wa = scr.WorkingArea;
-            double reach = w * (BaseWidth / pageW) * 0.3;   // 按人物那块的宽算：画布因为文字变宽时不该更容易贴边
+            double reach = w * (BaseWidth / pageW) * 0.3;   // 按人物那塊的寬算：畫布因為文字變寬時不該更容易貼邊
             bool Neighbor(bool left) => Forms.Screen.AllScreens.Any(o => !o.Equals(scr) && o.Bounds.Top < r.Bottom && o.Bounds.Bottom > r.Top &&
                 (left ? Math.Abs(o.Bounds.Right - scr.Bounds.Left) < 2 : Math.Abs(o.Bounds.Left - scr.Bounds.Right) < 2));
             if (mid - wa.Left < reach && !Neighbor(true)) SetDock("left");
@@ -90,7 +90,7 @@ namespace CrossPet
             dockOut = DockBusy();
             ApplyDock();
         }
-        /// <summary>AI 在干活 / 等你回答 / 刚干完（10 秒内）：跑出来</summary>
+        /// <summary>AI 在幹活 / 等你回答 / 剛乾完（10 秒內）：跑出來</summary>
         bool DockBusy()
         {
             var now = DateTime.UtcNow;
@@ -117,15 +117,15 @@ namespace CrossPet
         {
             var side = dock;
             if (side == null || hwnd == IntPtr.Zero) return;
-            hit?.Children.Clear(); lastHitRects = null;   // 换了样子，可点区域重新量（旧的范围会让她误以为鼠标在身上，来回闪）
-            After(500, () => { lastHitRects = null; _ = UpdateHitRects(); });   // 新图换好后再量一次
+            hit?.Children.Clear(); lastHitRects = null;   // 換了樣子，可點區域重新量（舊的範圍會讓她誤以為滑鼠在身上，來回閃）
+            After(500, () => { lastHitRects = null; _ = UpdateHitRects(); });   // 新圖換好後再量一次
             Native.GetWindowRect(hwnd, out var r);
             int w = r.Right - r.Left, h = r.Bottom - r.Top;
             var wa = Forms.Screen.FromHandle(hwnd).WorkingArea;
             int y = Math.Max(wa.Top, Math.Min(r.Top, wa.Bottom - (int)(h * 0.85)));
             int edgeX = side == "left" ? wa.Left : wa.Right - w;
             if (dockOut) { dockTucked = false; Js("setTucked(null)"); Slide(edgeX, y); return; }
-            // 窗口还没到边上（刚拖过来松手 / 刚干完活）：先整个滑到屏幕边缘，滑完再缩进去。一次只做一个动作，不然窗口在滑、人物也在窗口里滑，看着乱
+            // 視窗還沒到邊上（剛拖過來鬆手 / 剛乾完活）：先整個滑到螢幕邊緣，滑完再縮排去。一次只做一個動作，不然視窗在滑、人物也在視窗裡滑，看著亂
             if (!dockTucked && (Math.Abs(r.Left - edgeX) > 1 || Math.Abs(r.Top - y) > 1))
             {
                 Slide(edgeX, y);
@@ -133,20 +133,20 @@ namespace CrossPet
                 if (dock != side || dockOut) return;
             }
             dockTucked = true;
-            // 鼠标移上来：换成探出来更多的那张（edge_*_peek），切口照样对齐屏幕边缘（不能光把窗口往外挪，切口会露在屏幕中间）
+            // 滑鼠移上來：換成探出來更多的那張（edge_*_peek），切口照樣對齊螢幕邊緣（不能光把視窗往外挪，切口會露在螢幕中間）
             var peek = dockHover;
             Js($"setTucked({Q(side)}, {(peek ? "true" : "false")})");
             var key = side + (peek ? "-peek" : "") + current;
             if (!dockCut.TryGetValue(key, out var cut))
             {
-                await Task.Delay(450);   // 换成贴边立绘后再量切口（图要先载入），量过的记下来
+                await Task.Delay(450);   // 換成貼邊立繪後再量切口（圖要先載入），量過的記下來
                 if (dock != side || dockOut || dockHover != peek) return;
                 var res = await Eval($"dockCut({Q(side)})");
                 if (!double.TryParse(res, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out cut)) return;
                 dockCut[key] = cut;
             }
             if (dock != side || dockOut || dockHover != peek) return;
-            double zoom = (double)w / pageW;   // 网页像素 → 物理像素
+            double zoom = (double)w / pageW;   // 網頁畫素 → 物理畫素
             int tx = side == "left" ? wa.Left - (int)(cut * zoom) : wa.Right - (int)(cut * zoom);
             Native.GetWindowRect(hwnd, out var now);
             if (Math.Abs(now.Left - tx) > 1) Slide(tx, y);
@@ -168,17 +168,17 @@ namespace CrossPet
             };
             slideTimer.Start();
         }
-        /// <summary>缩着时鼠标在露出来的那截上停 0.15 秒：探出来；移开 0.3 秒后缩回去</summary>
+        /// <summary>縮著時滑鼠在露出來的那截上停 0.15 秒：探出來；移開 0.3 秒後縮回去</summary>
         void UpdateDockHover()
         {
             if (dock == null || dockOut || hwnd == IntPtr.Zero) return;
-            if (hit != null && hit.Children.Count == 0) _ = UpdateHitRects();   // 刚换了图：马上量能点的范围，探出来 / 缩回去才跟得上鼠标
-            bool inside = hit != null && hit.IsMouseOver;   // 只算露出来的那截（能点的区域），窗口其余是透明的
+            if (hit != null && hit.Children.Count == 0) _ = UpdateHitRects();   // 剛換了圖：馬上量能點的範圍，探出來 / 縮回去才跟得上滑鼠
+            bool inside = hit != null && hit.IsMouseOver;   // 只算露出來的那截（能點的區域），視窗其餘是透明的
             if (inside)
             {
                 dockLeaveAt = null;
                 if (dockHover) return;
-                if (dockEnterAt == null) dockEnterAt = DateTime.UtcNow;   // 停一小会儿才探出来，路过不算
+                if (dockEnterAt == null) dockEnterAt = DateTime.UtcNow;   // 停一小會兒才探出來，路過不算
                 else if ((DateTime.UtcNow - dockEnterAt.Value).TotalSeconds > 0.15) { dockEnterAt = null; dockHover = true; ApplyDock(); }
                 return;
             }

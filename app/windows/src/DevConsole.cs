@@ -9,15 +9,15 @@ using Microsoft.Web.WebView2.Wpf;
 
 namespace CrossPet
 {
-    /// <summary>设置、反馈窗口默认开到内容基本放得下的高度（反馈的四步一页排开、角色页的卡片墙），屏幕矮就缩到放得下。和 macOS 的 fitHeight 一致</summary>
+    /// <summary>設定、反饋視窗預設開到內容基本放得下的高度（反饋的四步一頁排開、角色頁的卡片牆），螢幕矮就縮到放得下。和 macOS 的 fitHeight 一致</summary>
     static class WindowSize
     {
         public static double FitHeight(double h) => Math.Min(h, SystemParameters.WorkArea.Height - 40);
     }
 
     /// <summary>
-    /// 开发者控制台（Shift + 右键打开）：加载和 macOS 共用的 app/web/devconsole.html，
-    /// 页面通过 chrome.webview.postMessage 发命令，这里转给桌宠页面执行，和 macOS 版 handleDev 一样。
+    /// 開發者控制台（Shift + 右鍵開啟）：載入和 macOS 共用的 app/web/devconsole.html，
+    /// 頁面通過 chrome.webview.postMessage 發命令，這裡轉給桌寵頁面執行，和 macOS 版 handleDev 一樣。
     /// </summary>
     sealed class DevConsole
     {
@@ -30,7 +30,7 @@ namespace CrossPet
         {
             this.pet = pet;
             web = new WebView2();
-            window = new Window { Title = "CrossPet 开发者控制台", Width = 1060, Height = 760, Content = web, WindowStartupLocation = WindowStartupLocation.CenterScreen };
+            window = new Window { Title = "CrossPet 開發者控制台", Width = 1060, Height = 760, Content = web, WindowStartupLocation = WindowStartupLocation.CenterScreen };
             window.Closed += (_, __) => Closed?.Invoke();
             window.Loaded += async (_, __) =>
             {
@@ -57,10 +57,10 @@ namespace CrossPet
             if (!(Store.Json.DeserializeObject(json) is Dictionary<string, object> msg) || !(msg.TryGetValue("cmd", out var c) && c is string cmd)) return;
             switch (cmd)
             {
-                case "pet":     // 在桌宠页面里执行一段代码（控制台自己的本地页面发来的）
+                case "pet":     // 在桌寵頁面裡執行一段程式碼（控制台自己的本地頁面發來的）
                     if (msg.TryGetValue("code", out var code) && code is string s) pet.Js(s);
                     break;
-                case "status":  // ExecuteScriptAsync 返回的是 JSON 编码后的结果：JSON.stringify 的字符串再套一层引号
+                case "status":  // ExecuteScriptAsync 返回的是 JSON 編碼後的結果：JSON.stringify 的字串再套一層引號
                     var raw = await pet.Eval("JSON.stringify(devStatus())");
                     if (raw != "null") Js($"onPetStatus(JSON.parse({raw}))");
                     break;
@@ -84,8 +84,8 @@ namespace CrossPet
     }
 
     /// <summary>
-    /// 设置窗口（右键「设置…」）：加载和 macOS 共用的 app/web/settings.html，
-    /// 页面通过 chrome.webview.postMessage 发 {cmd, ...}，Pet.HandleSettings 改完设置后用 Push 把最新状态推回页面
+    /// 設定視窗（右鍵「設定…」）：載入和 macOS 共用的 app/web/settings.html，
+    /// 頁面通過 chrome.webview.postMessage 發 {cmd, ...}，Pet.HandleSettings 改完設定後用 Push 把最新狀態推回頁面
     /// </summary>
     sealed class SettingsWindow
     {
@@ -94,8 +94,8 @@ namespace CrossPet
         readonly WebView2 web;
         public event Action Closed;
 
-        /// <summary>page：设置页 settings.html，或者换角色窗口 characters.html（同一套状态和命令，只是单独一个大窗口）</summary>
-        public SettingsWindow(Pet pet, CoreWebView2Environment env, string page = "settings.html", string title = "CrossPet 设置", double width = 560, double height = 780)
+        /// <summary>page：設定頁 settings.html，或者換角色視窗 characters.html（同一套狀態和命令，只是單獨一個大視窗）</summary>
+        public SettingsWindow(Pet pet, CoreWebView2Environment env, string page = "settings.html", string title = "CrossPet 設定", double width = 560, double height = 780)
         {
             this.pet = pet;
             web = new WebView2();
@@ -109,7 +109,7 @@ namespace CrossPet
                 web.CoreWebView2.WebMessageReceived += (_, e) =>
                 {
                     if (Store.Json.DeserializeObject(e.WebMessageAsJson) is Dictionary<string, object> msg)
-                        try { pet.HandleSettings(msg); } catch (Exception ex) { Store.Log("设置出错: " + ex); }
+                        try { pet.HandleSettings(msg); } catch (Exception ex) { Store.Log("設定出錯: " + ex); }
                 };
                 web.CoreWebView2.NavigationCompleted += (_, __) =>
                 {
@@ -121,7 +121,7 @@ namespace CrossPet
         }
 
         bool loaded; string pendingTab;
-        /// <summary>切到某个标签页（「新功能」卡片的「去看看」）；页面还没加载完就等加载完再切</summary>
+        /// <summary>切到某個標籤頁（「新功能」卡片的「去看看」）；頁面還沒載入完就等載入完再切</summary>
         public void ShowTab(string tab)
         {
             if (!loaded || web.CoreWebView2 == null) { pendingTab = tab; return; }
@@ -137,8 +137,8 @@ namespace CrossPet
     }
 
     /// <summary>
-    /// 反馈窗口（右键「反馈问题…」）：加载和 macOS 共用的 app/web/feedback.html，
-    /// 页面发 {cmd: get / send}，Pet.HandleFeedback 处理；Run 在页面里执行一段代码（setInfo / onSent）
+    /// 反饋視窗（右鍵「反饋問題…」）：載入和 macOS 共用的 app/web/feedback.html，
+    /// 頁面發 {cmd: get / send}，Pet.HandleFeedback 處理；Run 在頁面裡執行一段程式碼（setInfo / onSent）
     /// </summary>
     sealed class FeedbackWindow
     {
@@ -149,7 +149,7 @@ namespace CrossPet
         public FeedbackWindow(Pet pet, CoreWebView2Environment env)
         {
             web = new WebView2();
-            window = new Window { Title = "CrossPet 反馈问题", Width = 560, Height = WindowSize.FitHeight(700), Content = web, WindowStartupLocation = WindowStartupLocation.CenterScreen };
+            window = new Window { Title = "CrossPet 反饋問題", Width = 560, Height = WindowSize.FitHeight(700), Content = web, WindowStartupLocation = WindowStartupLocation.CenterScreen };
             window.Closed += (_, __) => Closed?.Invoke();
             window.Loaded += async (_, __) =>
             {
@@ -159,7 +159,7 @@ namespace CrossPet
                 web.CoreWebView2.WebMessageReceived += (_, e) =>
                 {
                     if (Store.Json.DeserializeObject(e.WebMessageAsJson) is Dictionary<string, object> msg)
-                        try { pet.HandleFeedback(msg); } catch (Exception ex) { Store.Log("反馈出错: " + ex); }
+                        try { pet.HandleFeedback(msg); } catch (Exception ex) { Store.Log("反饋出錯: " + ex); }
                 };
                 web.CoreWebView2.Navigate(Store.PageUrl("feedback.html"));
             };

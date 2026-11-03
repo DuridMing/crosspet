@@ -1,11 +1,11 @@
-// 换角色的那 330 毫秒里别的事件 / 计时器不能串到别的角色上。
-// 跑的是 app/web/index.html 里整段真实脚本（加上几个辅助脚本），DOM 和时钟是假的；不开窗口、不联网。
+// 換角色的那 330 毫秒裡別的事件 / 計時器不能串到別的角色上。
+// 跑的是 app/web/index.html 裡整段真實指令碼（加上幾個輔助指令碼），DOM 和時鐘是假的；不開視窗、不聯網。
 //   node tests/page_switch_test.cjs
 'use strict'
 process.env.TZ = 'UTC'
 const fs = require('fs'), path = require('path'), vm = require('vm')
 const WEB = path.join(__dirname, '..', 'app', 'web')
-const START = Date.UTC(2026, 9, 19, 9, 0, 0)   // 平常的上午，不是节日
+const START = Date.UTC(2026, 9, 19, 9, 0, 0)   // 平常的上午，不是節日
 
 function makeClock(start) {
   let now = start, next = 1
@@ -15,7 +15,7 @@ function makeClock(start) {
     setTimeout: (cb, delay, ...args) => { const id = next++; timers.set(id, { at: now + Math.max(0, Number(delay) || 0), cb, args, interval: 0 }); return id },
     setInterval: (cb, delay, ...args) => { const id = next++; const d = Math.max(1, Number(delay) || 0); timers.set(id, { at: now + d, cb, args, interval: d }); return id },
     clear: id => { timers.delete(id) },
-    // 按时间顺序一个一个跑；每跑一个让 Promise 也走一步
+    // 按時間順序一個一個跑；每跑一個讓 Promise 也走一步
     async advance(ms) {
       const target = now + ms
       for (let count = 0; count < 500000; count++) {
@@ -107,7 +107,7 @@ function makePage() {
   ctx.window = ctx
   ctx.globalThis = ctx
   vm.createContext(ctx)
-  vm.runInContext('Math.random = () => 0.99', ctx)   // 不随机出闲时小动作、彩蛋
+  vm.runInContext('Math.random = () => 0.99', ctx)   // 不隨機出閒時小動作、彩蛋
   for (const f of ['effects.js', 'text-size.js', 'codex-quota.js', 'quota-aggregate.js', 'plugin-update.js', 'stand-in.js', 'follow-policy.js', 'codex-resets.js', 'peak-hours.js', 'whats-new.js'])
     vm.runInContext(fs.readFileSync(path.join(WEB, f), 'utf8'), ctx, { filename: f })
   const html = fs.readFileSync(path.join(WEB, 'index.html'), 'utf8').replace(/\r\n/g, '\n')
@@ -124,11 +124,11 @@ function makePage() {
         cards: cards.length, bubble: $('bubble').classList.contains('hide') ? '' : $('bubble').textContent, caption: $('caption').textContent,
         stageHidden: $('stage').classList.contains('swap'), fxHidden: $('fx').classList.contains('hide') }
     }
-    // 钩子写的时间：外壳下一次 0.3 秒轮询才交过来，比现在略早一点
+    // 鉤子寫的時間：外殼下一次 0.3 秒輪詢才交過來，比現在略早一點
     function hook(id, p, event, extra = {}) { applyCharState(id, { pose: p, event, ts: (Date.now() - 150) / 1000, ...extra }) }
     function sess(...entries) { const o = {}; entries.forEach(([sid, p, ev]) => o[sid] = { pose: p, event: ev || 'PreToolUse', ts: (Date.now() - 150) / 1000 }); return o }
   `)
-  run('setPageHidden(true)')   // 特效的逐帧刷新不在这里测
+  run('setPageHidden(true)')   // 特效的逐幀重新整理不在這裡測
   return { run, clk, advance: ms => clk.advance(ms), state: () => run('__state()'), says: () => run('__says'), errors: clk.errors }
 }
 
@@ -144,7 +144,7 @@ function manifest() {
       poses: frames('egg-gpt', ['pop', 'pretend', 'caught', 'bye']) },
   } }
 }
-// 和外壳一样启动：init（先换上排第一的），再安静地换回上次的 GPT
+// 和外殼一樣啟動：init（先換上排第一的），再安靜地換回上次的 GPT
 async function fresh() {
   const e = makePage()
   e.run(`init(${JSON.stringify(manifest())})`)
@@ -202,7 +202,7 @@ const cases = [
     assert(e.state().multi, 'precondition: GPT juggles two sessions')
     e.run(`setCharacter('claude')`)
     await e.advance(150)
-    e.run(`setSessions('gpt', sess(['s1','running'],['s2','reading']))`)   // 下一次轮询：GPT 那边还在忙
+    e.run(`setSessions('gpt', sess(['s1','running'],['s2','reading']))`)   // 下一次輪詢：GPT 那邊還在忙
     await e.advance(250)
     let s = e.state()
     assert(s.charId === 'claude' && !s.multi && s.cards === 0, `Claude shows GPT's cards: ${JSON.stringify(s)}`)
@@ -211,7 +211,7 @@ const cases = [
     assert(s.bubble === 'Claude hello' && !/^busy_/.test(s.pose), `Claude's greeting was cut by GPT's cards: ${JSON.stringify(s)}`)
   }],
   ['restored_listening_moves_on_to_thinking', async e => {
-    e.run(`hook('claude','listening','UserPromptSubmit'); setCharacter('claude')`)   // Windows 跟着最新的事件换角色
+    e.run(`hook('claude','listening','UserPromptSubmit'); setCharacter('claude')`)   // Windows 跟著最新的事件換角色
     await e.advance(5000)
     assert(e.state().pose === 'thinking', `stuck in '${e.state().pose}'`)
   }],
@@ -252,7 +252,7 @@ const cases = [
     assert(s.multi && s.pose === 'asking' && s.fxHidden, `effects shown next to the cards: ${JSON.stringify(s)}`)
   }],
   ['switched_in_character_stays_awake', async e => {
-    await e.advance(11 * 60 * 1000)   // 十来分钟没动静
+    await e.advance(11 * 60 * 1000)   // 十來分鐘沒動靜
     e.run(`setCharacter('grok')`)     // 你切到了 Cursor
     await e.advance(21000)
     assert(e.state().pose !== 'sleeping', 'Grok fell asleep right after showing up')
@@ -260,19 +260,19 @@ const cases = [
   ['reset_notice_is_not_used_up_on_the_fading_stage', async e => {
     e.run(`resetsOn = true; resetsData = CodexResets.parse({data:{scheduled_reset:{id:'r1', announced_at:new Date(Date.now()-60000).toISOString(), scheduled_for:new Date(Date.now()+3600000).toISOString()}}}); announceReset()`)
     await e.advance(2800)
-    e.run(`setCharacter('grok')`)    // 3 秒那次刚好落在换角色的时候
+    e.run(`setCharacter('grok')`)    // 3 秒那次剛好落在換角色的時候
     await e.advance(1000)
     assert(e.run(`resetsTold().length`) === 0, 'the notice was marked as told while GPT was being switched away')
     e.run(`setCharacter('gpt')`)
     await e.advance(1000)
-    e.run(`say('')`)                 // 招呼说完，闲下来了
+    e.run(`say('')`)                 // 招呼說完，閒下來了
     await e.advance(10000)
     assert(e.says().some(x => x.charId === 'gpt' && /重置/.test(x.line || '')), 'GPT never told the notice')
   }],
   ['new_manifest_keeps_a_pending_switch', async e => {
     e.run(`setCharacter('grok')`)
     await e.advance(100)
-    e.run(`init(${JSON.stringify(manifest())})`)   // 换衣服时外壳重新 init
+    e.run(`init(${JSON.stringify(manifest())})`)   // 換衣服時外殼重新 init
     await e.advance(1000)
     const s = e.state()
     assert(s.charId === 'grok' && !s.stageHidden, `after init: ${JSON.stringify(s)}`)
@@ -291,7 +291,7 @@ const cases = [
     e.run(`setCharacter('grok')`)
     await e.advance(400)
     e.run(`setCharacter('claude')`)
-    e.run(`refreshLook('grok')`)     // 还显示着 Grok 时给她换了衣服
+    e.run(`refreshLook('grok')`)     // 還顯示著 Grok 時給她換了衣服
     await e.advance(1000)
     assert(e.state().charId === 'claude', `ended on ${e.state().charId}`)
   }],

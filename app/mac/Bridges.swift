@@ -13,7 +13,7 @@ final class LocalhostTrust: NSObject, URLSessionDelegate {
     }
 }
 
-/// 控制台页面 → App 的消息通道（单独一个对象，避免 WKUserContentController 强引用 App 造成循环）
+/// 控制台頁面 → App 的訊息通道（單獨一個物件，避免 WKUserContentController 強引用 App 造成迴圈）
 final class DevBridge: NSObject, WKScriptMessageHandler {
     enum Kind { case dev, settings, feedback, pet }
     weak var app: App?
