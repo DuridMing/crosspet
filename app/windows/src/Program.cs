@@ -11,7 +11,7 @@ namespace CrossPet
     {
         const string WebView2Download = "https://go.microsoft.com/fwlink/p/?LinkId=2124703";
 
-        /// WPF 渲染线程挂了（0x88980406 UCEERR_RENDERTHREADFAILURE）：这之后窗口不会再重画，当作没事继续跑就是画面冻住
+        /// WPF 渲染執行緒掛了（0x88980406 UCEERR_RENDERTHREADFAILURE）：這之後視窗不會再重畫，當作沒事繼續跑就是畫面凍住
         static bool IsRenderThreadFailure(Exception e)
         {
             for (var x = e; x != null; x = x.InnerException)
@@ -19,60 +19,60 @@ namespace CrossPet
             return false;
         }
 
-        // 只从开发者菜单触发；通过 Dispatcher 抛出同一 HRESULT，走真实异常处理与重启交接。
+        // 只從開發者選單觸發；通過 Dispatcher 丟擲同一 HRESULT，走真實異常處理與重啟交接。
         internal static void InjectRenderFailure() => Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-            throw new System.Runtime.InteropServices.COMException("开发测试：UCEERR_RENDERTHREADFAILURE", unchecked((int)0x88980406))));
+            throw new System.Runtime.InteropServices.COMException("開發測試：UCEERR_RENDERTHREADFAILURE", unchecked((int)0x88980406))));
 
-        /// <summary>安装目录缺东西（#24：上次一键更新删到一半）时不往下走——不然每次启动都崩、用户只看到「打不开」。
-        /// 找得到下载好的完整安装包就问要不要用它修复，找不到就指去发布页重新下载</summary>
+        /// <summary>安裝目錄缺東西（#24：上次一鍵更新刪到一半）時不往下走——不然每次啟動都崩、使用者只看到「打不開」。
+        /// 找得到下載好的完整安裝包就問要不要用它修復，找不到就指去釋出頁重新下載</summary>
         static bool InstallComplete()
         {
             var missing = InstallCheck.Missing(Store.Install);
             if (missing.Count == 0) return true;
-            Store.Log("安装不完整，缺少：" + string.Join("、", missing));
+            Store.Log("安裝不完整，缺少：" + string.Join("、", missing));
             var pkg = InstallCheck.RepairPackage(Path.Combine(Path.GetTempPath(), "CrossPet-update"));
-            var what = $"CrossPet 的安装不完整（缺少 {string.Join("、", missing)}），多半是上次更新没装完。";
+            var what = $"CrossPet 的安裝不完整（缺少 {string.Join("、", missing)}），多半是上次更新沒裝完。";
             if (pkg != null)
             {
                 var ver = Path.GetFileName(Path.GetDirectoryName(pkg));
-                if (MessageBox.Show($"{what}\n\n找到了已经下载好的安装包（{ver}），要现在用它修复吗？设置、角色和 AI 接入都会保留。",
+                if (MessageBox.Show($"{what}\n\n找到了已經下載好的安裝包（{ver}），要現在用它修復嗎？設定、角色和 AI 接入都會保留。",
                         "CrossPet", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
                 {
-                    Store.Log("用下载好的安装包修复：" + pkg);
+                    Store.Log("用下載好的安裝包修復：" + pkg);
                     Process.Start(new ProcessStartInfo("powershell.exe", $"-NoProfile -ExecutionPolicy Bypass -File \"{Path.Combine(pkg, "install.ps1")}\"") { UseShellExecute = false });
                 }
                 return false;
             }
-            if (MessageBox.Show($"{what}\n\n请重新下载安装（设置、角色和 AI 接入都会保留）。要现在打开下载页吗？",
+            if (MessageBox.Show($"{what}\n\n請重新下載安裝（設定、角色和 AI 接入都會保留）。要現在開啟下載頁嗎？",
                     "CrossPet", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
                 Process.Start(new ProcessStartInfo("https://github.com/DuridMing/crosspet/releases/latest") { UseShellExecute = true });
             return false;
         }
 
-        /// <summary>「双击 exe 就安装」先关着：它每次启动都要判断，判断错了已装好的也会被当成安装包（每次问要不要安装，等于打不开）。
-        /// 1.3.8 正式版不带，下一个测试版打开它单独测</summary>
+        /// <summary>「雙擊 exe 就安裝」先關著：它每次啟動都要判斷，判斷錯了已裝好的也會被當成安裝包（每次問要不要安裝，等於打不開）。
+        /// 1.3.8 正式版不帶，下一個測試版開啟它單獨測</summary>
         const bool SelfInstall = false;
 
-        /// <summary>不是从安装目录打开的（#28）：解压出来的安装包就问要不要现在安装（和一键更新一样在后台跑 install.ps1，装好自己打开），
-        /// 还在压缩包里就说先解压。返回 false = 这个进程不往下走</summary>
+        /// <summary>不是從安裝目錄開啟的（#28）：解壓出來的安裝包就問要不要現在安裝（和一鍵更新一樣在後臺跑 install.ps1，裝好自己開啟），
+        /// 還在壓縮包裡就說先解壓。返回 false = 這個程式不往下走</summary>
         static bool FromInstallDir()
         {
-            // 和 install.ps1 一样用 %LOCALAPPDATA%（两边拿法不同，个别电脑上可能对不上）
+            // 和 install.ps1 一樣用 %LOCALAPPDATA%（兩邊拿法不同，個別電腦上可能對不上）
             var local = Environment.GetEnvironmentVariable("LOCALAPPDATA");
             if (string.IsNullOrEmpty(local)) local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             var destination = Path.Combine(local, "Programs", "CrossPet");
             switch (InstallCheck.Locate(Store.Install, destination))
             {
                 case InstallCheck.Place.InsideZip:
-                    MessageBox.Show("CrossPet 还在压缩包里，没法直接运行。\n\n请先把压缩包整个解压（右键 →「全部解压缩」），再双击解压出来的 CrossPet.exe。",
+                    MessageBox.Show("CrossPet 還在壓縮包裡，沒法直接執行。\n\n請先把壓縮包整個解壓（右鍵 →「全部解壓縮」），再雙擊解壓出來的 CrossPet.exe。",
                         "CrossPet", MessageBoxButton.OK, MessageBoxImage.Information);
                     return false;
                 case InstallCheck.Place.Package:
-                    if (MessageBox.Show($"要把 CrossPet 安装到这台电脑吗？\n\n会装到 {destination}，在开始菜单建快捷方式，装好后自动打开，不需要管理员权限。" +
-                            "已经装过的话就是更新，设置、角色和 AI 接入都保留。\n\n安装要十几秒，装好后桌宠会自己出现。",
-                            "安装 CrossPet", MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
+                    if (MessageBox.Show($"要把 CrossPet 安裝到這臺電腦嗎？\n\n會裝到 {destination}，在開始選單建快捷方式，裝好後自動開啟，不需要管理員許可權。" +
+                            "已經裝過的話就是更新，設定、角色和 AI 接入都保留。\n\n安裝要十幾秒，裝好後桌寵會自己出現。",
+                            "安裝 CrossPet", MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
                     {
-                        Store.Log("从安装包安装：" + Store.Install);
+                        Store.Log("從安裝包安裝：" + Store.Install);
                         Process.Start(new ProcessStartInfo("powershell.exe", $"-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File \"{Path.Combine(Store.Install, "install.ps1")}\" -Update")
                             { UseShellExecute = false, CreateNoWindow = true, WorkingDirectory = Store.Install });
                     }
@@ -82,13 +82,13 @@ namespace CrossPet
             }
         }
 
-        // [STAThread] 必须紧挨着 Main：WPF 和 WebView2 都要求主线程是 STA（中间插了别的函数，Main 就成了 MTA，启动报 RPC_E_CHANGED_MODE）
+        // [STAThread] 必須緊挨著 Main：WPF 和 WebView2 都要求主執行緒是 STA（中間插了別的函式，Main 就成了 MTA，啟動報 RPC_E_CHANGED_MODE）
         [STAThread]
         static void Main(string[] args)
         {
             if (!RenderRecovery.WaitForParent(args)) return;
-            if (SelfInstall && args.Length == 0 && !FromInstallDir()) return;   // 放在「只开一个」前面：已装的旧版开着时，双击新版的安装包也要能装
-            // 只开一个：再次打开时让已经在跑的那个回到右下角
+            if (SelfInstall && args.Length == 0 && !FromInstallDir()) return;   // 放在「只開一個」前面：已裝的舊版開著時，雙擊新版的安裝包也要能裝
+            // 只開一個：再次開啟時讓已經在跑的那個回到右下角
             using (var mutex = new Mutex(true, @"Local\CrossPet-" + Environment.UserName, out var first))
             using (var show = new EventWaitHandle(false, EventResetMode.AutoReset, @"Local\CrossPet-Show-" + Environment.UserName))
             {
@@ -96,36 +96,36 @@ namespace CrossPet
 
                 Directory.CreateDirectory(Store.Data);
                 RenderRecovery.Started();
-                try { File.Delete(Pet.UserQuitFlag); } catch { }   // 自己打开了：恢复跟着 AI 出现
-                try { Directory.CreateDirectory(Store.State); File.WriteAllText(Path.Combine(Store.State, "pet.pid"), Process.GetCurrentProcess().Id.ToString()); } catch { }   // DSH 插件看它判断桌宠在不在跑
-                AppDomain.CurrentDomain.UnhandledException += (_, e) => Store.Log("崩溃: " + e.ExceptionObject);
-                Store.Log($"启动 {Store.Version}，{Environment.OSVersion}，64 位进程 = {Environment.Is64BitProcess}");
+                try { File.Delete(Pet.UserQuitFlag); } catch { }   // 自己開啟了：恢復跟著 AI 出現
+                try { Directory.CreateDirectory(Store.State); File.WriteAllText(Path.Combine(Store.State, "pet.pid"), Process.GetCurrentProcess().Id.ToString()); } catch { }   // DSH 外掛看它判斷桌寵在不在跑
+                AppDomain.CurrentDomain.UnhandledException += (_, e) => Store.Log("崩潰: " + e.ExceptionObject);
+                Store.Log($"啟動 {Store.Version}，{Environment.OSVersion}，64 位程式 = {Environment.Is64BitProcess}");
                 if (!InstallComplete()) return;
                 System.Windows.Forms.Application.EnableVisualStyles();
 
                 var app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
                 app.DispatcherUnhandledException += (_, e) =>
                 {
-                    Store.Log("界面异常: " + e.Exception);
+                    Store.Log("介面異常: " + e.Exception);
                     e.Handled = true;
                     if (IsRenderThreadFailure(e.Exception)) RenderRecovery.Restart();
                 };
 
-                // WebView2 运行时：Windows 11 自带；老的 Windows 10 可能没有，指引去微软官网装
+                // WebView2 執行時：Windows 11 自帶；老的 Windows 10 可能沒有，指引去微軟官網裝
                 string version;
                 try { version = CoreWebView2Environment.GetAvailableBrowserVersionString(); }
                 catch { version = null; }
                 if (string.IsNullOrEmpty(version))
                 {
-                    if (MessageBox.Show("CrossPet 需要系统组件「Microsoft Edge WebView2 运行时」（Windows 11 自带）。\n\n要现在打开微软官网下载吗？",
+                    if (MessageBox.Show("CrossPet 需要系統元件「Microsoft Edge WebView2 執行時」（Windows 11 自帶）。\n\n要現在開啟微軟官網下載嗎？",
                         "CrossPet", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
                         Process.Start(new ProcessStartInfo(WebView2Download) { UseShellExecute = true });
                     return;
                 }
-                Store.Log("WebView2 运行时 " + version);
+                Store.Log("WebView2 執行時 " + version);
                 Store.LoadSettings();
-                // 不能做「软件渲染」兼容模式（#28 提过）：网页画面是 WebView2CompositionControl 用 D3DImage 贴进透明窗口的，
-                // RenderOptions.ProcessRenderMode = SoftwareOnly 时 D3DImage 不出画面，桌宠整个空白（1.3.8 test.10 实测）
+                // 不能做「軟體渲染」相容模式（#28 提過）：網頁畫面是 WebView2CompositionControl 用 D3DImage 貼進透明視窗的，
+                // RenderOptions.ProcessRenderMode = SoftwareOnly 時 D3DImage 不出畫面，桌寵整個空白（1.3.8 test.10 實測）
 
                 app.Startup += async (_, __) =>
                 {
@@ -141,8 +141,8 @@ namespace CrossPet
                     }
                     catch (Exception e)
                     {
-                        Store.Log("启动失败: " + e);
-                        MessageBox.Show("CrossPet 启动失败：\n" + e.Message, "CrossPet");
+                        Store.Log("啟動失敗: " + e);
+                        MessageBox.Show("CrossPet 啟動失敗：\n" + e.Message, "CrossPet");
                         app.Shutdown();
                     }
                 };

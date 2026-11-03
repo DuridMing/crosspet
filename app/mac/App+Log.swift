@@ -1,9 +1,9 @@
 import Foundation
 
 extension App {
-    // MARK: 运行日志
-    // ~/Library/Logs/CrossPet.log：和 Windows 的 windows.log 同一种写法（一行一条带时间，超过 1 MB 删掉重来）。
-    // 反馈时按问题类型筛出相关的几十行（规则在 web/feedback-plan.js）。只记开关、时间和出错原因，不记对话
+    // MARK: 執行日誌
+    // ~/Library/Logs/CrossPet.log：和 Windows 的 windows.log 同一種寫法（一行一條帶時間，超過 1 MB 刪掉重來）。
+    // 反饋時按問題型別篩出相關的幾十行（規則在 web/feedback-plan.js）。只記開關、時間和出錯原因，不記對話
     static let logURL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs/CrossPet.log")
     static let logQueue = DispatchQueue(label: "crosspet.log")
 
@@ -13,12 +13,12 @@ extension App {
         Self.logQueue.async {
             let url = Self.logURL, fm = FileManager.default
             if let size = (try? fm.attributesOfItem(atPath: url.path))?[.size] as? Int, size > 1_000_000 { try? fm.removeItem(at: url) }
-            if let h = try? FileHandle(forWritingTo: url) { _ = try? h.seekToEnd(); try? h.write(contentsOf: Data(line.utf8)); try? h.close() }   // 出错不抛 ObjC 异常（见 Ledger）
+            if let h = try? FileHandle(forWritingTo: url) { _ = try? h.seekToEnd(); try? h.write(contentsOf: Data(line.utf8)); try? h.close() }   // 出錯不拋 ObjC 異常（見 Ledger）
             else { try? Data(line.utf8).write(to: url) }
         }
     }
 
-    /// 钩子事件记录、桌宠处理记录所在的文件夹（数据目录 events/）。启动时建好：Claude Code 的 mod 只能写文件、不能建文件夹
+    /// 鉤子事件記錄、桌寵處理記錄所在的資料夾（資料目錄 events/）。啟動時建好：Claude Code 的 mod 只能寫檔案、不能建資料夾
     var eventsDir: URL { root.appendingPathComponent("events", isDirectory: true) }
     var petEventsURL: URL { eventsDir.appendingPathComponent("pet.jsonl") }
     var switchesURL: URL { root.appendingPathComponent("switches.jsonl") }

@@ -13,108 +13,108 @@ final class App: NSObject, NSApplicationDelegate, WKNavigationDelegate {
         didSet { if ready != oldValue { followEventGeneration &+= 1 } }
     }
     var currentId: String? {
-        didSet { followEventGeneration &+= 1 }   // 同 id 的手动选择也要让旧事件答复失效。
+        didSet { followEventGeneration &+= 1 }   // 同 id 的手動選擇也要讓舊事件答覆失效。
     }
 
     let root = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         .appendingPathComponent("CrossPet", isDirectory: true)
     var charactersDir: URL { root.appendingPathComponent("characters") }
 
-    var characterIds: [String] = []           // 可切换的角色（不含彩蛋）
-    var skinChoices: [String: [(id: String, name: String)]] = [:]   // 角色 → 可换的衣服（皮肤）
-    var baseOutfit: [String: String] = [:]   // 原版衣服叫什么（character.json 的 outfit，比如「女仆装」）
-    var displayNames: [String: String] = [:]  // id → 显示名（含用户改的名）
+    var characterIds: [String] = []           // 可切換的角色（不含彩蛋）
+    var skinChoices: [String: [(id: String, name: String)]] = [:]   // 角色 → 可換的衣服（皮膚）
+    var baseOutfit: [String: String] = [:]   // 原版衣服叫什麼（character.json 的 outfit，比如「女僕裝」）
+    var displayNames: [String: String] = [:]  // id → 顯示名（含使用者改的名）
     var appToCharacter: [String: String] = [:]
     var stamps: [String: Date] = [:]
     var pendingSwitch: DispatchWorkItem?
     var latestRelease: (tag: String, url: URL)?
-    var manifestJSON = "{}"                    // 最近一次发给桌宠的角色清单，开发者控制台也要用
+    var manifestJSON = "{}"                    // 最近一次發給桌寵的角色清單，開發者控制台也要用
     var devWindow: NSWindow?
     var devWeb: WKWebView?
     var settingsWindow: NSWindow?
     var settingsWeb: WKWebView?
-    var charactersWindow: NSWindow?   // 换角色窗口：和设置页同一套状态（pushSettings 两个都推）
+    var charactersWindow: NSWindow?   // 換角色視窗：和設定頁同一套狀態（pushSettings 兩個都推）
     var charactersWeb: WKWebView?
-    var pendingSettingsTab: String?   // 设置窗口加载完后切到哪个标签页（从「新功能」卡片打开时是 news）
+    var pendingSettingsTab: String?   // 設定視窗載入完後切到哪個標籤頁（從「新功能」卡片開啟時是 news）
     var feedbackWindow: NSWindow?
     var feedbackWeb: WKWebView?
-    var defaultNames: [String: String] = [:]   // id → character.json 里的原名（设置页显示占位用）
-    var accents: [String: String] = [:]   // id → character.json 的 accent（设置页角色卡底色）
-    var pauseRealEvents = false {              // 控制台里测试时，先不让真实 AI 的状态打扰桌宠
+    var defaultNames: [String: String] = [:]   // id → character.json 裡的原名（設定頁顯示佔位用）
+    var accents: [String: String] = [:]   // id → character.json 的 accent（設定頁角色卡底色）
+    var pauseRealEvents = false {              // 控制台裡測試時，先不讓真實 AI 的狀態打擾桌寵
         didSet { if pauseRealEvents != oldValue { followEventGeneration &+= 1 } }
     }
 
 
     // 更新 用的
     let repoSlug = "DuridMing/crosspet"   // maid fork：更新來源指向自己的 fork，不會被上游覆蓋
-    var lastUpdateCheck = "还没查过"
+    var lastUpdateCheck = "還沒查過"
     var updating = false
 
-    // GPT 额度 用的
-    var codexLiveAt = Date.distantPast       // 上次问服务的时间（不管成没成）
-    var codexBusyAt: Date?   // Codex 最近一次干活的事件（不是 Stop）；Stop 后清掉。干活时额度查得勤一点
+    // GPT 額度 用的
+    var codexLiveAt = Date.distantPast       // 上次問服務的時間（不管成沒成）
+    var codexBusyAt: Date?   // Codex 最近一次幹活的事件（不是 Stop）；Stop 後清掉。幹活時額度查得勤一點
     var codexInFlight = false
-    var codexLast: (rateLimits: [String: Any], at: Date)?   // 最后一次问到的额度：问不到时接着显示它，并标上时间
-    var codexNote = ""                       // 从没问到过时的原因，设置里那个开关下面显示
-    var lastGptQuota = "还没读过"
-    var lastAgyNote = "还没查过"   // 最近一次找 Antigravity 服务的结果（反馈「额度不对」用）
+    var codexLast: (rateLimits: [String: Any], at: Date)?   // 最後一次問到的額度：問不到時接著顯示它，並標上時間
+    var codexNote = ""                       // 從沒問到過時的原因，設定裡那個開關下面顯示
+    var lastGptQuota = "還沒讀過"
+    var lastAgyNote = "還沒查過"   // 最近一次找 Antigravity 服務的結果（反饋「額度不對」用）
 
-    // Gemini 额度 用的
+    // Gemini 額度 用的
     var agySession: URLSession?
     var agyPort: (pid: Int32, port: Int)?
 
-    // 快捷键隐藏 用的
+    // 快捷鍵隱藏 用的
     var userHidden = false {
-        didSet { if userHidden != oldValue { applyHiddenState() } }   // 快捷键藏起来：和全屏时收着一样，只是透明
+        didSet { if userHidden != oldValue { applyHiddenState() } }   // 快捷鍵藏起來：和全屏時收著一樣，只是透明
     }
     var hotKeyRef: EventHotKeyRef?
     var hotKeyHandlerInstalled = false
     var hotkeyFailed = false
 
-    // 菜单栏图标 用的
+    // 選單欄圖示 用的
     var statusItem: NSStatusItem?
 
-    // 显示层级 用的
-    var lastPose: [String: (pose: String, at: Date)] = [:]   // 各角色最近一次状态（判断 AI 在不在干活）
+    // 顯示層級 用的
+    var lastPose: [String: (pose: String, at: Date)] = [:]   // 各角色最近一次狀態（判斷 AI 在不在幹活）
 
-    // 贴边 用的
+    // 貼邊 用的
     var dock: String?            // "left" / "right"
-    var dockOut = false          // 跑出来了
+    var dockOut = false          // 跑出來了
     var dockHover = false
     var dockLeaveAt: Date?
-    var dockedAt = Date.distantPast   // 刚拖到边上：之前就在进行的工作不算，先缩进去给个反应，AI 有新动作再跑出来
+    var dockedAt = Date.distantPast   // 剛拖到邊上：之前就在進行的工作不算，先縮排去給個反應，AI 有新動作再跑出來
     var screensAsleep = false
     var wasAway = false
-    var dockTucked = false   // 现在是缩着的样子（之后换探出来不用先挪窗口）
-    var dockCut: [String: Double] = [:]   // 切口位置（网页像素），按 边 + 角色 记
+    var dockTucked = false   // 現在是縮著的樣子（之後換探出來不用先挪視窗）
+    var dockCut: [String: Double] = [:]   // 切口位置（網頁畫素），按 邊 + 角色 記
     var dockEnterAt: Date?
 
-    // 点击穿透 用的
+    // 點選穿透 用的
     var hitRects: [CGRect] = []
     var hitRectsAt = Date.distantPast
     var hiddenForFullscreen = false {
-        didSet {   // 透明度 / 鼠标 / 动画都跟着这个标记走
+        didSet {   // 透明度 / 滑鼠 / 動畫都跟著這個標記走
             guard hiddenForFullscreen != oldValue else { return }
-            appLog(hiddenForFullscreen ? "全屏中，先藏起来（前台 \(NSWorkspace.shared.frontmostApplication?.bundleIdentifier ?? "-")）" : "退出全屏，出来了")
+            appLog(hiddenForFullscreen ? "全屏中，先藏起來（前臺 \(NSWorkspace.shared.frontmostApplication?.bundleIdentifier ?? "-")）" : "退出全屏，出來了")
             applyHiddenState()
         }
     }
     var fullscreenCheckedAt = Date.distantPast
-    var fullscreenOverride = false   // 全屏时你点菜单栏图标叫她出来：切换空间 / 前台程序之前不再收起来
+    var fullscreenOverride = false   // 全屏時你點選單欄圖示叫她出來：切換空間 / 前臺程式之前不再收起來
 
-    // 设置 用的
+    // 設定 用的
     var scaleTimer: Timer?
     var shownScale: CGFloat = 0
-    // 文字大小：网页按「人物大小、文字大小」算出的画布（网页 CSS 尺寸），窗口 = 画布 × 人物大小（app/web/text-size.js）
+    // 文字大小：網頁按「人物大小、文字大小」算出的畫布（網頁 CSS 尺寸），視窗 = 畫布 × 人物大小（app/web/text-size.js）
     var pageSize = NSSize(width: 260, height: 362)
-    var pageFoot: CGFloat = 62    // 画布底栏高（名牌 + 额度），改文字大小时按它的变化挪窗口，人物不动
-    var shownFootPt: CGFloat = 0  // 窗口现在的底栏在屏幕上多高（点）；0 = 还没按画布设过
+    var pageFoot: CGFloat = 62    // 畫布底欄高（名牌 + 額度），改文字大小時按它的變化挪視窗，人物不動
+    var shownFootPt: CGFloat = 0  // 視窗現在的底欄在螢幕上多高（點）；0 = 還沒按畫布設過
 
     // 接入 AI 用的
     var integrated: [String]?
-    var pluginStatus = "[]"      // 插件版本（接入工具的只读检查 integrate.py plugins，JSON 数组），桌宠和设置页据此提醒更新
+    var pluginStatus = "[]"      // 外掛版本（接入工具的只讀檢查 integrate.py plugins，JSON 陣列），桌寵和設定頁據此提醒更新
 
-    // 接入被别的工具冲掉时接回去 用的
+    // 接入被別的工具沖掉時接回去 用的
     var claudeConfigStamp: Date?
     var healTimes: [Date] = []
     var healPending: DispatchWorkItem?
@@ -126,17 +126,17 @@ final class App: NSObject, NSApplicationDelegate, WKNavigationDelegate {
         do { try p.run(); p.waitUntilExit(); return p.terminationStatus == 0 } catch { return false }
     }()
 
-    // 反馈问题 用的
+    // 反饋問題 用的
     let launchedAt = Date()
-    var diagText = ""   // 接入工具的诊断（integrate.py diagnose），反馈窗口打开时跑一次
+    var diagText = ""   // 接入工具的診斷（integrate.py diagnose），反饋視窗開啟時跑一次
 
-    // MARK: 启动
+    // MARK: 啟動
 
     func applicationDidFinishLaunching(_ note: Notification) {
         syncBundledResources()
         markLaunched()
-        try? FileManager.default.createDirectory(at: eventsDir, withIntermediateDirectories: true)   // 钩子 / 插件的事件记录写在这里（见 App+Log）
-        appLog("启动 \(currentVersion)，macOS \(ProcessInfo.processInfo.operatingSystemVersionString)")
+        try? FileManager.default.createDirectory(at: eventsDir, withIntermediateDirectories: true)   // 鉤子 / 外掛的事件記錄寫在這裡（見 App+Log）
+        appLog("啟動 \(currentVersion)，macOS \(ProcessInfo.processInfo.operatingSystemVersionString)")
 
         let size = NSSize(width: Self.baseSize.width * petScale, height: Self.baseSize.height * petScale)
         var origin = NSPoint.zero
@@ -156,7 +156,7 @@ final class App: NSObject, NSApplicationDelegate, WKNavigationDelegate {
 
         let container = NSView(frame: NSRect(origin: .zero, size: size))
         let petConfig = WKWebViewConfiguration()
-        petConfig.userContentController.add(DevBridge(app: self, kind: .pet), name: "pet")   // 桌宠页面 → App（「新功能」卡片的「去看看」）
+        petConfig.userContentController.add(DevBridge(app: self, kind: .pet), name: "pet")   // 桌寵頁面 → App（「新功能」卡片的「去看看」）
         web = WKWebView(frame: container.bounds, configuration: petConfig)
         web.setValue(false, forKey: "drawsBackground")
         web.autoresizingMask = [.width, .height]
@@ -167,7 +167,7 @@ final class App: NSObject, NSApplicationDelegate, WKNavigationDelegate {
 
         let drag = DragView(frame: container.bounds)
         drag.autoresizingMask = [.width, .height]
-        // 点的位置换成网页坐标（CSS 像素：除掉人物大小的缩放，y 轴翻过来）
+        // 點的位置換成網頁座標（CSS 畫素：除掉人物大小的縮放，y 軸翻過來）
         drag.onClick = { [weak self, weak drag] p in
             guard let self, let drag else { return }
             let z = max(self.web.pageZoom, 0.01)
@@ -190,7 +190,7 @@ final class App: NSObject, NSApplicationDelegate, WKNavigationDelegate {
         NSWorkspace.shared.notificationCenter.addObserver(
             self, selector: #selector(spaceChanged(_:)),
             name: NSWorkspace.activeSpaceDidChangeNotification, object: nil)
-        // 看不见时停动画：窗口被完全挡住、屏幕休眠、锁屏（锁屏时会话失活）
+        // 看不見時停動畫：視窗被完全擋住、螢幕休眠、鎖屏（鎖屏時會話失活）
         NotificationCenter.default.addObserver(forName: NSWindow.didChangeOcclusionStateNotification, object: panel, queue: .main) { [weak self] _ in self?.updatePageHidden() }
         let ws = NSWorkspace.shared.notificationCenter
         for (name, asleep) in [(NSWorkspace.screensDidSleepNotification, true), (NSWorkspace.screensDidWakeNotification, false),
@@ -201,10 +201,10 @@ final class App: NSObject, NSApplicationDelegate, WKNavigationDelegate {
         Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in self?.updateClickThrough() }
         quotaTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in self?.refreshCodexQuota(.tick); self?.refreshAntigravityQuota() }
         Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { [weak self] _ in self?.watchClaudeConfig() }
-        // 检查更新：启动后 20 秒、之后每 3 小时，电脑从睡眠中醒来时也查一次（很多人的电脑一直不关机，只是合盖）
+        // 檢查更新：啟動後 20 秒、之後每 3 小時，電腦從睡眠中醒來時也查一次（很多人的電腦一直不關機，只是合蓋）
         Timer.scheduledTimer(withTimeInterval: 3 * 3600, repeats: true) { [weak self] _ in self?.checkForUpdate(manual: false) }
         NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: .main) { [weak self] _ in
-            DispatchQueue.main.asyncAfter(deadline: .now() + 30) { self?.checkForUpdate(manual: false) }   // 等网络连上
+            DispatchQueue.main.asyncAfter(deadline: .now() + 30) { self?.checkForUpdate(manual: false) }   // 等網路連上
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 20) { [weak self] in self?.checkForUpdate(manual: false) }
     }

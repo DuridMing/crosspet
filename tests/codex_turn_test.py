@@ -1,6 +1,6 @@
-"""Codex 的迟到事件（PR #26 @KQYaili 报的，用例参考了他的测试）：一轮结束（Stop）后，子任务、工具的事件还会陆续到，
-上一轮的事件也可能在新的一轮里才到。钩子按「会话 + 轮次（turn_id）」记账，已经结束的轮次的事件直接丢掉，不改状态。
-不开真的桌宠、不碰用户配置。
+"""Codex 的遲到事件（PR #26 @KQYaili 報的，用例參考了他的測試）：一輪結束（Stop）後，子任務、工具的事件還會陸續到，
+上一輪的事件也可能在新的一輪裡才到。鉤子按「會話 + 輪次（turn_id）」記賬，已經結束的輪次的事件直接丟掉，不改狀態。
+不開真的桌寵、不碰使用者配置。
     python3 -m unittest tests.codex_turn_test
 """
 import json
@@ -51,11 +51,11 @@ class CodexTurnTest(unittest.TestCase):
         self.send("Stop")
         self.send("UserPromptSubmit", tid="T2")
         self.assertEqual(self.send("PreToolUse", tid="T2"), ("running", "PreToolUse"))
-        self.assertEqual(self.send("PostToolUse", tid="T1"), ("running", "PreToolUse"))   # 上一轮迟到的
+        self.assertEqual(self.send("PostToolUse", tid="T1"), ("running", "PreToolUse"))   # 上一輪遲到的
         self.assertEqual(self.send("Stop", tid="T2")[1], "Stop")
 
     def test_superseded_turn_without_stop_is_dropped(self):
-        # 上一轮没收到结束事件就开始了新一轮：上一轮迟到的事件也不能盖掉新一轮
+        # 上一輪沒收到結束事件就開始了新一輪：上一輪遲到的事件也不能蓋掉新一輪
         self.send("UserPromptSubmit")
         self.send("PreToolUse")
         self.send("UserPromptSubmit", tid="T2")
@@ -71,9 +71,9 @@ class CodexTurnTest(unittest.TestCase):
         child = dict(tid="C1", agent_id="child-1")
         self.send("UserPromptSubmit")
         self.send("PreToolUse", tool_name="spawn_agent")
-        self.assertEqual(self.send("UserPromptSubmit", **child)[1], "SubagentStart")   # 子任务的第一条消息不算你发了消息
+        self.assertEqual(self.send("UserPromptSubmit", **child)[1], "SubagentStart")   # 子任務的第一條訊息不算你發了訊息
         self.assertEqual(self.send("PreToolUse", **child)[0], "running")
-        self.assertEqual(self.send("Stop", **child)[1], "SubagentStop")                 # 子任务停了不等于这一轮结束
+        self.assertEqual(self.send("Stop", **child)[1], "SubagentStop")                 # 子任務停了不等於這一輪結束
         self.assertEqual(self.send("Stop")[1], "Stop")
 
     def test_subagent_after_root_stop_is_dropped(self):
@@ -93,7 +93,7 @@ class CodexTurnTest(unittest.TestCase):
         self.assertEqual(self.send("SubagentStop", tid="T1"), ("happy", "Stop"))
 
     def test_turn_seen_first_mid_way_is_accepted(self):
-        # 钩子刚装上、或者桌宠刚开：第一条就是一轮中间的事件，照常演
+        # 鉤子剛裝上、或者桌寵剛開：第一條就是一輪中間的事件，照常演
         self.assertEqual(self.send("PreToolUse", tid="T9")[0], "running")
 
     def test_sessions_are_independent(self):
@@ -103,7 +103,7 @@ class CodexTurnTest(unittest.TestCase):
         self.assertEqual(self.send("PreToolUse", sid="b", tid="B1")[0], "running")
 
     def test_events_without_turn_id_are_unaffected(self):
-        # Claude Code 等不带 turn_id：和以前一样，来什么演什么
+        # Claude Code 等不帶 turn_id：和以前一樣，來什麼演什麼
         self.send("UserPromptSubmit", tid=None, host="claude")
         self.send("Stop", tid=None, host="claude")
         self.assertEqual(self.send("PostToolUse", tid=None, host="claude")[0], "thinking")

@@ -4,8 +4,8 @@ import ServiceManagement
 import WebKit
 
 extension App {
-    // MARK: 开发者控制台
-    // 一个独立窗口（web/devconsole.html），直接调用桌宠页面里真实的动作代码：逐个检查姿态、跑场景、记反馈。
+    // MARK: 開發者控制台
+    // 一個獨立視窗（web/devconsole.html），直接呼叫桌寵頁面裡真實的動作程式碼：逐個檢查姿態、跑場景、記反饋。
     var feedbackURL: URL { root.appendingPathComponent("dev-feedback.md") }
 
     func devJS(_ code: String) { devWeb?.evaluateJavaScript(code, completionHandler: nil) }
@@ -20,7 +20,7 @@ extension App {
         config.userContentController.add(DevBridge(app: self, kind: .dev), name: "dev")
         let w = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1060, height: 760),
                          styleMask: [.titled, .closable, .resizable, .miniaturizable], backing: .buffered, defer: false)
-        w.title = "CrossPet 开发者控制台"
+        w.title = "CrossPet 開發者控制台"
         w.isReleasedWhenClosed = false
         w.center()
         let v = WKWebView(frame: w.contentView!.bounds, configuration: config)
@@ -44,9 +44,9 @@ extension App {
     func handleDev(_ body: Any) {
         guard let msg = body as? [String: Any], let cmd = msg["cmd"] as? String else { return }
         switch cmd {
-        case "pet":       // 在桌宠页面里执行一段代码（控制台自己的页面发来的，只在本机）
+        case "pet":       // 在桌寵頁面裡執行一段程式碼（控制台自己的頁面發來的，只在本機）
             if let code = msg["code"] as? String { js(code) }
-        case "status":    // 读桌宠当前状态，回给控制台
+        case "status":    // 讀桌寵當前狀態，回給控制台
             web.evaluateJavaScript("JSON.stringify(devStatus())") { [weak self] r, _ in
                 if let text = r as? String { self?.devJS("onPetStatus(\(text))") }
             }

@@ -30,7 +30,7 @@ namespace CrossPet
         public static Dictionary<string, object> Skins => null;
     }
 
-    // 换角色记录、事件记录（反馈用）：这里只验路由，不写文件
+    // 換角色記錄、事件記錄（反饋用）：這裡只驗路由，不寫檔案
     static class Ledger
     {
         public static void Append(string path, IDictionary<string, object> line) { }

@@ -11,30 +11,30 @@ using System.Threading.Tasks;
 namespace CrossPet
 {
     /// <summary>
-    /// Gemini 额度（可选，默认关）：和 macOS 版一样，向本机正在运行的 Antigravity 后台服务（language_server）问一次额度——
-    /// Antigravity 自己的界面就是这样拿额度的。令牌从它的启动参数里取（每次启动随机生成、只在本机有效，不是账号凭据），
-    /// 只在内存里用，只发给 127.0.0.1；只信任本机的自签名证书。Antigravity 没开就不显示。
+    /// Gemini 額度（可選，預設關）：和 macOS 版一樣，向本機正在執行的 Antigravity 後臺服務（language_server）問一次額度——
+    /// Antigravity 自己的介面就是這樣拿額度的。令牌從它的啟動引數裡取（每次啟動隨機生成、只在本機有效，不是賬號憑據），
+    /// 只在記憶體裡用，只發給 127.0.0.1；只信任本機的自簽名證書。Antigravity 沒開就不顯示。
     /// </summary>
     static partial class AntigravityQuota
     {
         static readonly HttpClient http = new HttpClient(new HttpClientHandler
         {
-            // 只信任本机 127.0.0.1 的自签名证书（Antigravity 后台服务用的是自签名 HTTPS）
+            // 只信任本機 127.0.0.1 的自簽名證書（Antigravity 後臺服務用的是自簽名 HTTPS）
             ServerCertificateCustomValidationCallback = (req, cert, chain, errors) => req.RequestUri.Host == "127.0.0.1",
         }) { Timeout = TimeSpan.FromSeconds(5) };
         static int cachedPid, cachedPort;
-        /// <summary>最近一次找服务的结果（反馈「额度不对」用）</summary>
-        public static string LastNote = "还没查过";
+        /// <summary>最近一次找服務的結果（反饋「額度不對」用）</summary>
+        public static string LastNote = "還沒查過";
 
         public static async Task<Dictionary<string, object>> Read()
         {
             var server = FindServer();
-            if (server == null) { LastNote = $"{DateTime.Now:MM-dd HH:mm} 没找到 Antigravity 的服务进程"; return null; }
+            if (server == null) { LastNote = $"{DateTime.Now:MM-dd HH:mm} 沒找到 Antigravity 的服務程式"; return null; }
             var (pid, token) = server.Value;
             var ports = cachedPid == pid ? new List<int> { cachedPort } : ListeningPorts(pid);
-            LastNote = $"{DateTime.Now:MM-dd HH:mm} 找到服务进程，监听端口 {ports.Count} 个";
-            // 每个端口先问「额度汇总」（和 Antigravity 的「View Usage」同一份数据，刚对话完就更新），旧版没有这个接口时退回「用户状态」
-            // （里面的额度是缓存，会慢几分钟；2026-10-14 实测 View Usage 已经 98%，用户状态里还是 100%）。和 macOS 版 askAntigravity 一致
+            LastNote = $"{DateTime.Now:MM-dd HH:mm} 找到服務程式，監聽埠 {ports.Count} 個";
+            // 每個埠先問「額度彙總」（和 Antigravity 的「View Usage」同一份資料，剛對話完就更新），舊版沒有這個介面時退回「使用者狀態」
+            // （裡面的額度是快取，會慢幾分鐘；2026-10-14 實測 View Usage 已經 98%，使用者狀態裡還是 100%）。和 macOS 版 askAntigravity 一致
             foreach (var port in ports)
             foreach (var method in new[] { "RetrieveUserQuotaSummary", "GetUserStatus" })
             {
@@ -58,7 +58,7 @@ namespace CrossPet
             return null;
         }
 
-        /// <summary>找到 Antigravity 的 language_server 进程，返回 (pid, 令牌)</summary>
+        /// <summary>找到 Antigravity 的 language_server 程式，返回 (pid, 令牌)</summary>
         static (int, string)? FindServer()
         {
             try
@@ -73,7 +73,7 @@ namespace CrossPet
                         if (token != null) return (Convert.ToInt32(p["ProcessId"]), token);
                     }
             }
-            catch (Exception e) { Store.Log("查找 Antigravity 后台服务失败: " + e.Message); }
+            catch (Exception e) { Store.Log("查詢 Antigravity 後臺服務失敗: " + e.Message); }
             return null;
         }
 
@@ -88,7 +88,7 @@ namespace CrossPet
             return null;
         }
 
-        // ---- 某个进程在 127.0.0.1 上监听的端口（系统的 TCP 连接表）----
+        // ---- 某個程式在 127.0.0.1 上監聽的埠（系統的 TCP 連線表）----
         [DllImport("iphlpapi.dll")]
         static extern uint GetExtendedTcpTable(IntPtr table, ref int size, bool sort, int af, int tableClass, uint reserved);
         const int AF_INET = 2, TCP_TABLE_OWNER_PID_LISTENER = 3;
@@ -105,12 +105,12 @@ namespace CrossPet
                 var count = Marshal.ReadInt32(buf);
                 for (int i = 0; i < count; i++)
                 {
-                    // MIB_TCPROW_OWNER_PID：state, localAddr, localPort, remoteAddr, remotePort, owningPid，各 4 字节
+                    // MIB_TCPROW_OWNER_PID：state, localAddr, localPort, remoteAddr, remotePort, owningPid，各 4 位元組
                     var row = buf + 4 + i * 24;
                     var addr = (uint)Marshal.ReadInt32(row + 4);
                     var port = ((Marshal.ReadByte(row + 8) << 8) | Marshal.ReadByte(row + 9));
                     var owner = Marshal.ReadInt32(row + 20);
-                    if (owner == pid && addr == 0x0100007F) ports.Add(port);   // 127.0.0.1（网络字节序）
+                    if (owner == pid && addr == 0x0100007F) ports.Add(port);   // 127.0.0.1（網路位元組序）
                 }
             }
             finally { Marshal.FreeHGlobal(buf); }

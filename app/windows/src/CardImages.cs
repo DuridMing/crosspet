@@ -5,9 +5,9 @@ using System.Linq;
 
 namespace CrossPet
 {
-    /// <summary>设置「角色」页卡片墙用的图：角色文件夹里专门画的展示立绘 portrait（衣服卡）、探头头像 avatar（角色卡），和待机图 idle。
-    /// portrait-card 是 portrait 按卡片大小缩好的小图（Windows 上大图缩太狠会糊）。portrait、portrait-card、avatar 不是姿态，扫立绘时要排除（不然桌宠会多出一个叫 portrait 的动作）。
-    /// 只给存在的文件，页面按「展示图 → 待机图 → 色块」退。和 macOS 版 cardImages 一致；不依赖 Windows，LogicTests 在 macOS 上测</summary>
+    /// <summary>設定「角色」頁卡片牆用的圖：角色資料夾裡專門畫的展示立繪 portrait（衣服卡）、探頭頭像 avatar（角色卡），和待機圖 idle。
+    /// portrait-card 是 portrait 按卡片大小縮好的小圖（Windows 上大圖縮太狠會糊）。portrait、portrait-card、avatar 不是姿態，掃立繪時要排除（不然桌寵會多出一個叫 portrait 的動作）。
+    /// 只給存在的檔案，頁面按「展示圖 → 待機圖 → 色塊」退。和 macOS 版 cardImages 一致；不依賴 Windows，LogicTests 在 macOS 上測</summary>
     static class CardImages
     {
         public static bool IsSprite(string stem) => stem != "portrait" && stem != "portrait-card" && stem != "avatar";

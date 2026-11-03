@@ -4,32 +4,32 @@ import ServiceManagement
 import WebKit
 
 extension App {
-    // MARK: 设置
-    // 一个独立窗口（web/settings.html，和 Windows 版共用），右键菜单只留常用的几项，其余都在这里
+    // MARK: 設定
+    // 一個獨立視窗（web/settings.html，和 Windows 版共用），右鍵選單隻留常用的幾項，其餘都在這裡
     static let baseSize = NSSize(width: 260, height: 362)
     var petScale: CGFloat {
         let v = defaults.double(forKey: "size")
         return v >= 0.6 && v <= 1.6 ? CGFloat(v) : 1
     }
-    /// 文字大小（只在解锁时用）和锁：没存过 = 锁着，文字跟着人物，和以前一样
+    /// 文字大小（只在解鎖時用）和鎖：沒存過 = 鎖著，文字跟著人物，和以前一樣
     var textScale: Double {
         let v = defaults.double(forKey: "textSize")
         return v >= 0.6 && v <= 1.6 ? v : 1
     }
     var textLinked: Bool { defaults.object(forKey: "textLinked") as? Bool ?? true }
     var showName: Bool { defaults.object(forKey: "showName") as? Bool ?? true }
-    var followApps: Bool { defaults.object(forKey: "followApps") as? Bool ?? false }   // maid fork：預設不跟著前台程式換角色
-    // 跟随 AI 工作事件（#23 给 macOS 补上的）：默认关——macOS 以前没有这个行为，升级后不该突然按事件换角色；Windows 一直默认开
+    var followApps: Bool { defaults.object(forKey: "followApps") as? Bool ?? false }   // maid fork：預設不跟著前臺程式換角色
+    // 跟隨 AI 工作事件（#23 給 macOS 補上的）：預設關——macOS 以前沒有這個行為，升級後不該突然按事件換角色；Windows 一直預設開
     var followEvents: Bool { defaults.object(forKey: "followEvents") as? Bool ?? false }
     var eggsEnabled: Bool { defaults.object(forKey: "eggs") as? Bool ?? true }
 
-    /// 换大小时窗口锚在哪：
-    /// - corner：启动 / 网页重载。存下的位置本来就是这个画布的窗口，左下角不动只换大小（不然解锁的人每次启动都往旁边漂）
-    /// - bottom：改人物大小。底边中点不动（脚下的位置不变），和以前一样；屏幕上的底栏高 = 62 × 文字大小，没变
-    /// - feet：改文字大小。底栏在屏幕上变高 / 变矮多少，窗口底边就往下 / 往上挪多少，人物不动
+    /// 換大小時視窗錨在哪：
+    /// - corner：啟動 / 網頁過載。存下的位置本來就是這個畫布的視窗，左下角不動只換大小（不然解鎖的人每次啟動都往旁邊漂）
+    /// - bottom：改人物大小。底邊中點不動（腳下的位置不變），和以前一樣；螢幕上的底欄高 = 62 × 文字大小，沒變
+    /// - feet：改文字大小。底欄在螢幕上變高 / 變矮多少，視窗底邊就往下 / 往上挪多少，人物不動
     enum Anchor: String { case corner, bottom, feet }
 
-    /// 纯计算（tests/window_place_probe.sh 测），屏幕点、y 向上。oldFoot / newFoot：底栏在屏幕上的高
+    /// 純計算（tests/window_place_probe.sh 測），螢幕點、y 向上。oldFoot / newFoot：底欄在螢幕上的高
     static func placeWindow(old: NSRect, size: NSSize, oldFoot: CGFloat, newFoot: CGFloat, anchor: Anchor, visibleMinY: CGFloat?) -> NSRect {
         switch anchor {
         case .corner:
@@ -38,13 +38,13 @@ extension App {
             return NSRect(x: old.midX - size.width / 2, y: old.minY, width: size.width, height: size.height)
         case .feet:
             var y = old.minY - (newFoot - oldFoot)
-            // 往下扩出了可见区：挪回来，但不挪到比原来还高（用户本来就放在边上的不动）
+            // 往下擴出了可見區：挪回來，但不挪到比原來還高（使用者本來就放在邊上的不動）
             if let v = visibleMinY, y < v, y < old.minY { y = min(old.minY, v) }
             return NSRect(x: old.midX - size.width / 2, y: y, width: size.width, height: size.height)
         }
     }
 
-    /// 改大小：窗口 = 画布 × 人物大小，网页按人物大小缩放；放在哪见 Anchor
+    /// 改大小：視窗 = 畫布 × 人物大小，網頁按人物大小縮放；放在哪見 Anchor
     func applyScale(_ scale: CGFloat, anchor: Anchor = .bottom) {
         let size = NSSize(width: pageSize.width * scale, height: pageSize.height * scale)
         let f = Self.placeWindow(old: panel.frame, size: size, oldFoot: shownFootPt, newFoot: pageFoot * scale, anchor: anchor,
@@ -55,24 +55,24 @@ extension App {
         defaults.set([f.minX, f.minY], forKey: "origin")
     }
 
-    /// 人物大小 / 文字大小变了：交给网页算画布（规则在 app/web/text-size.js），按回来的尺寸设窗口。
-    /// target：人物大小要动画到哪（底边不动）；nil = 文字变了（anchor .feet）或网页刚加载完（.corner），按现在的人物大小重设一次
+    /// 人物大小 / 文字大小變了：交給網頁算畫布（規則在 app/web/text-size.js），按回來的尺寸設視窗。
+    /// target：人物大小要動畫到哪（底邊不動）；nil = 文字變了（anchor .feet）或網頁剛載入完（.corner），按現在的人物大小重設一次
     func applySizes(animateTo target: CGFloat? = nil, anchor: Anchor = .feet) {
-        if shownFootPt == 0 { shownFootPt = pageFoot * panel.frame.width / pageSize.width }   // 还没按画布设过：按现在的窗口算
+        if shownFootPt == 0 { shownFootPt = pageFoot * panel.frame.width / pageSize.width }   // 還沒按畫布設過：按現在的視窗算
         let finish = { [weak self] in
             guard let self else { return }
             if let t = target { self.animateScale(to: t); return }
             self.applyScale(self.shownScale > 0 ? self.shownScale : self.petScale, anchor: anchor)
-            if anchor == .feet, self.dock != nil { self.applyDock() }   // 贴着边时改了文字：窗口变宽了，重新对齐屏幕边
+            if anchor == .feet, self.dock != nil { self.applyDock() }   // 貼著邊時改了文字：視窗變寬了，重新對齊螢幕邊
         }
-        guard ready else { finish(); return }   // 网页还没加载完：先按旧画布，加载完（didFinish）会再调一次
+        guard ready else { finish(); return }   // 網頁還沒載入完：先按舊畫布，載入完（didFinish）會再調一次
         web.evaluateJavaScript("setSizes(\(Double(target ?? petScale)), \(textScale), \(textLinked))") { [weak self] r, _ in
             guard let self else { return }
             if let text = r as? String, let data = text.data(using: .utf8),
                let o = try? JSONSerialization.jsonObject(with: data) as? [String: Double],
                let w = o["w"], let h = o["h"], let foot = o["foot"] {
                 let page = NSSize(width: w, height: h)
-                if page != self.pageSize || CGFloat(foot) != self.pageFoot { self.dockCut = [:] }   // 画布变了：贴边切口要重新量
+                if page != self.pageSize || CGFloat(foot) != self.pageFoot { self.dockCut = [:] }   // 畫布變了：貼邊切口要重新量
                 self.pageSize = page
                 self.pageFoot = CGFloat(foot)
             }
@@ -80,7 +80,7 @@ extension App {
         }
     }
 
-    /// 拖滑块时每次只变一点，直接跟手；一下子变很多（点「还原」）时用 0.2 秒过渡过去
+    /// 拖滑塊時每次只變一點，直接跟手；一下子變很多（點「還原」）時用 0.2 秒過渡過去
     func animateScale(to target: CGFloat) {
         scaleTimer?.invalidate()
         let from = shownScale > 0 ? shownScale : petScale
@@ -92,16 +92,16 @@ extension App {
             let eased = 1 - pow(1 - k, 3)
             self.shownScale = from + (target - from) * CGFloat(eased)
             self.applyScale(self.shownScale)
-            if k >= 1 { t.invalidate(); if self.dock != nil { self.applyDock() } }   // 贴着边时调完大小重新对齐边缘
+            if k >= 1 { t.invalidate(); if self.dock != nil { self.applyDock() } }   // 貼著邊時調完大小重新對齊邊緣
         }
     }
 
-    /// 设置、反馈窗口默认开到内容基本放得下的高度（反馈的四步一页排开、角色页的卡片墙），屏幕矮就缩到放得下
+    /// 設定、反饋視窗預設開到內容基本放得下的高度（反饋的四步一頁排開、角色頁的卡片牆），螢幕矮就縮到放得下
     static func fitHeight(_ h: CGFloat) -> CGFloat { min(h, (NSScreen.main?.visibleFrame.height ?? h) - 60) }
 
     @objc func openSettings() { openSettingsAt(tab: nil) }
-    /// 换角色窗口（右键「换角色…」、设置里的按钮）：大立绘 + 衣服卡 + 角色卡。和设置页同一条通道、同一份状态，
-    /// 单独开一个大窗口好让立绘看得清楚；可以拖大小，系统记住上次的大小和位置
+    /// 換角色視窗（右鍵「換角色…」、設定裡的按鈕）：大立繪 + 衣服卡 + 角色卡。和設定頁同一條通道、同一份狀態，
+    /// 單獨開一個大視窗好讓立繪看得清楚；可以拖大小，系統記住上次的大小和位置
     @objc func openCharacterPage() {
         if let w = charactersWindow {
             NSApp.activate(ignoringOtherApps: true)
@@ -112,7 +112,7 @@ extension App {
         config.userContentController.add(DevBridge(app: self, kind: .settings), name: "settings")
         let w = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 760, height: Self.fitHeight(740)),
                          styleMask: [.titled, .closable, .resizable, .miniaturizable], backing: .buffered, defer: false)
-        w.title = "CrossPet 换角色"
+        w.title = "CrossPet 換角色"
         w.isReleasedWhenClosed = false
         w.minSize = NSSize(width: 420, height: 400)
         w.center()
@@ -132,17 +132,17 @@ extension App {
         w.makeKeyAndOrderFront(nil)
     }
 
-    /// 桌宠页面发来的消息：「新功能」卡片点了「去看看」→ 打开设置停在「新功能」页
+    /// 桌寵頁面發來的訊息：「新功能」卡片點了「去看看」→ 開啟設定停在「新功能」頁
     func handlePet(_ body: Any) {
         if let d = body as? [String: Any], let tab = d["openSettings"] as? String { if tab == "character" { openCharacterPage() } else { openSettingsAt(tab: tab) } }
-        // 按时段换衣服（网页层判断好了时段）：只换这个角色已有的衣服，不切换当前角色
+        // 按時段換衣服（網頁層判斷好了時段）：只換這個角色已有的衣服，不切換當前角色
         if let d = body as? [String: Any], let w = d["wear"] as? [String: Any], let id = w["id"] as? String, let skin = w["skin"] as? String,
            characterIds.contains(id), skin.isEmpty || skinChoices[id]?.contains(where: { $0.id == skin }) == true {
             wear(id, skin)
         }
     }
 
-    /// tab：打开后停在哪个标签页（nil = 上次看的那页）；窗口已经开着就切过去
+    /// tab：開啟後停在哪個標籤頁（nil = 上次看的那頁）；視窗已經開著就切過去
     func openSettingsAt(tab: String?) {
         if let w = settingsWindow {
             if let tab { settingsWeb?.evaluateJavaScript("showTab(\(quote(tab)))", completionHandler: nil) }
@@ -155,7 +155,7 @@ extension App {
         config.userContentController.add(DevBridge(app: self, kind: .settings), name: "settings")
         let w = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 560, height: Self.fitHeight(780)),
                          styleMask: [.titled, .closable, .resizable, .miniaturizable], backing: .buffered, defer: false)
-        w.title = "CrossPet 设置"
+        w.title = "CrossPet 設定"
         w.isReleasedWhenClosed = false
         w.center()
         let v = WKWebView(frame: w.contentView!.bounds, configuration: config)
@@ -181,14 +181,14 @@ extension App {
             "gptQuota": defaults.bool(forKey: "gptQuota"), "agyQuota": defaults.bool(forKey: "agyQuota"), "gptQuotaNote": codexNote,
             "login": SMAppService.mainApp.status == .enabled,
             "edgeDock": edgeDockEnabled, "dsQuota": dsQuotaEnabled, "quotaAggregate": quotaAggregate, "codexResets": codexResets, "peakStyle": peakStyle, "quotaStyle": quotaStyle, "peakSkins": peakSkins, "powerSave": powerSave,
-            "hideHotkey": hideHotkey, "hotkeyFailed": hotkeyFailed, "hotkeys": [["id": "off", "label": "不用快捷键"]] + Self.hotkeyChoices.map { ["id": $0.id, "label": $0.label] },
+            "hideHotkey": hideHotkey, "hotkeyFailed": hotkeyFailed, "hotkeys": [["id": "off", "label": "不用快捷鍵"]] + Self.hotkeyChoices.map { ["id": $0.id, "label": $0.label] },
             "aiAutostart": aiAutostart,
             "character": currentId ?? characterIds.first ?? "",
             "characters": characterIds.map { id -> [String: Any] in
                 var c: [String: Any] = ["id": id, "name": displayNames[id] ?? id, "defaultName": defaultNames[id] ?? id, "custom": names[id] ?? "",
-                                        "images": cardImages(id)]   // 角色页卡片图（原版）
+                                        "images": cardImages(id)]   // 角色頁卡片圖（原版）
                 if let accent = accents[id] { c["accent"] = accent }
-                if let skins = skinChoices[id], !skins.isEmpty {   // 有别的衣服：原版排第一
+                if let skins = skinChoices[id], !skins.isEmpty {   // 有別的衣服：原版排第一
                     c["skins"] = [["id": "", "name": baseOutfit[id] ?? "原版", "images": cardImages(id)] as [String: Any]]
                         + skins.map { ["id": $0.id, "name": $0.name, "images": cardImages($0.id)] as [String: Any] }
                     c["skin"] = (defaults.dictionary(forKey: "skins") as? [String: String])?[id] ?? ""

@@ -21,10 +21,10 @@ namespace CrossPet
 {
     sealed partial class Pet
     {
-        // ---------------- 和网页打交道 ----------------
+        // ---------------- 和網頁打交道 ----------------
         public void Js(string code)
         {
-            try { web?.CoreWebView2?.ExecuteScriptAsync(code); } catch (Exception e) { Store.Log("JS 出错: " + e.Message); }
+            try { web?.CoreWebView2?.ExecuteScriptAsync(code); } catch (Exception e) { Store.Log("JS 出錯: " + e.Message); }
         }
         public async Task<string> Eval(string code)
         {
@@ -34,7 +34,7 @@ namespace CrossPet
         public void Reload() { ++followEventGeneration; ready = false; web?.CoreWebView2?.Reload(); }
         public static string Q(string s) => Store.Json.Serialize(s);
 
-        /// <summary>换衣服（皮肤）：记下来，重新载入立绘；正在显示的就是她的话马上换上</summary>
+        /// <summary>換衣服（皮膚）：記下來，重新載入立繪；正在顯示的就是她的話馬上換上</summary>
         void Wear(string id, string skin)
         {
             if (!(Store.Settings.TryGetValue("skins", out var sv) && sv is Dictionary<string, object> sd)) Store.Settings["skins"] = sd = new Dictionary<string, object>();
@@ -43,38 +43,38 @@ namespace CrossPet
             Store.SaveSettings();
             LoadCharacters();
             Js($"init({ManifestJson}); refreshLook({Q(id)})");
-            PushSettings();   // 设置页开着（角色页的衣服卡）时高亮跟着变：按时段自动换衣服也走这里
+            PushSettings();   // 設定頁開著（角色頁的衣服卡）時高亮跟著變：按時段自動換衣服也走這裡
         }
 
-        /// <summary>why：为什么换（front 跟随前台 / event 跟随事件 / manual 菜单或设置 / skin 换衣服），记进换角色记录（反馈「角色换得不对」用）</summary>
+        /// <summary>why：為什麼換（front 跟隨前臺 / event 跟隨事件 / manual 選單或設定 / skin 換衣服），記進換角色記錄（反饋「角色換得不對」用）</summary>
         void SwitchTo(string id, string why, string via = "")
         {
-            ++followEventGeneration;  // 同一个角色也算新的手动选择，不能让旧的异步跟随请求盖回来。
+            ++followEventGeneration;  // 同一個角色也算新的手動選擇，不能讓舊的非同步跟隨請求蓋回來。
             if (!Characters().Any(c => c.id == id)) return;
             var skin = Store.Skins != null && Store.Skins.TryGetValue(id, out var w) ? w as string ?? "" : "";
             Ledger.Append(SwitchesFile, new Dictionary<string, object> { ["from"] = current ?? "", ["to"] = id, ["skin"] = skin, ["why"] = why, ["via"] = via });
-            if (id != current) Store.Log($"换角色 {current} → {id}（{why}{(via == "" ? "" : " " + via)}）");
+            if (id != current) Store.Log($"換角色 {current} → {id}（{why}{(via == "" ? "" : " " + via)}）");
             current = id;
-            if (dock != null && !dockOut) After(800, ApplyDock);   // 换了角色，切口位置跟着变
+            if (dock != null && !dockOut) After(800, ApplyDock);   // 換了角色，切口位置跟著變
             Store.Settings["character"] = id; Store.SaveSettings();
             Js($"setCharacter({Q(id)})");
             PushSettings();
         }
 
-        /// <summary>读 AI 写来的状态 / 额度文件（state 目录），有变化就交给网页。和 macOS 版 pollStates 一样</summary>
+        /// <summary>讀 AI 寫來的狀態 / 額度檔案（state 目錄），有變化就交給網頁。和 macOS 版 pollStates 一樣</summary>
         void Poll()
         {
             if (!ready) return;
-            // 前台换成 / 离开桌面：Win+D「显示桌面」不一定发前台切换事件，这里兜一下（见 ZOrderRule.Top）
+            // 前臺換成 / 離開桌面：Win+D「顯示桌面」不一定發前臺切換事件，這裡兜一下（見 ZOrderRule.Top）
             var shell = Native.ForegroundIsShell();
             if (shell != frontIsShell) { frontIsShell = shell; ApplyLayer(); }
-            // 多模型宿主（DeepSeek Harness、WorkBuddy、ZCode，以及接了别家接口的 Claude Code、Codex）里换了模型：
-            // 它正在前台的话马上换成那个模型的角色
+            // 多模型宿主（DeepSeek Harness、WorkBuddy、ZCode，以及接了別家介面的 Claude Code、Codex）裡換了模型：
+            // 它正在前臺的話馬上換成那個模型的角色
             if (HostRoutesChanged()) FollowForeground("host");
             var latestActive = (id: (string)null, ts: 0.0);
-            // current：多模型宿主（WorkBuddy）里没有对应角色的模型，由当前角色来演；它只有状态，没有额度
+            // current：多模型宿主（WorkBuddy）裡沒有對應角色的模型，由當前角色來演；它只有狀態，沒有額度
             foreach (var id in Characters().Select(c => c.id).Concat(new[] { "current" }))
-                foreach (var kind in new[] { "state", "quota", "sessions" })   // sessions：好几个对话同时干活时各自的状态
+                foreach (var kind in new[] { "state", "quota", "sessions" })   // sessions：好幾個對話同時幹活時各自的狀態
                 {
                     if (id == "current" && kind == "quota") continue;
                     if (id == "deepseek" && kind == "quota" && !DsQuotaEnabled) continue;
@@ -84,9 +84,9 @@ namespace CrossPet
                     var stamp = fi.LastWriteTimeUtc.Ticks + ":" + fi.Length;
                     var key = id + "-" + kind;
                     if (stamps.TryGetValue(key, out var old) && old == stamp) continue;
-                    if (kind == "state" && (DateTime.UtcNow - fi.LastWriteTimeUtc).TotalMinutes > 10) { stamps[key] = stamp; NotePet(id, null, "skipped", "stale"); continue; }  // 只认 10 分钟内的
+                    if (kind == "state" && (DateTime.UtcNow - fi.LastWriteTimeUtc).TotalMinutes > 10) { stamps[key] = stamp; NotePet(id, null, "skipped", "stale"); continue; }  // 只認 10 分鐘內的
                     var value = Store.ReadJson(file);
-                    if (value == null) continue;   // 可能正被另一边写一半，下次再读
+                    if (value == null) continue;   // 可能正被另一邊寫一半，下次再讀
                     stamps[key] = stamp;
                     var json = Store.Json.Serialize(value);
                     if (kind == "sessions") { if (!Paused) Js($"setSessions({Q(id)}, {json})"); continue; }
@@ -94,18 +94,18 @@ namespace CrossPet
                     if (Paused) { if (kind == "state") NotePet(id, value, "skipped", "paused"); continue; }
                     if (kind == "state")
                     {
-                        NotePet(id, value, "played");   // 交给网页了；网页自己的判断（不是当前角色、正在演彩蛋……）在 diagnoseDisplay 里
-                        // 在终端里用 AI 时没有对应的前台程序：跟着最新一条工作事件换角色
+                        NotePet(id, value, "played");   // 交給網頁了；網頁自己的判斷（不是當前角色、正在演彩蛋……）在 diagnoseDisplay 裡
+                        // 在終端裡用 AI 時沒有對應的前臺程式：跟著最新一條工作事件換角色
                         var pose = value.TryGetValue("pose", out var p) ? p as string : null;
                         var ts = value.TryGetValue("ts", out var t) ? Convert.ToDouble(t) : 0;
                         lastPose[id] = (pose ?? "", DateTime.UtcNow);
                         if (id != "current" && pose != "idle" && pose != "sleeping" && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - ts < 30 && ts > latestActive.ts) latestActive = (id, ts);
                         Js($"applyCharState({Q(id)}, {json})");
-                        // Codex 回完一轮：额度记录刚写进会话，马上读一次（不然要等每分钟一次的定时刷新）
+                        // Codex 回完一輪：額度記錄剛寫進會話，馬上讀一次（不然要等每分鐘一次的定時重新整理）
                         if (id == "gpt")
                         {
                             if (value.TryGetValue("event", out var ev) && ev as string == "Stop") { codexBusyAt = null; After(1500, () => RefreshCodexQuota(CodexWhy.TurnEnd)); }
-                            else codexBusyAt = DateTime.UtcNow;   // 在干活：定时查额度改成 1 分钟一次（CodexTickDue）
+                            else codexBusyAt = DateTime.UtcNow;   // 在幹活：定時查額度改成 1 分鐘一次（CodexTickDue）
                         }
                     }
                     else Js($"setQuota({Q(id)}, {json})");

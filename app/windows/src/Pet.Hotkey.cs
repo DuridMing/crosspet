@@ -21,8 +21,8 @@ namespace CrossPet
 {
     sealed partial class Pet
     {
-        // ---------------- 快捷键隐藏 ----------------
-        // 全局快捷键（默认 Ctrl+Alt+P）：按一下藏起来，再按一下出来；双击托盘图标也能叫出来。藏着时 AI 干活也不出来，重开恢复显示
+        // ---------------- 快捷鍵隱藏 ----------------
+        // 全域性快捷鍵（預設 Ctrl+Alt+P）：按一下藏起來，再按一下出來；雙擊托盤圖示也能叫出來。藏著時 AI 幹活也不出來，重開恢復顯示
         [System.Runtime.InteropServices.DllImport("user32.dll")] static extern bool RegisterHotKey(IntPtr hWnd, int id, uint mods, uint vk);
         [System.Runtime.InteropServices.DllImport("user32.dll")] static extern bool UnregisterHotKey(IntPtr hWnd, int id);
         const int HotKeyId = 0x4350;
@@ -37,8 +37,8 @@ namespace CrossPet
             hotkeyFailed = false;
             var choice = HotkeyChoices.FirstOrDefault(h => h.id == HideHotkey);
             if (choice.id == null) return;
-            hotkeyFailed = !RegisterHotKey(hwnd, HotKeyId, 0x0001 | 0x0002 | 0x4000, choice.vk);   // Alt | Ctrl | 不连发
-            if (hotkeyFailed) Store.Log($"快捷键 {choice.label} 注册失败（被别的程序占用了）");
+            hotkeyFailed = !RegisterHotKey(hwnd, HotKeyId, 0x0001 | 0x0002 | 0x4000, choice.vk);   // Alt | Ctrl | 不連發
+            if (hotkeyFailed) Store.Log($"快捷鍵 {choice.label} 註冊失敗（被別的程式佔用了）");
         }
         IntPtr HotKeyHook(IntPtr h, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
@@ -50,7 +50,7 @@ namespace CrossPet
             userHidden = hidden;
             if (!hidden) { fullscreenOverride = true; hiddenForFullscreen = false; }
             SetConcealed(hidden);
-            if (!hidden) RefreshCodexQuota(CodexWhy.Tick);   // 藏着时没查：叫回来补一次（自带间隔，不会多问）
+            if (!hidden) RefreshCodexQuota(CodexWhy.Tick);   // 藏著時沒查：叫回來補一次（自帶間隔，不會多問）
         }
 
         public void Recenter()
@@ -58,8 +58,8 @@ namespace CrossPet
             Undock();
             Store.Settings.Remove("position"); Store.SaveSettings();
             RestorePosition();
-            if (userHidden) SetUserHidden(false);   // 快捷键藏起来的：一起恢复（包括动画）
-            fullscreenOverride = true; hiddenForFullscreen = false;   // 你主动叫她：全屏时也出来，前台窗口换了再按规则藏
+            if (userHidden) SetUserHidden(false);   // 快捷鍵藏起來的：一起恢復（包括動畫）
+            fullscreenOverride = true; hiddenForFullscreen = false;   // 你主動叫她：全屏時也出來，前臺視窗換了再按規則藏
             SetConcealed(false);
         }
         bool fullscreenOverride;

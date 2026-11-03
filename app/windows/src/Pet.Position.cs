@@ -21,7 +21,7 @@ namespace CrossPet
 {
     sealed partial class Pet
     {
-        // ---------------- 位置（按物理像素存，多显示器、不同缩放都对） ----------------
+        // ---------------- 位置（按物理畫素存，多顯示器、不同縮放都對） ----------------
         void RestorePosition()
         {
             Native.GetWindowRect(hwnd, out var r);

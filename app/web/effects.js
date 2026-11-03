@@ -1,4 +1,4 @@
-// CrossPet 特效：每个状态身边的小动画（SVG + SMIL），surroundings(pose) 返回 SVG 片段
+// CrossPet 特效：每個狀態身邊的小動畫（SVG + SMIL），surroundings(pose) 返回 SVG 片段
 // ART-BEGIN
            
                                                                                                       
@@ -6,21 +6,21 @@
 
                                                            
 
-// 画布比立绘宽一圈，特效画在人物周围的留白里（画布坐标）
+// 畫布比立繪寬一圈，特效畫在人物周圍的留白裡（畫布座標）
 const CW = 580
 const CH = 560
 const AW = 374
 const AH = 420
 const AX = (CW - AW) / 2 // 103
 const AY = CH - AH - 22 // 118
-const HEAD = { x: AX + 187, y: AY + 20 } // 头顶
+const HEAD = { x: AX + 187, y: AY + 20 } // 頭頂
 const FOOT = `${AW / 2} ${AH}`
 const INK = '#4a2418'
 
 const ease = 'calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1"'
 const loop = 'repeatCount="indefinite"'
 
-// ---- 身体动作（立绘坐标，围绕脚底） ----
+// ---- 身體動作（立繪座標，圍繞腳底） ----
 const bob = (amp        , dur        ) =>
   `<animateTransform attributeName="transform" type="translate" values="0 0;0 ${-amp};0 0" keyTimes="0;0.5;1" ${ease} dur="${dur}" ${loop}/>`
 const rock = (deg        , dur        ) =>
@@ -49,7 +49,7 @@ const motion = (p      )         => {
   }
 }
 
-// ---- 背景光晕：每个状态一种颜色 ----
+// ---- 背景光暈：每個狀態一種顏色 ----
 const AURA                                 = {
   idle: ['#ffd9b0', 0.35], listening: ['#ffb27a', 0.45], thinking: ['#9ec5ff', 0.45], reading: ['#ffe08a', 0.5],
   writing: ['#ffd38a', 0.45], running: ['#9be7b4', 0.45], searching: ['#a6e3ff', 0.45], delegating: ['#d7c4ff', 0.45],
@@ -60,14 +60,14 @@ const AURA                                 = {
   stretch: ['#ffe0b8', 0.35], yawn: ['#d8d0f0', 0.4], drawing: ['#ffd6e8', 0.45],
   asking: ['#c9d4ff', 0.5], update: ['#ffe7a3', 0.55],
 }
-// 叠几层半透明圆当柔光（渐变的 stop-opacity 有的渲染器不认，这样最稳）
+// 疊幾層半透明圓當柔光（漸變的 stop-opacity 有的渲染器不認，這樣最穩）
 const aura = (p      ) => {
   const [c, o] = AURA[p]
   const rings = [250, 215, 180, 145, 110].map(r => `<circle cx="${CW / 2}" cy="${AY + 210}" r="${r}" fill="${c}" fill-opacity="${(o * 0.16).toFixed(3)}"/>`).join('')
   return `<g class="aura-rings">${rings}<animate attributeName="opacity" values="0.7;1;0.7" dur="3s" ${loop}/></g>`
 }
 
-// ---- 小部件（画布坐标） ----
+// ---- 小部件（畫布座標） ----
 const fadeLoop = (dur        , begin        ) =>
   `<animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.75;1" dur="${dur}" begin="${begin}" ${loop}/>`
 const rise = (dur        , begin        , dy        , dx = 0) =>
@@ -83,7 +83,7 @@ const mark = (x        , y        , ch        , color        , size = 54) =>
 const sweat = (x        , y        ) =>
   `<path d="M0 0 C-8 12 -8 22 0 22 C8 22 8 12 0 0Z" fill="#8fd3ff" stroke="#4aa3d8" stroke-width="2"><animateTransform attributeName="transform" type="translate" values="${x} ${y};${x} ${y + 18};${x} ${y}" dur="1.6s" ${loop}/></path>`
 
-// 思考云朵，里面三个点依次亮
+// 思考雲朵，裡面三個點依次亮
 const thoughtCloud = (() => {
   const x = 470, y = 58
   const cloud = `<path d="M${x - 50} ${y + 18} a22 22 0 0 1 10 -40 a28 28 0 0 1 50 -10 a24 24 0 0 1 40 18 a20 20 0 0 1 -6 38 z" fill="#fff" stroke="${INK}" stroke-width="3"/>`
@@ -92,13 +92,13 @@ const thoughtCloud = (() => {
   return `<g>${tail}${cloud}${dots}<animateTransform attributeName="transform" type="translate" values="0 0;0 -5;0 0" dur="2.4s" ${loop}/></g>`
 })()
 
-// 读书：左侧飘起的字符和书页
+// 讀書：左側飄起的字元和書頁
 const floatingGlyphs = ['A', 'あ', '{ }', '∑', '文'].map((g, i) =>
   `<g transform="translate(${14 + (i % 2) * 30} ${330 - i * 6})" opacity="0"><text font-size="${24 + (i % 3) * 4}" style="fill: var(--glyph, #b5651d); stroke: var(--glyph-stroke, none); stroke-width: 1.2px; paint-order: stroke" font-family="serif" font-weight="bold">${g}</text>${fadeLoop('3.5s', `${i * 0.7}s`)}${rise('3.5s', `${i * 0.7}s`, -200, 6)}</g>`,
 ).join('')
 
 
-// 跑命令：右上角小终端，一行行打字
+// 跑命令：右上角小終端，一行行打字
 const terminal = (() => {
   const x = 430, y = 40
   const lines = ['$ npm test', '✓ 12 passed', '$ git add .'].map((l, i) =>
@@ -111,7 +111,7 @@ const terminal = (() => {
 
 const magnifier = `<g><circle r="22" fill="#cfefff" fill-opacity="0.55" stroke="${INK}" stroke-width="5"/><circle cx="-7" cy="-7" r="6" fill="#fff" opacity="0.8"/><path d="M15 15 L34 34" stroke="#8b5a2b" stroke-width="8" stroke-linecap="round"/>` +
   `<animateMotion path="M470 120 a40 26 0 1 1 1 0" dur="2.6s" ${loop}/></g>`
-// 查资料：左上角一个小浏览器窗口，搜索框打字、结果一行行出来
+// 查資料：左上角一個小瀏覽器視窗，搜尋框打字、結果一行行出來
 const browser = (() => {
   const x = 22, y = 40
   const results = [0, 1, 2].map(i =>
@@ -133,7 +133,7 @@ const confetti = Array.from({ length: 10 }, (_, i) => {
   return `<rect x="${x}" y="-10" width="9" height="14" rx="2" fill="${colors[i % 5]}" opacity="0"><animate attributeName="opacity" values="0;1;1;0" dur="2.4s" begin="${(i % 5) * 0.35}s" ${loop}/><animateTransform attributeName="transform" type="translate" values="0 0;${(i % 2 ? 1 : -1) * 8} 300" dur="2.4s" begin="${(i % 5) * 0.35}s" ${loop}/></rect>`
 }).join('')
 
-// 被戳：头边弹出一个「!」小气泡（只弹一次），三道短冲击线闪一下就消失
+// 被戳：頭邊彈出一個「!」小氣泡（只彈一次），三道短衝擊線閃一下就消失
 const pokeBurst = (() => {
   const x = 452, y = 104
   const once = (begin        , dur        ) => `begin="${begin}" dur="${dur}" fill="freeze"`
@@ -153,12 +153,12 @@ const zz = `<g font-family="sans-serif" font-weight="900" fill="#e8a33d" stroke=
   `<g transform="translate(420 140)" opacity="0"><text font-size="30">z</text>${fadeLoop('3s', '0s')}${rise('3s', '0s', -60, 20)}</g>` +
   `<g transform="translate(445 120)" opacity="0"><text font-size="42">Z</text>${fadeLoop('3s', '1.5s')}${rise('3s', '1.5s', -60, 20)}</g></g>`
 
-// 额度低：一个快没电的电池
+// 額度低：一個快沒電的電池
 const battery = `<g transform="translate(450 70)"><rect width="70" height="34" rx="6" fill="#fff" stroke="${INK}" stroke-width="3"/><rect x="70" y="10" width="7" height="14" rx="2" fill="${INK}"/>` +
   `<rect x="5" y="5" width="12" height="24" rx="2" fill="#ff5f56"><animate attributeName="opacity" values="1;0.2;1" dur="1.2s" ${loop}/></rect></g>`
 const gloom = [0, 1, 2, 3].map(i => `<line x1="${248 + i * 22}" y1="${AY - 62}" x2="${248 + i * 22}" y2="${AY - 22 + (i % 2) * 8}" stroke="#8b86a8" stroke-width="4" stroke-linecap="round" opacity="0.6"/>`).join('')
 
-// 伸懒腰：头顶几颗暖色小光点慢慢升起、淡出（取代原来的弧线）
+// 伸懶腰：頭頂幾顆暖色小光點慢慢升起、淡出（取代原來的弧線）
 const stretchGlow = [0, 1, 2, 3].map(i =>
   `<g transform="translate(${208 + i * 52} ${96 + (i % 2) * 10})" opacity="0">` +
   `<path d="M0 -7 L1.8 -1.8 L7 0 L1.8 1.8 L0 7 L-1.8 1.8 L-7 0 L-1.8 -1.8Z" fill="#ffcf8a"/>` +
@@ -166,20 +166,20 @@ const stretchGlow = [0, 1, 2, 3].map(i =>
 const yawnBubble = `<g transform="translate(440 140)" opacity="0"><text font-size="34" fill="#9a8fd0" font-family="sans-serif" font-weight="bold">~♡</text>${fadeLoop('3s', '0s')}${rise('3s', '0s', -40, 10)}</g>`
 
 
-// ---- 小卡片动画（和小终端同一套样式：圆角窗口 + 红黄绿三点，内容在动） ----
+// ---- 小卡片動畫（和小終端同一套樣式：圓角視窗 + 紅黃綠三點，內容在動） ----
 const winFrame = (x        , y        , w        , h        , dark         , accent = '') =>
   `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="9" fill="${dark ? '#262626' : '#fff'}" stroke="${dark ? '#fff' : INK}" stroke-width="${dark ? 3 : 2.5}"/>` +
   (dark ? '' : `<path d="M${x} ${y + 9} a9 9 0 0 1 9 -9 h${w - 18} a9 9 0 0 1 9 9 v9 h-${w}z" fill="${accent || '#eef1f5'}"/>`) +
   `<circle cx="${x + 12}" cy="${y + 10}" r="3.5" fill="#ff5f56"/><circle cx="${x + 23}" cy="${y + 10}" r="3.5" fill="#ffbd2e"/><circle cx="${x + 34}" cy="${y + 10}" r="3.5" fill="#27c93f"/>`
-// 小卡片（终端、浏览器、编辑器……）不浮动：上下飘时每帧落在半个像素上，里面的小字、细线会闪、起锯齿，清晰更要紧
+// 小卡片（終端、瀏覽器、編輯器……）不浮動：上下飄時每幀落在半個畫素上，裡面的小字、細線會閃、起鋸齒，清晰更要緊
 const floatY = (dur = '2.4s', amp = 4) =>
   `<animateTransform attributeName="transform" type="translate" values="0 0;0 ${-amp};0 0" dur="${dur}" ${loop}/>`
 const appear = (from        , to        , dur        ) =>
   `<animate attributeName="opacity" values="0;0;1;1" keyTimes="0;${from.toFixed(2)};${to.toFixed(2)};1" dur="${dur}" ${loop}/>`
 
-// 大活完成：头顶落下一顶皇冠（回弹一下），金色渐变 + 珍珠尖 + 宝石，高光扫过，周围小星星闪
+// 大活完成：頭頂落下一頂皇冠（回彈一下），金色漸變 + 珍珠尖 + 寶石，高光掃過，周圍小星星閃
 const crown = (() => {
-  const W = 112, H = 70, x = HEAD.x - W / 2, y = HEAD.y - 88  // 底边 y≈101，留在头顶上方
+  const W = 112, H = 70, x = HEAD.x - W / 2, y = HEAD.y - 88  // 底邊 y≈101，留在頭頂上方
   const body = 'M10 50 L4 14 L31 33 L56 3 L81 33 L108 14 L102 50 Z'
   const defs = `<defs><linearGradient id="cpGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff4b8"/><stop offset="0.45" stop-color="#ffd54a"/><stop offset="1" stop-color="#e59a00"/></linearGradient>` +
     `<linearGradient id="cpBand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffcf3a"/><stop offset="1" stop-color="#c98200"/></linearGradient>` +
@@ -194,7 +194,7 @@ const crown = (() => {
     pearl(4, 14, 6) + pearl(56, 3, 7) + pearl(108, 14, 6) +
     `<g clip-path="url(#cpClip)"><rect x="-40" y="-10" width="16" height="90" fill="#fff" opacity="0.7" transform="skewX(-20)">` +
     `<animate attributeName="x" values="-40;-40;150" keyTimes="0;0.55;1" dur="2.4s" begin="0.7s" ${loop}/></rect></g>`
-  // 入场：从上面落下来回弹一下；之后轻轻上下浮、左右微晃
+  // 入場：從上面落下來回彈一下；之後輕輕上下浮、左右微晃
   const enter = `<animateTransform attributeName="transform" type="translate" values="0 -70;0 6;0 -2;0 0" keyTimes="0;0.6;0.8;1" dur="0.7s" fill="freeze" additive="sum"/>`
   const sway = `<animateTransform attributeName="transform" type="rotate" values="-3 ${W / 2} ${H};3 ${W / 2} ${H};-3 ${W / 2} ${H}" dur="2.6s" begin="0.7s" ${loop} additive="sum"/>`
   const sparkles = [[-22, 18, 1.1, '0.8s'], [W + 18, 10, 1.2, '1.3s'], [W + 8, 50, 0.8, '1.9s'], [-12, 52, 0.9, '2.3s']]
@@ -203,7 +203,7 @@ const crown = (() => {
   return `<g transform="translate(${x} ${y})">${defs}<g>${enter}<g>${floatY('2s', 5)}<g>${sway}${crownArt}</g>${sparkles}</g></g></g>`
 })()
 
-// 听你说话：聊天卡片，你的消息滑进来，然后「正在输入」三个点跳动
+// 聽你說話：聊天卡片，你的訊息滑進來，然後「正在輸入」三個點跳動
 const chatCard = (() => {
   const x = 432, y = 36, D = '3s'
   const dots = [0, 1, 2].map(i =>
@@ -215,8 +215,8 @@ const chatCard = (() => {
     `</g>`
 })()
 
-// 等你回答：选项卡片——上面一行问题，后面三个点一跳一跳（在等你），下面两个选项，
-// 一道蓝色高亮在两个选项之间来回挪（在等你挑），和聊天卡片、小终端同一套画法
+// 等你回答：選項卡片——上面一行問題，後面三個點一跳一跳（在等你），下面兩個選項，
+// 一道藍色高亮在兩個選項之間來回挪（在等你挑），和聊天卡片、小終端同一套畫法
 const choiceCard = (() => {
   const x = 432, y = 30, D = '2.8s'
   const dots = [0, 1, 2].map(i =>
@@ -225,7 +225,7 @@ const choiceCard = (() => {
     `<rect x="${x + 12}" y="${oy}" width="102" height="20" rx="10" fill="#fff" stroke="#d5dbe3" stroke-width="2"/>` +
     `<circle cx="${x + 24}" cy="${oy + 10}" r="5" fill="#fff" stroke="#9aa3ad" stroke-width="2"/>` +
     `<rect x="${x + 36}" y="${oy + 7}" width="${w}" height="6" rx="3" fill="#c9ced6"/>`
-  // 高亮：蓝边框 + 选中的小圆点，在两个选项之间来回挪，每个停一会儿
+  // 高亮：藍邊框 + 選中的小圓點，在兩個選項之間來回挪，每個停一會兒
   const highlight = `<g><rect x="${x + 12}" y="${y + 48}" width="102" height="20" rx="10" fill="#5b8def" fill-opacity="0.14" stroke="#5b8def" stroke-width="2.5"/>` +
     `<circle cx="${x + 24}" cy="${y + 58}" r="2.6" fill="#5b8def"/>` +
     `<animateTransform attributeName="transform" type="translate" values="0 0;0 0;0 26;0 26;0 0" keyTimes="0;0.35;0.5;0.85;1" calcMode="spline" keySplines="0 0 1 1;0.45 0 0.55 1;0 0 1 1;0.45 0 0.55 1" dur="${D}" ${loop}/></g>`
@@ -234,15 +234,15 @@ const choiceCard = (() => {
     `${option(y + 48, 58)}${option(y + 74, 46)}${highlight}</g>`
 })()
 
-// 有新版本：小窗口里一个往上跳的箭头、「NEW」标签和一条下载进度条，旁边几颗金色闪光
-// progress：正在下载 / 安装时的真实进度（0–100），这时标签显示百分比、进度条停在真实位置；
-// 到 100 是「正在安装」，进度条满格一闪一闪。没有 progress 时是发现新版本时的循环动画
+// 有新版本：小視窗裡一個往上跳的箭頭、「NEW」標籤和一條下載進度條，旁邊幾顆金色閃光
+// progress：正在下載 / 安裝時的真實進度（0–100），這時標籤顯示百分比、進度條停在真實位置；
+// 到 100 是「正在安裝」，進度條滿格一閃一閃。沒有 progress 時是發現新版本時的迴圈動畫
 const updateCard = (progress = null) => {
   const x = 432, y = 30, D = '2.4s'
   const arrow = `<g><circle cx="${x + 40}" cy="${y + 60}" r="20" fill="#ffe9a8" stroke="#e0a526" stroke-width="2.5"/>` +
     `<path d="M${x + 40} ${y + 70} v-20 m-9 9 l9 -9 l9 9" fill="none" stroke="#c07f0e" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>` +
     `<animateTransform attributeName="transform" type="translate" values="0 0;0 -6;0 0" dur="1.1s" ${loop}/></g>`
-  const label = progress === null ? 'NEW' : progress >= 100 ? '安装' : `${Math.round(progress)}%`
+  const label = progress === null ? 'NEW' : progress >= 100 ? '安裝' : `${Math.round(progress)}%`
   const badge = `<rect x="${x + 70}" y="${y + 36}" width="44" height="20" rx="10" fill="#ff7a59"/>` +
     `<text x="${x + 92}" y="${y + 50.5}" text-anchor="middle" font-family="-apple-system, 'PingFang SC', 'Segoe UI', sans-serif" font-size="12" font-weight="700" fill="#fff">${label}</text>`
   const fill = progress === null
@@ -255,7 +255,7 @@ const updateCard = (progress = null) => {
     star(80, 190, 0.9, '0.6s', '#ffd54a') + star(548, 360, 0.8, '0.2s', '#ffd54a') + star(60, 320, 0.7, '1s', '#ffd54a') + star(530, 220, 0.6, '0.9s')
 }
 
-// 读文件：代码查看器，一条高亮扫描线逐行往下扫
+// 讀檔案：程式碼檢視器，一條高亮掃描線逐行往下掃
 const viewerCard = (() => {
   const x = 432, y = 36
   const cols = ['#c678dd', '#61afef', '#98c379', '#61afef', '#e5c07b', '#98c379', '#c678dd']
@@ -267,7 +267,7 @@ const viewerCard = (() => {
     `</g>`
 })()
 
-// 写文件：编辑器，代码一行行打出来，左边冒出绿色 +，光标闪
+// 寫檔案：編輯器，程式碼一行行打出來，左邊冒出綠色 +，遊標閃
 const editorCard = (() => {
   const x = 432, y = 36, D = '3.6s'
   const widths = [70, 54, 84, 40, 66]
@@ -282,7 +282,7 @@ const editorCard = (() => {
     `</g>`
 })()
 
-// 派帮手：任务列表，转圈的加载依次变成绿色对勾
+// 派幫手：任務列表，轉圈的載入依次變成綠色對勾
 const taskCard = (() => {
   const x = 432, y = 36, D = '3.6s'
   const rows = [0, 1, 2].map(i => {
@@ -296,7 +296,7 @@ const taskCard = (() => {
   return `<g>${winFrame(x, y, 126, 90, false)}${rows}</g>`
 })()
 
-// 完成：清单卡片，三个勾依次画出来
+// 完成：清單卡片，三個勾依次畫出來
 const checklist = (() => {
   const x = 22, y = 40, D = '2.4s'
   const rows = [0, 1, 2].map(i => {
@@ -309,7 +309,7 @@ const checklist = (() => {
   return `<g>${winFrame(x, y, 118, 90, false, '#e6f6ea')}${rows}</g>`
 })()
 
-// 出错：红色报错卡片，抖一抖
+// 出錯：紅色報錯卡片，抖一抖
 const errorCard = (() => {
   const x = 432, y = 36
   return `<g>${winFrame(x, y, 126, 78, false, '#fde2e1')}` +
@@ -319,7 +319,7 @@ const errorCard = (() => {
     `<animateTransform attributeName="transform" type="translate" values="0 0;-4 0;4 0;-3 0;3 0;0 0;0 0" keyTimes="0;0.05;0.1;0.15;0.2;0.25;1" dur="1.6s" ${loop}/></g>`
 })()
 
-// 哼歌：迷你播放器，均衡器跳动，进度条往前走
+// 哼歌：迷你播放器，均衡器跳動，進度條往前走
 const musicCard = (() => {
   const x = 432, y = 36
   const bars = [0, 1, 2, 3, 4].map(i =>
@@ -332,7 +332,7 @@ const musicCard = (() => {
     `</g>`
 })()
 
-// 大活完成：金奖杯（渐变 + 星星徽章 + 高光扫过），底下一块深色底座
+// 大活完成：金獎盃（漸變 + 星星徽章 + 高光掃過），底下一塊深色底座
 const trophy = (() => {
   const x = 34, y = 62
   const cup = 'M8 4 H72 V26 C72 46 58 58 40 58 C22 58 8 46 8 26 Z'
@@ -351,7 +351,7 @@ const trophy = (() => {
     `${floatY('1.8s', 6)}</g></g>`
 })()
 
-// 画画：画板卡片，彩色笔触一笔笔画出来，小画笔跟着走，下面一排调色盘
+// 畫畫：畫板卡片，彩色筆觸一筆筆畫出來，小畫筆跟著走，下面一排調色盤
 const easelCard = (() => {
   const x = 432, y = 36, D = '3.6s'
   const strokes = [
@@ -368,22 +368,22 @@ const easelCard = (() => {
 })()
 
 
-// ---- 可被角色点名使用的特效（character.json 的 fx 字段）----
-// 深海泡泡：两侧和头顶的泡泡摇摇晃晃往上冒（DeepSeek 思考 / 深度思考 / 游泳）
+// ---- 可被角色點名使用的特效（character.json 的 fx 欄位）----
+// 深海泡泡：兩側和頭頂的泡泡搖搖晃晃往上冒（DeepSeek 思考 / 深度思考 / 游泳）
 const bubbles = [[30, 340, 9], [44, 400, 6], [26, 250, 7], [548, 350, 10], [540, 290, 6], [546, 220, 8], [300, 96, 7], [250, 108, 5]].map(([x, y, r], i) =>
   `<g transform="translate(${x} ${y})" opacity="0"><circle r="${r}" fill="#bfe6ff" fill-opacity="0.35" stroke="#5aa9e6" stroke-width="2"/>` +
   `<circle cx="${-r * 0.35}" cy="${-r * 0.35}" r="${Math.max(1.5, r * 0.25)}" fill="#fff" opacity="0.9"/>` +
   `${fadeLoop(`${2.6 + (i % 3) * 0.4}s`, `${(i * 0.37).toFixed(2)}s`)}${rise(`${2.6 + (i % 3) * 0.4}s`, `${(i * 0.37).toFixed(2)}s`, y > 200 ? -110 : -50, i % 2 ? 8 : -8)}</g>`).join('')
-// 饭碗冒热气：右上角三缕蒸汽（DeepSeek 吃白饭）
+// 飯碗冒熱氣：右上角三縷蒸汽（DeepSeek 吃白飯）
 const steam = [0, 1, 2].map(i =>
   `<path d="M${470 + i * 18} 140 q-8 -12 0 -24 t0 -24" stroke="#d9d4cc" stroke-width="4" fill="none" stroke-linecap="round" opacity="0">` +
   `${fadeLoop('2.2s', `${i * 0.5}s`)}<animateTransform attributeName="transform" type="translate" values="0 0;0 -26" dur="2.2s" begin="${i * 0.5}s" ${loop} additive="sum"/></path>`).join('')
-// 庆祝：两侧彩纸 + 闪光（GPT reset、DeepSeek 吃大餐）
+// 慶祝：兩側彩紙 + 閃光（GPT reset、DeepSeek 吃大餐）
 const fxCelebrate = confetti + star(500, 170, 1, '0.5s', '#ffd54a') + star(80, 200, 0.9, '0.9s', '#ffd54a') + star(548, 392, 0.8, '0.3s')
-// 大成功但立绘里已经画了皇冠：只留几颗金色闪光，不再叠特效皇冠和奖杯
+// 大成功但立繪裡已經畫了皇冠：只留幾顆金色閃光，不再疊特效皇冠和獎盃
 const fxVictory = star(510, 140, 1.1, '0.4s', '#ffd54a') + star(548, 330, 0.8, '0.2s', '#ffd54a') + star(70, 200, 0.9, '0.8s', '#ffd54a') + star(60, 330, 0.7, '1.1s', '#ffd54a')
-// 价签（DeepSeek × GLM 的彩蛋）：右上角挂着一张晃来晃去的价签，旁边的箭头一跳一跳。
-// down：DeepSeek 偷偷把 GLM 的价签改成打折（原价划掉）；up：GLM 顺手涨个价
+// 價籤（DeepSeek × GLM 的彩蛋）：右上角掛著一張晃來晃去的價籤，旁邊的箭頭一跳一跳。
+// down：DeepSeek 偷偷把 GLM 的價籤改成打折（原價劃掉）；up：GLM 順手漲個價
 const priceTag = (up) => {
   const x = 470, y = 40, color = up ? '#e5484d' : '#2f9e5b'
   const tag = `<g><line x1="${x + 30}" y1="${y - 14}" x2="${x + 30}" y2="${y + 4}" stroke="#8a7a70" stroke-width="2"/>` +
@@ -395,14 +395,14 @@ const priceTag = (up) => {
   const ax = x + 92
   const arrow = `<g><path d="${up ? `M${ax} ${y + 64} v-34 m-10 10 l10 -10 l10 10` : `M${ax} ${y + 24} v34 m-10 -10 l10 10 l10 -10`}" fill="none" stroke="${color}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>` +
     `<animateTransform attributeName="transform" type="translate" values="0 0;0 ${up ? -6 : 6};0 0" dur="0.9s" ${loop}/></g>`
-  // 画的时候按小尺寸算，整体放大到和其他小窗差不多大，右上角对齐
+  // 畫的時候按小尺寸算，整體放大到和其他小窗差不多大，右上角對齊
   return `<g transform="translate(${x} ${y}) scale(1.45) translate(${-x} ${-y}) translate(-40 -8)">${tag}${arrow}</g>`
 }
-// 红温：蒸汽从头顶两侧「噗」地斜着喷出去，边冲边胀大再淡掉，左右交替；头的右上方一个「💢」一鼓一鼓地跳
-// 蓬松的云团：先画一圈带描边的圆，再在上面叠一层不带描边的白，几个圆连成一朵没有内部线条的云
+// 紅溫：蒸汽從頭頂兩側「噗」地斜著噴出去，邊衝邊脹大再淡掉，左右交替；頭的右上方一個「💢」一鼓一鼓地跳
+// 蓬鬆的雲團：先畫一圈帶描邊的圓，再在上面疊一層不帶描邊的白，幾個圓連成一朵沒有內部線條的雲
 const cloudBlob = (r) => {
   const parts = [[0, 0, r], [r * 0.8, -r * 0.35, r * 0.75], [-r * 0.8, -r * 0.3, r * 0.7], [r * 0.15, -r * 0.75, r * 0.65]]
-  return parts.map(([x, y, rr]) => `<circle cx="${x}" cy="${y}" r="${rr + 2.5}" fill="#b8b0a6"/>`).join('') +   // 浅灰描边：看起来才是白蒸汽，不是黑点
+  return parts.map(([x, y, rr]) => `<circle cx="${x}" cy="${y}" r="${rr + 2.5}" fill="#b8b0a6"/>`).join('') +   // 淺灰描邊：看起來才是白蒸汽，不是黑點
     parts.map(([x, y, rr]) => `<circle cx="${x}" cy="${y}" r="${rr - 1}" fill="#fff"/>`).join('')
 }
 const burst = (x, y, dx, dy, r, begin, dur = '1.1s') =>
@@ -410,36 +410,36 @@ const burst = (x, y, dx, dy, r, begin, dur = '1.1s') =>
   `<animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.12;0.55;1" dur="${dur}" begin="${begin}" ${loop}/>` +
   `<animateTransform attributeName="transform" type="translate" values="${x} ${y};${x + dx} ${y + dy}" keySplines="0.2 0.8 0.3 1" calcMode="spline" keyTimes="0;1" dur="${dur}" begin="${begin}" ${loop}/>` +
   `<animateTransform attributeName="transform" type="scale" additive="sum" values="0.5;1.6" dur="${dur}" begin="${begin}" ${loop}/></g>`
-// 「💢」：四道弯弧拼成的十字，红色，按心跳节奏一鼓一鼓
+// 「💢」：四道彎弧拼成的十字，紅色，按心跳節奏一鼓一鼓
 const vein = (x, y, s, dur = '0.7s') => {
   const arc = (rot) => `<path d="M6 -16 Q4 -6 14 -5" transform="rotate(${rot})" stroke="#e5483b" stroke-width="4.5" fill="none" stroke-linecap="round"/>`
   return `<g transform="translate(${x} ${y})"><g>${[0, 90, 180, 270].map(arc).join('')}` +
     `<animateTransform attributeName="transform" type="scale" values="${s};${s * 1.25};${s};${s * 1.1};${s}" keyTimes="0;0.15;0.35;0.5;1" dur="${dur}" ${loop}/></g></g>`
 }
-// 坐标：人物的头大约在 y 125～300，左右两侧大约在 x 180 / 400；蒸汽贴着头顶两侧喷出去
+// 座標：人物的頭大約在 y 125～300，左右兩側大約在 x 180 / 400；蒸汽貼著頭頂兩側噴出去
 const angerSteam = burst(212, 168, -110, -84, 26, '0s') + burst(368, 162, 112, -86, 27, '0.55s') +
   burst(198, 200, -118, -40, 20, '0.3s') + burst(382, 196, 120, -42, 21, '0.85s') + vein(392, 150, 2.3)
-// 鼓脸：从头顶往上一小团一小团地冒（左右稍微错开、轮流），+ 小一点的「💢」
+// 鼓臉：從頭頂往上一小團一小團地冒（左右稍微錯開、輪流），+ 小一點的「💢」
 const angerPuff = burst(270, 132, -8, -96, 16, '0s', '1.5s') + burst(312, 128, 10, -100, 15, '0.75s', '1.5s') + vein(390, 150, 1.6, '1.1s')
-// 被甩晕：头顶三颗小星星绕圈
+// 被甩暈：頭頂三顆小星星繞圈
 const dizzyStars = [0, 1, 2].map(i => `<g>${star(0, 0, 0.55, `${i * 0.1}s`, '#ffd54a', '2s')}` +
   `<animateMotion path="M290 92 m-70 0 a70 20 0 1 0 140 0 a70 20 0 1 0 -140 0" dur="1.6s" begin="-${(i * 1.6 / 3).toFixed(2)}s" ${loop}/></g>`).join('')
 const named = { bubbles, steam, celebrate: fxCelebrate, victory: fxVictory, priceDown: priceTag(false), priceUp: priceTag(true) }
 
-// ---- 按时段 / 节日打招呼的环境特效 ----
-// 和角色有关的东西（茶杯、装扮、道具）都画在立绘里；这里只做氛围，放在两侧（x<95 或 x>485）和头顶上方（y<105），不压人物
+// ---- 按時段 / 節日打招呼的環境特效 ----
+// 和角色有關的東西（茶杯、裝扮、道具）都畫在立繪裡；這裡只做氛圍，放在兩側（x<95 或 x>485）和頭頂上方（y<105），不壓人物
 const fxOnce = (dur, begin = '0s') => `dur="${dur}" begin="${begin}" fill="freeze"`
-// 入场：从透明淡入并轻轻落位
+// 入場：從透明淡入並輕輕落位
 const fxEnter = (dy = 12, dur = '0.7s') =>
   `<animate attributeName="opacity" values="0;1" ${fxOnce(dur)}/><animateTransform attributeName="transform" type="translate" values="0 ${dy};0 0" ${fxOnce(dur)} additive="sum"/>`
-// 从上往下飘落的小东西：shape(i) 返回以 (0,0) 为中心的图形
+// 從上往下飄落的小東西：shape(i) 返回以 (0,0) 為中心的圖形
 const fall = (xs, shape, { dur = 4, dy = 300, sway = 14, y0 = -10, spin = 0 } = {}) => xs.map((x, i) => {
   const d = `${(dur + (i % 3) * 0.6).toFixed(1)}s`, b = `${(i * 0.53).toFixed(2)}s`
   return `<g transform="translate(${x} ${y0 + (i % 4) * 18})" opacity="0"><g>${shape(i)}` +
     (spin ? `<animateTransform attributeName="transform" type="rotate" values="0;${spin * (i % 2 ? 1 : -1)}" dur="${d}" begin="${b}" ${loop}/>` : '') +
     `</g>${fadeLoop(d, b)}<animateTransform attributeName="transform" type="translate" values="0 0;${sway} ${dy * 0.5};${-sway / 2} ${dy}" dur="${d}" begin="${b}" ${loop} additive="sum"/></g>`
 }).join('')
-// 从下往上升起
+// 從下往上升起
 const ascend = (pts, shape, { dur = 5, dy = -220 } = {}) => pts.map(([x, y], i) => {
   const d = `${(dur + (i % 3) * 0.7).toFixed(1)}s`, b = `${(i * 0.9).toFixed(2)}s`
   return `<g transform="translate(${x} ${y})" opacity="0">${shape(i)}${fadeLoop(d, b)}${rise(d, b, dy, i % 2 ? 10 : -10)}</g>`
@@ -460,23 +460,23 @@ const fxCloud = (x, y, s, dur, dx) =>
   `<path d="M-24 4 a10 10 0 0 1 10 -10" stroke="#dfe8f5" stroke-width="3" fill="none" stroke-linecap="round"/>` +
   `<animateTransform attributeName="transform" type="translate" values="0 0;${dx} 0;0 0" dur="${dur}" ${loop} additive="sum"/></g>`
 
-// 早上：右上角太阳升起，光芒慢慢转
+// 早上：右上角太陽昇起，光芒慢慢轉
 const fxMorning = `${sunDefs}<g>${sun(520, 72, 26)}${fxEnter(40, '1.4s')}</g>` +
   star(60, 150, 0.7, '0.4s', '#ffd98a', '2.6s') + star(40, 260, 0.5, '1.3s', '#ffd98a', '2.6s')
-// 中午：头顶高处的太阳 + 两朵飘过的云
+// 中午：頭頂高處的太陽 + 兩朵飄過的雲
 const fxNoon = `${sunDefs}<g>${sun(70, 64, 24, '10s')}${fxEnter(-20, '0.9s')}</g>` +
   `<g>${fxCloud(512, 70, 0.9, '6s', -14)}${fxEnter(0, '1s')}</g><g>${fxCloud(530, 170, 0.6, '7s', 10)}${fxEnter(0, '1.4s')}</g>`
-// 下午：两侧飘落的暖色花瓣
+// 下午：兩側飄落的暖色花瓣
 const petal = i => `<path d="M0 -9 C7 -6 7 5 0 9 C-7 5 -7 -6 0 -9Z" fill="${['#ffc1a8', '#ffd7a0', '#f9a98b'][i % 3]}" stroke="${INK}" stroke-width="1.4"/><path d="M0 -6 V6" stroke="#e98e6f" stroke-width="1"/>`
 const fxAfternoon = fall(SIDES, petal, { dur: 4.4, dy: 360, sway: 18, spin: 220 })
-// 晚上：两侧一闪一闪、慢慢飘的萤火虫
+// 晚上：兩側一閃一閃、慢慢飄的螢火蟲
 const firefly = i => `<circle r="9" fill="#fff3b0" opacity="0.35"/><circle r="4" fill="#ffe066" stroke="#d9a21b" stroke-width="1.2"/>`
 const fxEvening = ascend([[40, 300], [70, 380], [30, 200], [520, 320], [548, 240], [505, 400]], firefly, { dur: 4.2, dy: -90 })
-// 深夜：弯月 + 闪烁的星星 + 偶尔一颗流星
+// 深夜：彎月 + 閃爍的星星 + 偶爾一顆流星
 const moonDefs = `<defs><linearGradient id="fxMoon" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff8d6"/><stop offset="1" stop-color="#f2cf6b"/></linearGradient></defs>`
 const crescent = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M0 -30 a30 30 0 1 0 26 45 a24 24 0 1 1 -26 -45z" fill="url(#fxMoon)" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>` +
   `<circle cx="-12" cy="6" r="3" fill="#e8c35a" opacity="0.7"/><circle cx="-6" cy="18" r="2" fill="#e8c35a" opacity="0.7"/></g>`
-// 流星：头沿斜线划过，尾巴晚一点出发跟着走，所以先拖出一道光、再收短消失（不是一整根线平移）
+// 流星：頭沿斜線劃過，尾巴晚一點出發跟著走，所以先拖出一道光、再收短消失（不是一整根線平移）
 const shootingStar = (() => {
   const [x0, y0, x1, y1] = [570, 12, 380, 88], t = 'dur="6s" ' + loop
   const kt = 'keyTimes="0;0.6;0.72;1"', ktTail = 'keyTimes="0;0.63;0.76;1"'
@@ -494,7 +494,7 @@ const fxNight = `${moonDefs}<g>${crescent(66, 76, 1)}${fxEnter(16, '1.2s')}</g>`
 const fxDawn = `${moonDefs}<g opacity="0.85">${crescent(520, 66, 0.7)}${fxEnter(0, '1.5s')}</g>` +
   star(60, 70, 0.5, '0s', '#e8ecff', '3.4s') + star(36, 180, 0.4, '1.2s', '#e8ecff', '3.4s') + star(470, 40, 0.4, '2.1s', '#e8ecff', '3.4s')
 
-// 万圣节：两侧扑扇翅膀的小蝙蝠
+// 萬聖節：兩側撲扇翅膀的小蝙蝠
 const bat = (path, dur, begin) => `<g opacity="0"><g><path d="M0 0 C-6 -10 -14 -12 -22 -6 C-18 -4 -16 0 -18 4 C-12 0 -6 2 0 6 C6 2 12 0 18 4 C16 0 18 -4 22 -6 C14 -12 6 -10 0 0Z" fill="#3b2a3f" stroke="${INK}" stroke-width="1.6" stroke-linejoin="round"/>` +
   `<circle cx="-3" cy="-1" r="1.4" fill="#ffd34d"/><circle cx="3" cy="-1" r="1.4" fill="#ffd34d"/>` +
   `<animateTransform attributeName="transform" type="scale" values="1 1;1 0.35;1 1" dur="0.32s" ${loop}/></g>` +
@@ -502,11 +502,11 @@ const bat = (path, dur, begin) => `<g opacity="0"><g><path d="M0 0 C-6 -10 -14 -
 const fxHalloween = bat('M60 120 C20 90 90 60 50 30 C10 0 100 10 70 60 C40 110 100 140 60 120', '5s', '0s') +
   bat('M520 90 C560 60 490 40 530 20 C570 0 480 10 510 60 C540 110 480 120 520 90', '6s', '0.6s') +
   bat('M540 260 C570 230 500 220 530 200 C560 180 500 170 520 230 C540 290 510 290 540 260', '5.5s', '1.2s')
-// 圣诞：雪花飘落
+// 聖誕：雪花飄落
 const flake = i => `<g transform="scale(${[1, 0.75, 0.9][i % 3]})"><circle r="7" fill="#fff" stroke="#9fb6d6" stroke-width="1.6"/>` +
   `<path d="M0 -5 V5 M-4.3 -2.5 L4.3 2.5 M-4.3 2.5 L4.3 -2.5" stroke="#9fb6d6" stroke-width="1.3" stroke-linecap="round"/></g>`
 const fxChristmas = fall([...SIDES, 140, 440, 200, 380], flake, { dur: 5.2, dy: 420, sway: 16, spin: 120 })
-// 元旦：两侧烟花一朵朵绽放
+// 元旦：兩側煙花一朵朵綻放
 const firework = (x, y, color, begin) => {
   const rays = Array.from({ length: 12 }, (_, i) => {
     const a = (i * 30) * Math.PI / 180, x2 = (Math.cos(a) * 34).toFixed(1), y2 = (Math.sin(a) * 34).toFixed(1)
@@ -518,7 +518,7 @@ const firework = (x, y, color, begin) => {
     `<animateTransform attributeName="transform" type="scale" values="0.2;1;1.15" keyTimes="0;0.35;1" dur="2.4s" begin="${begin}" ${loop}/></g></g>`
 }
 const fxNewYear = firework(70, 90, '#ff6b81', '0s') + firework(512, 70, '#ffd54a', '0.8s') + firework(530, 210, '#5b8def', '1.6s') + firework(50, 230, '#7ed957', '1.2s')
-// 春节：两角挂着摇晃的红灯笼 + 金色闪光
+// 春節：兩角掛著搖晃的紅燈籠 + 金色閃光
 const lanternDefs = `<defs><radialGradient id="fxLantern" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#ff8a6b"/><stop offset="0.6" stop-color="#e5352b"/><stop offset="1" stop-color="#b81f1a"/></radialGradient></defs>`
 const redLantern = (x, s, begin) => `<g transform="translate(${x} 0) scale(${s})"><g>` +
   `<line x1="0" y1="0" x2="0" y2="34" stroke="${INK}" stroke-width="2"/>` +
@@ -531,23 +531,23 @@ const redLantern = (x, s, begin) => `<g transform="translate(${x} 0) scale(${s})
   `<animateTransform attributeName="transform" type="rotate" values="-6;6;-6" dur="2.6s" begin="${begin}" ${loop}/></g></g>`
 const fxSpring = `${lanternDefs}<g>${redLantern(52, 0.95, '0s')}${fxEnter(-30, '0.9s')}</g><g>${redLantern(528, 0.95, '0.6s')}${fxEnter(-30, '1.1s')}</g>` +
   star(60, 230, 0.9, '0.3s', '#ffd54a') + star(520, 250, 1, '0.9s', '#ffd54a') + star(40, 330, 0.6, '1.4s', '#ffd54a') + star(548, 350, 0.7, '0.5s', '#ffd54a')
-// 元宵：孔明灯慢慢升起
+// 元宵：孔明燈慢慢升起
 const skyLantern = i => `<g transform="scale(${[1, 0.8, 0.9][i % 3]})"><ellipse cx="0" cy="4" rx="20" ry="8" fill="#ffd27a" opacity="0.35"/>` +
   `<path d="M-13 -20 Q0 -26 13 -20 L10 12 Q0 15 -10 12Z" fill="#ffb347" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>` +
   `<path d="M-5 -18 Q-7 -4 -5 10" stroke="#fff1c9" stroke-width="2.4" fill="none" opacity="0.8"/>` +
   `<ellipse cx="0" cy="12" rx="10" ry="2.6" fill="#ffe066" stroke="${INK}" stroke-width="1.4"/></g>`
 const fxLantern = ascend([[46, 440], [80, 360], [30, 300], [520, 430], [550, 350], [500, 280]], skyLantern, { dur: 6, dy: -300 })
-// 端午：竹叶飘落
+// 端午：竹葉飄落
 const leaf = i => `<path d="M0 -14 C8 -8 8 8 0 14 C-8 8 -8 -8 0 -14Z" fill="${i % 2 ? '#7fbf6a' : '#5ea85a'}" stroke="${INK}" stroke-width="1.5"/><path d="M0 -12 V12" stroke="#3f7d43" stroke-width="1.2"/>`
 const fxDragonBoat = fall(SIDES, leaf, { dur: 4.6, dy: 330, sway: 20, spin: 160 })
-// 中秋：右上角一轮圆月 + 桂花飘落
+// 中秋：右上角一輪圓月 + 桂花飄落
 const fullMoon = `<defs><radialGradient id="fxFull" cx="42%" cy="40%" r="62%"><stop offset="0" stop-color="#fffbe6"/><stop offset="0.7" stop-color="#ffe49a"/><stop offset="1" stop-color="#f3c85c"/></radialGradient></defs>` +
   `<g transform="translate(512 74)"><circle r="46" fill="#fff3c4" opacity="0.35"/><circle r="34" fill="url(#fxFull)" stroke="${INK}" stroke-width="2.5"/>` +
   `<circle cx="10" cy="-8" r="5" fill="#ecc96b" opacity="0.6"/><circle cx="-10" cy="10" r="3.5" fill="#ecc96b" opacity="0.6"/><circle cx="14" cy="14" r="2.5" fill="#ecc96b" opacity="0.6"/>` +
   `<animate attributeName="opacity" values="0;1" ${fxOnce('1.4s')}/></g>`
 const osmanthus = i => `<g fill="#ffb627" stroke="${INK}" stroke-width="1">${[0, 90, 180, 270].map(a => `<ellipse cx="0" cy="-3.6" rx="2.4" ry="3.4" transform="rotate(${a})"/>`).join('')}<circle r="1.6" fill="#fff1b0" stroke="none"/></g>`
 const fxMidAutumn = fullMoon + fall([22, 52, 82, 470, 540, 560], osmanthus, { dur: 4.8, dy: 320, sway: 14, spin: 180, y0: 140 })
-// 国庆（出游主题）：白云飘过 + 一架纸飞机
+// 國慶（出遊主題）：白雲飄過 + 一架紙飛機
 const plane = `<g opacity="0"><path d="M0 0 L36 -12 L14 6Z" fill="#fff" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/><path d="M14 6 L36 -12 L18 14Z" fill="#dfe8f5" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>` +
   `<animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.85;1" dur="5s" ${loop}/>` +
   `<animateMotion path="M10 140 C60 60 140 40 200 60 S330 30 380 50 S500 90 560 40" dur="5s" ${loop}/></g>`
@@ -565,7 +565,7 @@ Object.assign(AURA, {
   fest_lantern: ['#ffcf8a', 0.55], fest_dragonboat: ['#a8e0b8', 0.5], fest_midautumn: ['#ffe7a3', 0.55], fest_national: ['#bfe0ff', 0.5],
 })
 
-// 每个姿态周围的细节
+// 每個姿態周圍的細節
 const surroundings = (p      )         => {
   switch (p) {
     case 'idle': return star(80, 180, 0.6, '0s', '#ffc58a', '3s') + star(500, 260, 0.5, '1.5s', '#ffc58a', '3s')
@@ -577,7 +577,7 @@ const surroundings = (p      )         => {
     case 'writing': return editorCard
     case 'running': return terminal
     case 'searching': return magnifier + browser
-    case 'delegating': return taskCard  // 子任务依次完成；「派出分身」交给立绘表现
+    case 'delegating': return taskCard  // 子任務依次完成；「派出分身」交給立繪表現
     case 'happy': return checklist + confetti + star(500, 170, 1, '0.5s') + star(548, 392, 0.9, '0.3s')
     case 'proud': return trophy + crown + star(510, 140, 1.1, '0.4s', '#ffd54a') + star(548, 330, 0.8, '0.2s', '#ffd54a')
     case 'oops': return errorCard
@@ -605,7 +605,7 @@ const sceneSvg = (art     , p      )         => {
     `${surroundings(p)}</svg>`
 }
 
-// 多会话的小卡片：每个对话正在做的事只取主要的那个道具（不带星星、彩带这些散在四周的点缀），网页裁好放进桌宠两侧
+// 多會話的小卡片：每個對話正在做的事只取主要的那個道具（不帶星星、綵帶這些散在四週的點綴），網頁裁好放進桌寵兩側
 const cardProp = (p      )         => {
   switch (p) {
     case 'listening': return chatCard

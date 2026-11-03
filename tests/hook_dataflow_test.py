@@ -1,4 +1,4 @@
-"""钩子脚本写给桌宠的数据（crosspet-hook.py）。只用临时目录，不打开桌宠。
+"""鉤子指令碼寫給桌寵的資料（crosspet-hook.py）。只用臨時目錄，不開啟桌寵。
 
     python3 tests/hook_dataflow_test.py
 """
@@ -42,7 +42,7 @@ class HookDataflowTest(unittest.TestCase):
         return json.loads(path.read_text(encoding="utf-8-sig")) if path.exists() else None
 
     def test_mixed_up_models_file_does_not_break_the_hook(self):
-        # 以前 claude-models.json 和 claude-sessions.json 共用一个临时文件，几个钩子同时写时会互相写错
+        # 以前 claude-models.json 和 claude-sessions.json 共用一個臨時檔案，幾個鉤子同時寫時會互相寫錯
         (self.state / "claude-models.json").write_text(json.dumps({"s1": {"pose": "running", "ts": 1}}))
         state = self.run_hook({"hook_event_name": "PreToolUse", "session_id": "s1", "tool_name": "Read"})
         self.assertEqual(state["pose"], "reading")
@@ -53,7 +53,7 @@ class HookDataflowTest(unittest.TestCase):
         self.assertEqual(set(self.read("claude-sessions.json")), {"s1"})
 
     def test_cursor_running_claude_hooks_writes_nothing(self):
-        # Cursor 默认也跑 Claude Code 的钩子；Cursor 有自己的接入，这里什么都不写（心跳也不算 Claude 的）
+        # Cursor 預設也跑 Claude Code 的鉤子；Cursor 有自己的接入，這裡什麼都不寫（心跳也不算 Claude 的）
         home = Path(self.temp.name) / "home"
         cursor = home / ".cursor"
         cursor.mkdir(parents=True)
@@ -73,9 +73,9 @@ class HookDataflowTest(unittest.TestCase):
         self.assertEqual(state["pose"], "idle")
 
     def test_launch_events_follow_the_data_dir(self):
-        # 临时运行目录里关掉了「AI 开始工作时自动出现」：钩子照它办，不去打开真的桌宠（macOS 上以前看的是真的设置）
+        # 臨時執行目錄裡關掉了「AI 開始工作時自動出現」：鉤子照它辦，不去開啟真的桌寵（macOS 上以前看的是真的設定）
         self.run_hook({"hook_event_name": "UserPromptSubmit", "session_id": "s1"})
-        self.assertIn("不打开", (self.state / "autostart.txt").read_text(encoding="utf-8-sig"))
+        self.assertIn("不開啟", (self.state / "autostart.txt").read_text(encoding="utf-8-sig"))
 
     @unittest.skipUnless(os.name == "nt", "Windows file-sharing semantics")
     def test_transient_state_reader_does_not_fail_the_observer(self):

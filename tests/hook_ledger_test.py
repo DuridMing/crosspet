@@ -1,5 +1,5 @@
-"""钩子事件记录（数据目录 events/<接入名>.jsonl）：每条事件记处理结果（演了 / 被哪条规则丢了 / 出错），绝不记内容。
-设计见 docs/superpowers/specs/2026-10-21-feedback-redesign-design.md 第四节。不开真的桌宠、不碰用户配置。
+"""鉤子事件記錄（資料目錄 events/<接入名>.jsonl）：每條事件記處理結果（演了 / 被哪條規則丟了 / 出錯），絕不記內容。
+設計見 docs/superpowers/specs/2026-10-21-feedback-redesign-design.md 第四節。不開真的桌寵、不碰使用者配置。
     python3 -m unittest tests.hook_ledger_test
 """
 import hashlib
@@ -103,7 +103,7 @@ class HookLedgerTest(unittest.TestCase):
             self.send("PreToolUse", tool_name=f"tool{i}", session_id=f"s{i}")
         with ThreadPoolExecutor(10) as pool:
             list(pool.map(one, range(20)))
-        self.assertEqual(len(self.lines("codex")), 20)   # 每行都能解析（lines() 里 json.loads），而且一条没丢
+        self.assertEqual(len(self.lines("codex")), 20)   # 每行都能解析（lines() 裡 json.loads），而且一條沒丟
 
     def test_session_hashed(self):
         self.send("PreToolUse", session_id="abc-secret-session")

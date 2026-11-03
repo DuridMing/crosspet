@@ -2,7 +2,7 @@
   "name": "@local/dsh-plugin-crosspet",
   "version": "1.3.9",
   "private": true,
-  "description": "CrossPet 桌宠的 DeepSeek Harness 插件：把 DeepSeek 的工作状态和账户余额写给桌宠。",
+  "description": "CrossPet 桌寵的 DeepSeek Harness 外掛：把 DeepSeek 的工作狀態和賬戶餘額寫給桌寵。",
   "type": "module",
   "main": "lib/index.js",
   "exports": {

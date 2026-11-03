@@ -1,10 +1,10 @@
 // CrossPet × DeepSeek Harness
-// - 监听 Harness 的工作事件（收到消息 / 调工具 / 子任务 / 一轮结束），写 <状态目录>/<角色>-state.json
-//   Harness 能接好几家模型：按会话实际在用的模型选角色（DeepSeek / GPT / Claude / Gemini），
-//   当前角色另外记在 deepseek-host.json，桌宠切到 Harness 窗口时按它换角色
-// - 每 1 分钟查一次余额（发消息、一轮结束时也查，30 秒内只查一次）（有 API Key 用 Key；没有就用 Harness 里登录的账号），写 <状态目录>/deepseek-quota.json
-// - 跟着 AI 出现：Harness 启动、新会话、发消息时，桌宠没开着就把它打开（用户从菜单退出后到 Harness 重开前不管；在设置 / 插件配置 autostart: false 里关掉了也不管）
-// 状态目录默认 /tmp/crosspet，可在插件配置里改 stateDir。插件只观察，不改变 DeepSeek 的任何行为。
+// - 監聽 Harness 的工作事件（收到訊息 / 調工具 / 子任務 / 一輪結束），寫 <狀態目錄>/<角色>-state.json
+//   Harness 能接好幾家模型：按會話實際在用的模型選角色（DeepSeek / GPT / Claude / Gemini），
+//   當前角色另外記在 deepseek-host.json，桌寵切到 Harness 視窗時按它換角色
+// - 每 1 分鐘查一次餘額（發訊息、一輪結束時也查，30 秒內只查一次）（有 API Key 用 Key；沒有就用 Harness 裡登入的賬號），寫 <狀態目錄>/deepseek-quota.json
+// - 跟著 AI 出現：Harness 啟動、新會話、發訊息時，桌寵沒開著就把它開啟（使用者從選單退出後到 Harness 重開前不管；在設定 / 外掛配置 autostart: false 裡關掉了也不管）
+// 狀態目錄預設 /tmp/crosspet，可在外掛配置裡改 stateDir。外掛只觀察，不改變 DeepSeek 的任何行為。
 import { appendFile, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { spawn } from "node:child_process";
@@ -16,14 +16,14 @@ export const name = "crosspet";
 export const inject = ["credentials"];
 
 const ID = "deepseek";
-const PLUGIN_VERSION = "1.3.9";  // 出现在 deepseek-plugin.json 里，用来确认跑的是哪一版插件。必须是三段的合法版本号（同步写进 package.json，Harness 装插件时会校验）
+const PLUGIN_VERSION = "1.3.9";  // 出現在 deepseek-plugin.json 裡，用來確認跑的是哪一版外掛。必須是三段的合法版本號（同步寫進 package.json，Harness 裝外掛時會校驗）
 const BIG_JOB_TOOLS = 8;
-const BALANCE_EVERY_MS = 60 * 1000;   // 定时查余额：充了值、没再对话，最多等 1 分钟（以前 10 分钟，用户充值后半天没变）。只是要一次账户余额，不耗 token
+const BALANCE_EVERY_MS = 60 * 1000;   // 定時查餘額：充了值、沒再對話，最多等 1 分鐘（以前 10 分鐘，使用者充值後半天沒變）。只是要一次賬戶餘額，不耗 token
 
 function poseForTool(name, args) {
   const t = String(name ?? "").toLowerCase();
   const input = (() => { try { return JSON.stringify(args ?? "").toLowerCase(); } catch { return ""; } })();
-  if (t === "ask_user_question" || t === "ask_user") return "asking";  // 停下来问你问题、让你选选项
+  if (t === "ask_user_question" || t === "ask_user") return "asking";  // 停下來問你問題、讓你選選項
   if (/image_gen|imagegen|generate_image|draw|paint/.test(t) || input.includes("image_gen")) return "drawing";
   if (/read|grep|glob|list|view|cat/.test(t)) return "reading";
   if (/write|edit|patch|replace|create/.test(t)) return "writing";
@@ -32,8 +32,8 @@ function poseForTool(name, args) {
   return "running";
 }
 
-// 模型 → 角色：先看模型名，再看 provider 名（provider 是用户自己起的路由名，可能叫什么都有），都认不出算 DeepSeek。
-// 插件配置里的 characters 可以覆盖，比如 { "my-gateway": "gpt" }（键是 provider 或模型名）
+// 模型 → 角色：先看模型名，再看 provider 名（provider 是使用者自己起的路由名，可能叫什麼都有），都認不出算 DeepSeek。
+// 外掛配置裡的 characters 可以覆蓋，比如 { "my-gateway": "gpt" }（鍵是 provider 或模型名）
 function characterFor(provider, model, custom = {}) {
   const p = String(provider ?? ""), m = String(model ?? "");
   if (custom[m]) return custom[m];
@@ -58,21 +58,21 @@ function failed(result) {
 export function apply(ctx, config = {}) {
   const data = process.env.CROSSPET_DATA_DIR || join(process.env.LOCALAPPDATA || join(homedir(), "AppData", "Local"), "CrossPet");
   const dir = config.stateDir || process.env.CROSSPET_STATE_DIR || (process.platform === "win32" ? join(data, "state") : "/tmp/crosspet");
-  const lowBalance = lowThresholds(config.lowBalance);  // 按币种的门槛，见 balance.js
+  const lowBalance = lowThresholds(config.lowBalance);  // 按幣種的門檻，見 balance.js
   let tools = 0;
 
   let writes = 0;
   async function writeJson(file, data) {
     await mkdir(dir, { recursive: true });
-    // 临时文件名每次不同：几次写入同时发生时（比如启动时查两次余额、连续的工作事件）不会互相抢同一个文件
+    // 臨時檔名每次不同：幾次寫入同時發生時（比如啟動時查兩次餘額、連續的工作事件）不會互相搶同一個檔案
     const tmp = join(dir, `.${file}.${process.pid}.${++writes}`);
     await writeFile(tmp, JSON.stringify(data));
     await rename(tmp, join(dir, file));
   }
-  // 当前在用的模型对应的角色：每条会话事件都看一眼会话的请求路由（和 Harness 自带插件一样用 requestContext）
+  // 當前在用的模型對應的角色：每條會話事件都看一眼會話的請求路由（和 Harness 自帶外掛一樣用 requestContext）
   const custom = config.characters && typeof config.characters === "object" ? config.characters : {};
   let character = ID;
-  // 最近一次请求走的服务商：记在 <状态目录>/deepseek-host.json，Harness 重新打开、还没发消息时先按上次的算
+  // 最近一次請求走的服務商：記在 <狀態目錄>/deepseek-host.json，Harness 重新開啟、還沒發訊息時先按上次的算
   let provider = null;
   try { provider = JSON.parse(readFileSync(join(dir, `${ID}-host.json`), "utf8")).provider || null; } catch {}
   function noteRoute(session) {
@@ -83,7 +83,7 @@ export function apply(ctx, config = {}) {
     const switched = route.provider && route.provider !== provider;
     if (switched) {
       provider = route.provider;
-      publishQuota();   // 换了服务商：余额该显示还是该藏起来
+      publishQuota();   // 換了服務商：餘額該顯示還是該藏起來
     }
     if (next === character && !switched) return;
     character = next;
@@ -93,23 +93,23 @@ export function apply(ctx, config = {}) {
 
   let seenAt = 0;
   function state(pose, event, tool = "") {
-    if (Date.now() - seenAt > 10000) {   // 心跳：最近一次收到消息（桌宠记下来，设置和反馈里看）
+    if (Date.now() - seenAt > 10000) {   // 心跳：最近一次收到訊息（桌寵記下來，設定和反饋裡看）
       seenAt = Date.now();
       mkdir(dir, { recursive: true }).then(() => writeFile(join(dir, "seen-deepseek"), String(Math.floor(seenAt / 1000)))).catch(() => {});
     }
     ledger(event, tool, "shown", `${character} ${pose}`);
     writeJson(`${character}-state.json`, { pose, event, tool, ts: Date.now() / 1000 }).catch((e) =>
-      ctx.logger?.warn?.(`crosspet: 写状态失败 ${String(e)}`),
+      ctx.logger?.warn?.(`crosspet: 寫狀態失敗 ${String(e)}`),
     );
   }
 
-  // ---- 跟着 AI 出现 ----
-  // 桌宠在跑时把自己的进程号写在 <状态目录>/pet.pid；从菜单手动退出时在数据目录写 user-quit（Harness 重开或重启电脑后作废），
-  // 设置里关掉时写 ai-autostart-off。用独立进程打开（detached），Harness 退出时桌宠不会被一起关掉
+  // ---- 跟著 AI 出現 ----
+  // 桌寵在跑時把自己的程式號寫在 <狀態目錄>/pet.pid；從選單手動退出時在資料目錄寫 user-quit（Harness 重開或重啟電腦後作廢），
+  // 設定裡關掉時寫 ai-autostart-off。用獨立程式開啟（detached），Harness 退出時桌寵不會被一起關掉
   const appData = process.platform === "win32" ? data : join(homedir(), "Library", "Application Support", "CrossPet");
 
-  // ---- 事件记录（反馈「AI 干活时她没反应」用）：数据目录 events/deepseek.jsonl，格式和 crosspet-hook.py 一样（见 docs/架构.md「记录」）。
-  // 只记事件名、工具名、结果，不记消息和工具参数；只留最近 200 行。插件只有一个进程，按顺序排队写就行
+  // ---- 事件記錄（反饋「AI 幹活時她沒反應」用）：資料目錄 events/deepseek.jsonl，格式和 crosspet-hook.py 一樣（見 docs/架构.md「记录」）。
+  // 只記事件名、工具名、結果，不記訊息和工具引數；只留最近 200 行。外掛只有一個程式，按順序排隊寫就行
   const ledgerDir = join(config.dataDir || (process.env.CROSSPET_DATA_DIR ? data : appData), "events");
   let ledgerChain = Promise.resolve();
   function ledger(ev, tool, result, detail) {
@@ -124,63 +124,63 @@ export function apply(ctx, config = {}) {
         await writeFile(tmp, rows.slice(-200).join("\n") + "\n");
         await rename(tmp, file);
       }
-    }).catch(() => {});   // 记录写不了不能影响插件本身
+    }).catch(() => {});   // 記錄寫不了不能影響外掛本身
   }
   let lastEnsure = 0;
-  function noteAutostart(source, result) {  // 写进 <状态目录>/autostart.txt，排查「为什么没出来」用
+  function noteAutostart(source, result) {  // 寫進 <狀態目錄>/autostart.txt，排查「為什麼沒出來」用
     const at = new Date().toLocaleString("zh-CN", { hour12: false });
-    // Windows 上带 BOM：系统自带的 PowerShell 5 没有 BOM 就按 GBK 读，中文会乱码
+    // Windows 上帶 BOM：系統自帶的 PowerShell 5 沒有 BOM 就按 GBK 讀，中文會亂碼
     const bom = process.platform === "win32" ? "\ufeff" : "";
     mkdir(dir, { recursive: true }).then(() => writeFile(join(dir, "autostart.txt"), `${bom}${at} deepseek ${source}：${result}\n`)).catch(() => {});
   }
   function ensurePet(source) {
-    if (config.autostart === false) return noteAutostart(source, "不打开：插件配置里 autostart 是 false");
+    if (config.autostart === false) return noteAutostart(source, "不開啟：外掛配置裡 autostart 是 false");
     if (Date.now() - lastEnsure < 30000) return;
     lastEnsure = Date.now();
     try {
-      // 手动退出过：Harness 是在那之后才打开的（关掉重开过、或者重启过电脑）就作废，否则先不管
+      // 手動退出過：Harness 是在那之後才打開的（關掉重開過、或者重啟過電腦）就作廢，否則先不管
       const quitFlag = join(appData, "user-quit");
       if (existsSync(quitFlag)) {
         const hm = (ms) => new Date(ms).toLocaleTimeString("zh-CN", { hour12: false });
         const started = Date.now() - process.uptime() * 1000, quitAt = statSync(quitFlag).mtimeMs;
         if (started < quitAt)
-          return noteAutostart(source, `不打开：从菜单手动退出过，Harness 是在那之前就开着的（Harness 打开于 ${hm(started)}，退出于 ${hm(quitAt)}）`);
+          return noteAutostart(source, `不開啟：從選單手動退出過，Harness 是在那之前就開著的（Harness 開啟於 ${hm(started)}，退出於 ${hm(quitAt)}）`);
       }
-      if (existsSync(join(appData, "ai-autostart-off"))) return noteAutostart(source, "不打开：设置里关掉了「AI 开始工作时自动出现」");
+      if (existsSync(join(appData, "ai-autostart-off"))) return noteAutostart(source, "不開啟：設定裡關掉了「AI 開始工作時自動出現」");
       try {
         process.kill(Number(readFileSync(join(dir, "pet.pid"), "utf8").trim()), 0);
-        return noteAutostart(source, "已经在跑");
+        return noteAutostart(source, "已經在跑");
       } catch (e) {
-        if (e?.code === "EPERM") return noteAutostart(source, "已经在跑");
+        if (e?.code === "EPERM") return noteAutostart(source, "已經在跑");
       }
       let child;
       if (process.platform === "win32") {
         const exe = join(process.env.LOCALAPPDATA || join(homedir(), "AppData", "Local"), "Programs", "CrossPet", "CrossPet.exe");
-        if (!existsSync(exe)) return noteAutostart(source, `不打开：没找到 ${exe}`);
+        if (!existsSync(exe)) return noteAutostart(source, `不開啟：沒找到 ${exe}`);
         child = spawn(exe, [], { detached: true, stdio: "ignore", cwd: dirname(exe) });
       } else if (process.platform === "darwin") {
         child = spawn("/usr/bin/open", ["-g", "-b", "io.github.crosspet"], { detached: true, stdio: "ignore" });
       } else return;
-      child.on("error", (e) => noteAutostart(source, `打开失败：${String(e?.message ?? e)}`));
+      child.on("error", (e) => noteAutostart(source, `開啟失敗：${String(e?.message ?? e)}`));
       child.unref();
-      noteAutostart(source, "已打开");
+      noteAutostart(source, "已開啟");
     } catch (e) {
-      noteAutostart(source, `出错：${String(e?.message ?? e)}`);
-      ctx.logger?.warn?.(`crosspet: 打开桌宠失败 ${String(e?.message ?? e)}`);
+      noteAutostart(source, `出錯：${String(e?.message ?? e)}`);
+      ctx.logger?.warn?.(`crosspet: 開啟桌寵失敗 ${String(e?.message ?? e)}`);
     }
   }
   ctx.effect(() => {
-    const timer = setTimeout(() => ensurePet("Harness 启动"), 2500);  // 稍微错开 Harness 自己的启动
+    const timer = setTimeout(() => ensurePet("Harness 啟動"), 2500);  // 稍微錯開 Harness 自己的啟動
     return () => clearTimeout(timer);
   }, "crosspet: open pet with Harness");
 
-  ctx.on("agent/created", () => { state("idle", "SessionStart"); ensurePet("新会话"); });
+  ctx.on("agent/created", () => { state("idle", "SessionStart"); ensurePet("新會話"); });
   ctx.on("agent/pre-step", async ({ messages }, next) => {
     if (messages?.length) {
-      ensurePet("发消息");
+      ensurePet("發訊息");
       tools = 0;
       state("listening", "UserPromptSubmit");
-      pollBalanceSoon();   // 充完值回来一说话，余额马上跟上
+      pollBalanceSoon();   // 充完值回來一說話，餘額馬上跟上
     }
     return next();
   });
@@ -196,10 +196,10 @@ export function apply(ctx, config = {}) {
   ctx.on("agent/turn-stopping", () => {
     state(tools >= BIG_JOB_TOOLS ? "proud" : "happy", "Stop");
     tools = 0;
-    pollBalanceSoon();   // 这一轮花掉的钱
+    pollBalanceSoon();   // 這一輪花掉的錢
   });
-  // 要你授权：只旁听，决定原样交回给 Harness。自动放行的请求也会经过这里，
-  // 所以超过 0.4 秒还没答复（真的在等人）才换成等你回答的表情，免得干活时一闪一闪
+  // 要你授權：只旁聽，決定原樣交回給 Harness。自動放行的請求也會經過這裡，
+  // 所以超過 0.4 秒還沒答覆（真的在等人）才換成等你回答的表情，免得幹活時一閃一閃
   ctx.on("approval/request", async (_request, next) => {
     const waiting = setTimeout(() => state("asking", "PermissionRequest"), 400);
     try {
@@ -209,12 +209,12 @@ export function apply(ctx, config = {}) {
     }
   });
   ctx.on("subagent/start", () => state("delegating", "SubagentStart"));
-  // 压缩上下文：会话日志里的 compaction/start、compaction/end
-  // ---- 多会话：按对话另记 <角色>-sessions.json（{会话id: {pose, event, ts}}）----
-  // 好几个对话同时在干活时桌宠演「手忙脚乱」，每个对话一张小卡片。全靠 session/event：每条都带着是哪个对话，
-  // 一轮开始 / 调工具 / 工具结果 / 请求授权 / 一轮结束都有。子任务（subagent）的会话不算单独的对话
-  const perChar = {};      // 角色 → {会话id: 状态}
-  const turnTools = {};    // 会话id → 这一轮用了几次工具
+  // 壓縮上下文：會話日誌裡的 compaction/start、compaction/end
+  // ---- 多會話：按對話另記 <角色>-sessions.json（{會話id: {pose, event, ts}}）----
+  // 好幾個對話同時在幹活時桌寵演「手忙腳亂」，每個對話一張小卡片。全靠 session/event：每條都帶著是哪個對話，
+  // 一輪開始 / 調工具 / 工具結果 / 請求授權 / 一輪結束都有。子任務（subagent）的會話不算單獨的對話
+  const perChar = {};      // 角色 → {會話id: 狀態}
+  const turnTools = {};    // 會話id → 這一輪用了幾次工具
   let sessionsDirty = new Set(), sessionsTimer = null;
   function noteSession(session, pose, ev) {
     const header = session?.header;
@@ -222,12 +222,12 @@ export function apply(ctx, config = {}) {
     let who = ID;
     try { const r = session.requestContext?.(); if (r?.provider || r?.model) who = characterFor(r.provider, r.model, custom); } catch {}
     const now = Date.now() / 1000;
-    for (const [c, map] of Object.entries(perChar)) if (c !== who && map[session.id]) { delete map[session.id]; sessionsDirty.add(c); }   // 中途换了模型
+    for (const [c, map] of Object.entries(perChar)) if (c !== who && map[session.id]) { delete map[session.id]; sessionsDirty.add(c); }   // 中途換了模型
     const map = (perChar[who] ??= {});
     map[session.id] = { pose, event: ev, ts: now };
     for (const [k, v] of Object.entries(map)) if (now - v.ts > 600) delete map[k];
     sessionsDirty.add(who);
-    // 合并 0.2 秒内的连续事件再写盘
+    // 合併 0.2 秒內的連續事件再寫盤
     sessionsTimer ??= setTimeout(() => {
       sessionsTimer = null;
       for (const c of sessionsDirty) writeJson(`${c}-sessions.json`, perChar[c] || {}).catch(() => {});
@@ -257,8 +257,8 @@ export function apply(ctx, config = {}) {
   ctx.on("session/event", (session, event) => {
     noteRoute(session);
     try { sessionPose(session, event); } catch {}
-    // 一轮结束都会记 turn/end（reason.kind：completed / aborted / error / blocked）；
-    // 正常完成由 agent/turn-stopping 处理，这里补上被你打断、出错停下的情况，不然会一直停在思考
+    // 一輪結束都會記 turn/end（reason.kind：completed / aborted / error / blocked）；
+    // 正常完成由 agent/turn-stopping 處理，這裡補上被你打斷、出錯停下的情況，不然會一直停在思考
     if (event?.type === "turn/end") {
       const kind = event.data?.reason?.kind;
       if (kind === "aborted") { tools = 0; state("surprised", "Stop"); }
@@ -269,11 +269,11 @@ export function apply(ctx, config = {}) {
   });
   ctx.on("subagent/end", () => state("thinking", "SubagentStop"));
 
-  // ---- 余额 ----
-  // 两条路，都是 Harness 官方接口，Key / 登录凭据都只在 Harness 内部使用，插件只拿到余额数字：
-  // 1. 配置了 API Key（模型页填的 sk-…）：用凭据接口取 Key，调官方余额接口（值只在内存里用，不写盘、不打日志）
-  // 2. 没有 Key、但在 Harness 里登录了 DeepSeek 账号：调 Harness 自己的账号服务 deepseekAccount.getBalance
-  // 账号服务不是每个版本都有：用 ctx.inject 声明成「有就用」，没有时插件照常工作
+  // ---- 餘額 ----
+  // 兩條路，都是 Harness 官方介面，Key / 登入憑據都只在 Harness 內部使用，外掛只拿到餘額數字：
+  // 1. 配置了 API Key（模型頁填的 sk-…）：用憑據介面取 Key，調官方餘額介面（值只在記憶體裡用，不寫盤、不打日誌）
+  // 2. 沒有 Key、但在 Harness 裡登入了 DeepSeek 賬號：調 Harness 自己的賬號服務 deepseekAccount.getBalance
+  // 賬號服務不是每個版本都有：用 ctx.inject 宣告成「有就用」，沒有時外掛照常工作
   let account = null;
   try {
     ctx.inject(["deepseekAccount"], (sub) => {
@@ -284,12 +284,12 @@ export function apply(ctx, config = {}) {
       }, "crosspet: account balance");
     });
   } catch (e) {
-    // 万一这个版本的 Harness 不支持：只是少了「用账号查余额」，工作状态和用 Key 查余额照常
-    ctx.logger?.warn?.(`crosspet: 账号服务不可用 ${String(e?.message ?? e)}`);
+    // 萬一這個版本的 Harness 不支援：只是少了「用賬號查餘額」，工作狀態和用 Key 查餘額照常
+    ctx.logger?.warn?.(`crosspet: 賬號服務不可用 ${String(e?.message ?? e)}`);
   }
 
-  // 余额只属于 DeepSeek 官方的两个服务商（登录的账号、填的 API Key）。正在用别家的服务商
-  // （OpenCode Go、OpenRouter、自定义网关……）时官方余额跟她干活没关系：不显示，也不因为余额低没精神
+  // 餘額只屬於 DeepSeek 官方的兩個服務商（登入的賬號、填的 API Key）。正在用別家的服務商
+  // （OpenCode Go、OpenRouter、自定義閘道器……）時官方餘額跟她幹活沒關係：不顯示，也不因為餘額低沒精神
   const OFFICIAL = new Set(["deepseek-account", "deepseek-official"]);
   let lastQuota = null;
   function publishQuota() {
@@ -299,7 +299,7 @@ export function apply(ctx, config = {}) {
   }
   const setQuota = (q) => { lastQuota = q; return publishQuota(); };
 
-  // entries：[{ currency, amount }]。显示、余额低、充值比对的规则都在 balance.js（两条路共用）
+  // entries：[{ currency, amount }]。顯示、餘額低、充值比對的規則都在 balance.js（兩條路共用）
   const show = (entries, available = true) => {
     const q = summarize(entries, { available, low: lowBalance });
     return q ? setQuota(q).then(() => "ok") : "no-balance";
@@ -313,7 +313,7 @@ export function apply(ctx, config = {}) {
     });
     if (!res.ok) return `HTTP ${res.status}`;
     const body = await res.json();
-    // 有人民币也有美元时一次返回两项，顺序不固定（#10）：全部按币种读，不取第 0 项
+    // 有人民幣也有美元時一次返回兩項，順序不固定（#10）：全部按幣種讀，不取第 0 項
     const infos = Array.isArray(body?.balance_infos) ? body.balance_infos : [];
     return show(infos.map((i) => ({ currency: i?.currency, amount: i?.total_balance })), body?.is_available !== false);
   }
@@ -325,18 +325,18 @@ export function apply(ctx, config = {}) {
     });
     if (r === null) return "not-signed-in";
     if (r?.status !== "ready") return "failed";
-    // 现金钱包 + 赠送钱包，同一币种加在一起，各币种分别显示
+    // 現金錢包 + 贈送錢包，同一幣種加在一起，各幣種分別顯示
     const wallets = [...(r.value || []), ...(r.bonusWallets || [])];
     return show(wallets.map((w) => ({ currency: w?.currency, amount: w?.balance })));
   }
 
-  // 每次查余额都把过程记到 deepseek-plugin.json（只有结果代码，没有 Key / 令牌），
-  // 余额不显示时看它就知道卡在哪一步：Harness 的日志不落盘，没有别的办法看
+  // 每次查餘額都把過程記到 deepseek-plugin.json（只有結果程式碼，沒有 Key / 令牌），
+  // 餘額不顯示時看它就知道卡在哪一步：Harness 的日誌不落盤，沒有別的辦法看
   const diagnose = (info) => writeJson(`${ID}-plugin.json`, { plugin: PLUGIN_VERSION, at: new Date().toISOString(),
     accountService: !!account?.getBalance, ...info }).catch(() => {});
 
-  // 发消息、一轮结束时也查：间隔太近（默认 30 秒内查过）就不再查，连着对话时不会问得太勤。
-  // 查余额只是向 DeepSeek 官方要一次账户余额，不消耗 token。balanceGapMs 可在插件配置里改（测试时设 0）
+  // 發訊息、一輪結束時也查：間隔太近（預設 30 秒內查過）就不再查，連著對話時不會問得太勤。
+  // 查餘額只是向 DeepSeek 官方要一次賬戶餘額，不消耗 token。balanceGapMs 可在外掛配置裡改（測試時設 0）
   const balanceGap = typeof config.balanceGapMs === "number" ? config.balanceGapMs : 30 * 1000;
   let lastPollAt = 0;
   function pollBalanceSoon() {
@@ -353,18 +353,18 @@ export function apply(ctx, config = {}) {
       await diagnose({ apiKey: byKey, account: byAccount });
       if (byKey === "ok" || byAccount === "ok") return;
       if (byKey === "no-key" && ["no-account", "not-signed-in"].includes(byAccount)) {
-        // 两样都没有：名牌上说清楚怎么办，别一声不吭
-        await setQuota({ text: "余额：请在 Harness 登录账号或填 API Key", low: false });
+        // 兩樣都沒有：名牌上說清楚怎麼辦，別一聲不吭
+        await setQuota({ text: "餘額：請在 Harness 登入賬號或填 API Key", low: false });
         return;
       }
-      ctx.logger?.warn?.(`crosspet: 查余额失败（API Key：${byKey}，账号：${byAccount}）`);
+      ctx.logger?.warn?.(`crosspet: 查餘額失敗（API Key：${byKey}，賬號：${byAccount}）`);
     } catch (e) {
       await diagnose({ apiKey: byKey, account: byAccount, error: String(e?.message ?? e) });
-      ctx.logger?.warn?.(`crosspet: 查余额失败 ${String(e?.message ?? e)}`);
+      ctx.logger?.warn?.(`crosspet: 查餘額失敗 ${String(e?.message ?? e)}`);
     }
   }
-  // 定时查的间隔：插件配置里的 balanceIntervalMs，0 = 不定时查（只在启动、发消息、一轮结束时查），
-  // 不写或写错（不是数、负数）按默认每分钟。常开着 Harness、人又不在时可以调慢或关掉（#29，@mkinnqijn）
+  // 定時查的間隔：外掛配置裡的 balanceIntervalMs，0 = 不定時查（只在啟動、發訊息、一輪結束時查），
+  // 不寫或寫錯（不是數、負數）按預設每分鐘。常開著 Harness、人又不在時可以調慢或關掉（#29，@mkinnqijn）
   const every = config.balanceIntervalMs;
   const balanceInterval = typeof every === "number" && Number.isFinite(every) && every >= 0 ? every : BALANCE_EVERY_MS;
   ctx.effect(() => {

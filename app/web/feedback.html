@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="zh"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>反馈问题</title>
+<title>反饋問題</title>
 <style>
-/* 和设置窗口同一套配色；跟着系统深浅色 */
+/* 和設定視窗同一套配色；跟著系統深淺色 */
 :root { --bg: #f6f3ee; --panel: #fff; --ink: #3b2a22; --muted: #8a7a70; --line: #e7dfd5; --accent: #c8792f; --ok: #2f9e5b; --warn: #b07a00; --field: #fffdfa; --hover: #faf5ee; }
 @media (prefers-color-scheme: dark) {
   :root { --bg: #1f1b18; --panel: #2a2522; --ink: #efe6dd; --muted: #a8998d; --line: #3d3631; --accent: #e09a52; --ok: #5cc184; --warn: #e3b341; --field: #241f1c; --hover: #332c28; }
@@ -57,33 +57,33 @@ body.sent .done { display: block; }
 </style></head>
 <body>
 <div class="form">
-  <h1>反馈问题</h1>
-  <div class="note">每一条反馈我都会认真看 🙏 因为是业余时间一个人维护，修复会跟着版本更新一起发布，可能要等几天；崩溃、打不开这类问题会优先处理。着急的话，也可以先让你常用的 AI 编程助手（Claude Code、Codex 等）帮忙排查一下：让它看看 CrossPet 的日志和接入配置，常常能更快找到原因。</div>
-  <div class="qq-row" id="qq">有问题也可以来群里聊：</div>
-  <div class="sub">点一点，我们就知道该查哪里。</div>
-  <div class="q"><span class="n">1</span>遇到了什么？</div>
+  <h1>反饋問題</h1>
+  <div class="note">每一條反饋我都會認真看 🙏 因為是業餘時間一個人維護，修復會跟著版本更新一起釋出，可能要等幾天；崩潰、打不開這類問題會優先處理。著急的話，也可以先讓你常用的 AI 程式設計助手（Claude Code、Codex 等）幫忙排查一下：讓它看看 CrossPet 的日誌和接入配置，常常能更快找到原因。</div>
+  <div class="qq-row" id="qq">有問題也可以來群裡聊：</div>
+  <div class="sub">點一點，我們就知道該查哪裡。</div>
+  <div class="q"><span class="n">1</span>遇到了什麼？</div>
   <div class="kinds" id="kinds"></div>
   <div id="followBox" class="hidden"><div class="q"><span class="n" id="followN">2</span><span id="followQ"></span></div><div class="chips" id="follow"></div></div>
-  <div id="stillBox" class="hidden"><div class="q"><span class="n" id="stillN">3</span>问题现在还在吗？</div><div class="chips" id="still"></div></div>
-  <div id="textBox" class="hidden"><div class="q" id="ask"><span class="n" id="textN">4</span>一句话说说<em>必填</em></div>
+  <div id="stillBox" class="hidden"><div class="q"><span class="n" id="stillN">3</span>問題現在還在嗎？</div><div class="chips" id="still"></div></div>
+  <div id="textBox" class="hidden"><div class="q" id="ask"><span class="n" id="textN">4</span>一句話說說<em>必填</em></div>
     <input type="text" id="text" maxlength="200"></div>
   <label class="attach"><input type="checkbox" id="attach" checked>
-    <span>附上排查这类问题要用的信息（只有开关、时间和记录，不含对话和密钥；路径里的用户名会被隐去）
-      <a id="peek">看看会发什么</a></span></label>
+    <span>附上排查這類問題要用的資訊（只有開關、時間和記錄，不含對話和金鑰；路徑裡的使用者名稱會被隱去）
+      <a id="peek">看看會發什麼</a></span></label>
   <pre id="preview" class="hidden"></pre>
-  <div class="bar"><span class="msg" id="msg"></span><button class="send" id="send" disabled>发送</button></div>
+  <div class="bar"><span class="msg" id="msg"></span><button class="send" id="send" disabled>傳送</button></div>
 </div>
-<div class="done"><b>收到啦，谢谢！</b><span>每一条我都会看。窗口可以关掉了。</span></div>
+<div class="done"><b>收到啦，謝謝！</b><span>每一條我都會看。視窗可以關掉了。</span></div>
 
 <script src="feedback-plan.js"></script>
 <script src="qq-group.js"></script>
 <script>
 document.getElementById('qq').append(QQGroup.button())
-// 和宿主（macOS 的 WKWebView / Windows 的 WebView2）通信：
-//   页面 → 外壳：{cmd:'get'}（打开时）；{cmd:'collect', kind, target, want, key}（选好类型和补选时，want 是要收集的段落 id）；{cmd:'send', body}
-//   外壳 → 页面：setFacts(facts)（形状见 feedback-plan.js；收集的结果带回 collect 时的 key）；onSent(ok, message)
-//   key 防串：换了类型后，上一类迟到的结果不能当成这一类的发出去
-// 选哪些段、怎么排、超长怎么缩都在 feedback-plan.js（设计见 docs/superpowers/specs/2026-10-21-feedback-redesign-design.md）
+// 和宿主（macOS 的 WKWebView / Windows 的 WebView2）通訊：
+//   頁面 → 外殼：{cmd:'get'}（開啟時）；{cmd:'collect', kind, target, want, key}（選好型別和補選時，want 是要收集的段落 id）；{cmd:'send', body}
+//   外殼 → 頁面：setFacts(facts)（形狀見 feedback-plan.js；收集的結果帶回 collect 時的 key）；onSent(ok, message)
+//   key 防串：換了型別後，上一類遲到的結果不能當成這一類的發出去
+// 選哪些段、怎麼排、超長怎麼縮都在 feedback-plan.js（設計見 docs/superpowers/specs/2026-10-21-feedback-redesign-design.md）
 const post = msg => window.chrome?.webview ? window.chrome.webview.postMessage(msg) : window.webkit?.messageHandlers?.feedback?.postMessage(msg)
 const $ = id => document.getElementById(id)
 const P = window.FeedbackPlan
@@ -106,7 +106,7 @@ function renderKinds() {
     return b
   }))
 }
-const FOLLOW_Q = { ai: '是哪个 AI 在干活？', character: '是哪个角色？', quota: '哪一家的额度？' }
+const FOLLOW_Q = { ai: '是哪個 AI 在幹活？', character: '是哪個角色？', quota: '哪一家的額度？' }
 function refresh() {
   renderKinds()
   const k = kindOf(), opts = k ? P.followOptions(kind, facts) : []
@@ -133,15 +133,15 @@ function refresh() {
 function collect() {
   if (!kindOf()) return
   collectedFor = key(); receivedFor = null
-  facts.sections = {}   // 上一类的段落作废
+  facts.sections = {}   // 上一類的段落作廢
   post({ cmd: 'collect', kind, target: target || '', want: P.sectionsFor(kind, target || '', facts), key: collectedFor })
 }
 function card(partial) {
   return P.buildCard({ kind, target: target || '', still, text: $('text').value.trim(), attach: $('attach').checked, facts, partial })
 }
-// 预览：把卡片摊成纯文本，和真正发出去的一样
+// 預覽：把卡片攤成純文本，和真正發出去的一樣
 function renderPreview() {
-  if (!kindOf()) { $('preview').textContent = '先在上面选一个'; return }
+  if (!kindOf()) { $('preview').textContent = '先在上面選一個'; return }
   const c = card().card
   const lines = [c.header.title.content, '']
   for (const e of c.elements) {
@@ -152,7 +152,7 @@ function renderPreview() {
   $('preview').textContent = lines.join('\n')
 }
 function setFacts(f) {
-  // 只更新开头 / 选项的那次（不带 key）不动已经收到的段落；收集的结果只认当前这一类的
+  // 只更新開頭 / 選項的那次（不帶 key）不動已經收到的段落；收集的結果只認當前這一類的
   const mine = f.key != null && f.key === key()
   facts = { ...facts, ...f, sections: mine ? { ...(f.sections || {}) } : facts.sections }
   if (mine) receivedFor = f.key
@@ -163,7 +163,7 @@ function doSend(partial) { post({ cmd: 'send', body: JSON.stringify(card(partial
 function onSent(ok, message) {
   sending = false
   if (ok) { document.body.classList.add('sent'); return }
-  $('msg').textContent = message || '没发出去，稍后再试试'
+  $('msg').textContent = message || '沒發出去，稍後再試試'
   $('msg').classList.add('err')
   refresh()
 }
@@ -171,12 +171,12 @@ function onSent(ok, message) {
 $('text').oninput = () => { $('msg').classList.remove('err'); refresh() }
 $('text').onkeydown = e => { if (e.key === 'Enter' && !$('send').disabled) $('send').click() }
 $('attach').onchange = () => refresh()
-// 链接在勾选框的 <label> 里：不拦住默认动作的话，点它会顺带把「附上」的勾取消掉
+// 連結在勾選框的 <label> 裡：不攔住預設動作的話，點它會順帶把「附上」的勾取消掉
 $('peek').onclick = e => { e.preventDefault(); $('preview').classList.toggle('hidden'); refresh() }
 $('send').onclick = () => {
   sending = true; refresh()
-  $('msg').textContent = '正在发送…'; $('msg').classList.remove('err')
-  // 外壳还没把这一类的信息交回来：等它，最多 8 秒；到点就照发，卡片里写明没收齐
+  $('msg').textContent = '正在傳送…'; $('msg').classList.remove('err')
+  // 外殼還沒把這一類的資訊交回來：等它，最多 8 秒；到點就照發，卡片裡寫明沒收齊
   if ($('attach').checked && receivedFor !== key()) {
     if (collectedFor !== key()) collect()
     pendingSend = setTimeout(() => { pendingSend = null; doSend(true) }, 8000); return

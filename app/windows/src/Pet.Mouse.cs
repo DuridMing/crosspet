@@ -21,7 +21,7 @@ namespace CrossPet
 {
     sealed partial class Pet
     {
-        // ---------------- 能点到的区域 ----------------
+        // ---------------- 能點到的區域 ----------------
         Canvas hit;
         static readonly Brush HitBrush = new SolidColorBrush(Color.FromArgb(1, 0, 0, 0));
         string lastHitRects;
@@ -32,7 +32,7 @@ namespace CrossPet
             if (json == lastHitRects || json == "null") return;
             lastHitRects = json;
             if (!(Store.Json.DeserializeObject(Store.Json.Deserialize<string>(json)) is object[] list)) return;
-            var zoom = Window.Width / pageW;   // 网页像素 → 窗口坐标（画布可能因为文字大小比 260 宽）
+            var zoom = Window.Width / pageW;   // 網頁畫素 → 視窗座標（畫布可能因為文字大小比 260 寬）
             hit.Children.Clear();
             foreach (var item in list)
             {
@@ -44,11 +44,11 @@ namespace CrossPet
             }
         }
 
-        // ---------------- 鼠标：单击摸头、拖动换位置、右键菜单 ----------------
+        // ---------------- 滑鼠：單擊摸頭、拖動換位置、右鍵選單 ----------------
         void WireMouse(UIElement hit)
         {
             Point down = default; bool pressed = false;
-            // 按下时抓住鼠标：能点的只有桌宠那几块，拖的时候鼠标出了这几块也要继续收到移动
+            // 按下時抓住滑鼠：能點的只有桌寵那幾塊，拖的時候滑鼠出了這幾塊也要繼續收到移動
             hit.MouseLeftButtonDown += (_, e) => { down = e.GetPosition(Window); pressed = true; hit.CaptureMouse(); };
             hit.MouseMove += (_, e) =>
             {
@@ -58,7 +58,7 @@ namespace CrossPet
                 pressed = false;
                 hit.ReleaseMouseCapture();
                 Undock();
-                // 甩：拖动时横向来回反转方向（记住这个方向上的最远点，往回超过 18 算一次反转），0.9 秒内两次以上就算在甩（惹她生气）
+                // 甩：拖動時橫向來回反轉方向（記住這個方向上的最遠點，往回超過 18 算一次反轉），0.9 秒內兩次以上就算在甩（惹她生氣）
                 bool shook = false; double swingX = Window.Left, swingDir = 0; var swings = new List<DateTime>(); var lastShake = DateTime.MinValue;
                 EventHandler onMove = (_, __) =>
                 {
@@ -77,15 +77,15 @@ namespace CrossPet
                 try { Window.DragMove(); } catch { }
                 Window.LocationChanged -= onMove;
                 SavePosition();
-                if (!shook) CheckDock();   // 甩她的时候松手不贴边
+                if (!shook) CheckDock();   // 甩她的時候鬆手不貼邊
             };
             hit.MouseLeftButtonUp += (_, e) =>
             {
                 hit.ReleaseMouseCapture();
                 if (!pressed) return;
                 pressed = false;
-                // 点的位置换成网页坐标（CSS 像素，和可点区域一样按 窗口宽 / 画布宽 换算；不用 ZoomFactor：缩放被自动修正过时它不等于人物大小）：
-                // 网页要知道是不是点在「新功能」卡片的按钮上
+                // 點的位置換成網頁座標（CSS 畫素，和可點區域一樣按 視窗寬 / 畫布寬 換算；不用 ZoomFactor：縮放被自動修正過時它不等於人物大小）：
+                // 網頁要知道是不是點在「新功能」卡片的按鈕上
                 var p = e.GetPosition(hit); var z = Math.Max(Window.Width / pageW, 0.01);
                 Js($"handleClick('pat', {Num(Math.Round(p.X / z, 1))}, {Num(Math.Round(p.Y / z, 1))})");
             };
@@ -93,10 +93,10 @@ namespace CrossPet
             {
                 openMenu?.Close();
                 var menu = new Forms.ContextMenuStrip();
-                // 按住 Shift 右键才出现「开发者控制台」（macOS 版是 ⌥）
+                // 按住 Shift 右鍵才出現「開發者控制台」（macOS 版是 ⌥）
                 FillMenu(menu, (Keyboard.Modifiers & ModifierKeys.Shift) != 0);
-                // 菜单靠「程序失去焦点」来关，可桌宠窗口从不拿焦点（WS_EX_NOACTIVATE），点别的程序它收不到，菜单一直挂着。
-                // 开着时自己看：鼠标在菜单（含展开的子菜单）外面按下就关
+                // 選單靠「程式失去焦點」來關，可桌寵視窗從不拿焦點（WS_EX_NOACTIVATE），點別的程式它收不到，選單一直掛著。
+                // 開著時自己看：滑鼠在選單（含展開的子選單）外面按下就關
                 var watch = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
                 watch.Tick += (_, ___) =>
                 {
@@ -114,7 +114,7 @@ namespace CrossPet
             };
         }
 
-        /// <summary>开着的右键菜单：藏起来（全屏、快捷键）时一起关掉，不然桌宠藏了、菜单还单独挂在屏幕上</summary>
+        /// <summary>開著的右鍵選單：藏起來（全屏、快捷鍵）時一起關掉，不然桌寵藏了、選單還單獨掛在螢幕上</summary>
         Forms.ContextMenuStrip openMenu;
 
         static bool MenuCovers(Forms.ToolStripDropDown d, System.Drawing.Point p) =>

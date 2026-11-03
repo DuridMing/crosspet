@@ -13,21 +13,21 @@ try {
     Set-Location -LiteralPath ([IO.Path]::GetTempPath())
     [Environment]::CurrentDirectory = [IO.Path]::GetTempPath()
     if (!(Test-Path -LiteralPath $destination)) {
-        Write-Host '没有找到已安装的 CrossPet。解压后直接运行的，退出后删掉那个文件夹就行。'
+        Write-Host '沒有找到已安裝的 CrossPet。解壓後直接執行的，退出後刪掉那個資料夾就行。'
     } else {
         $exe = Join-Path $destination 'CrossPet.exe'
         $python = Join-Path $destination 'python\python.exe'
         $integrator = Join-Path $destination 'tools\integrate.py'
         if (!(Test-Path -LiteralPath $python) -or !(Test-Path -LiteralPath $integrator)) {
-            throw '安装不完整：请先用完整的安装包运行 install.cmd，再卸载。'
+            throw '安裝不完整：請先用完整的安裝包執行 install.cmd，再解除安裝。'
         }
         $env:PYTHONUTF8 = '1'
         $env:CROSSPET_DATA_DIR = $data
         foreach ($target in @('claude-hooks', 'claude-mod', 'codex', 'deepseek', 'gemini', 'antigravity', 'workbuddy', 'zcode', 'hermes', 'qwen')) {
             & $python $integrator uninstall $target
-            if ($LASTEXITCODE -ne 0) { throw "撤销 $target 的接入失败，程序文件已保留。" }
+            if ($LASTEXITCODE -ne 0) { throw "撤銷 $target 的接入失敗，程式檔案已保留。" }
         }
-        # 只关掉这个位置的 CrossPet，等它释放文件
+        # 只關掉這個位置的 CrossPet，等它釋放檔案
         $processes = @(Get-Process CrossPet -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $exe })
         foreach ($process in $processes) { Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue }
         if ($processes.Count -gt 0) {
@@ -51,15 +51,15 @@ try {
             try { Remove-Item -LiteralPath $destination -Recurse -Force; break }
             catch { if ($attempt -eq 4) { throw }; Start-Sleep -Milliseconds 500 }
         }
-        Write-Host 'CrossPet 已卸载：各 AI 的接入都已撤销。角色和设置保留在 %LOCALAPPDATA%\CrossPet，不需要的话可以手动删除。' -ForegroundColor Green
+        Write-Host 'CrossPet 已解除安裝：各 AI 的接入都已撤銷。角色和設定保留在 %LOCALAPPDATA%\CrossPet，不需要的話可以手動刪除。' -ForegroundColor Green
     }
 } catch {
     $exitCode = 1
-    Write-Host "卸载失败：$($_.Exception.Message)" -ForegroundColor Red
-    Write-Host "日志：$log"
+    Write-Host "解除安裝失敗：$($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "日誌：$log"
 } finally {
     if ($transcribing) { Stop-Transcript | Out-Null }
     # Keep errors visible for double-click users. CLI/tests remain non-interactive.
-    if ($Interactive) { Read-Host '按回车关闭' | Out-Null }
+    if ($Interactive) { Read-Host '按回車關閉' | Out-Null }
 }
 exit $exitCode

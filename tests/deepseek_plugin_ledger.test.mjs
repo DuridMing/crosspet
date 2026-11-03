@@ -1,4 +1,4 @@
-// DeepSeek Harness 插件的事件记录（数据目录 events/deepseek.jsonl，格式同 crosspet-hook.py）：node --test tests/deepseek_plugin_ledger.test.mjs
+// DeepSeek Harness 外掛的事件記錄（資料目錄 events/deepseek.jsonl，格式同 crosspet-hook.py）：node --test tests/deepseek_plugin_ledger.test.mjs
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { mkdtempSync, readFileSync, existsSync } from 'node:fs'
@@ -22,7 +22,7 @@ function harness() {
   return { fire, rows, dataDir }
 }
 
-test('收到消息记一行 shown，字段和钩子的一样', async () => {
+test('收到訊息記一行 shown，欄位和鉤子的一樣', async () => {
   const h = harness()
   await h.fire('agent/pre-step', { messages: [{ role: 'user', content: 'hi' }] })
   const last = (await h.rows()).at(-1)
@@ -32,7 +32,7 @@ test('收到消息记一行 shown，字段和钩子的一样', async () => {
   for (const k of ['t', 'ev', 'tool', 'sid', 'turn', 'result', 'detail']) assert.ok(k in last, k)
 })
 
-test('不记内容：消息、工具参数都不进记录', async () => {
+test('不記內容：訊息、工具引數都不進記錄', async () => {
   const h = harness()
   await h.fire('agent/pre-step', { messages: [{ role: 'user', content: 'SECRET-DS-1' }] })
   await h.fire('tools/pre-execute', { name: 'Bash', arguments: { command: 'cat SECRET-DS-2' } })
@@ -42,7 +42,7 @@ test('不记内容：消息、工具参数都不进记录', async () => {
   assert.ok(text.includes('"tool":"bash"'))
 })
 
-test('超过 240 行截回 200 行，最后一行是最新的', async () => {
+test('超過 240 行截回 200 行，最後一行是最新的', async () => {
   const h = harness()
   for (let i = 0; i < 245; i++) await h.fire('tools/pre-execute', { name: `t${i}`, arguments: {} })
   const rows = await h.rows()

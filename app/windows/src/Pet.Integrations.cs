@@ -21,16 +21,16 @@ namespace CrossPet
 {
     sealed partial class Pet
     {
-        // ---------------- 接入被别的工具冲掉时接回去 ----------------
-        // CC Switch 3.x 切换服务商会整个重写 .claude\settings.json，CrossPet 的 mod / 钩子跟着没了。每 3 秒看一眼这个文件，
-        // 有改动就等 2 秒（等对方写完）跑一次 integrate.py heal：只补 CrossPet 自己的那一项，在 CrossPet 里撤销过的不管。
-        // 启动时也看一次。一小时最多接 6 次，免得和别的工具来回打架。和 macOS 版一样
+        // ---------------- 接入被別的工具沖掉時接回去 ----------------
+        // CC Switch 3.x 切換服務商會整個重寫 .claude\settings.json，CrossPet 的 mod / 鉤子跟著沒了。每 3 秒看一眼這個檔案，
+        // 有改動就等 2 秒（等對方寫完）跑一次 integrate.py heal：只補 CrossPet 自己的那一項，在 CrossPet 裡撤銷過的不管。
+        // 啟動時也看一次。一小時最多接 6 次，免得和別的工具來回打架。和 macOS 版一樣
         DateTime? claudeConfigStamp;
         readonly List<DateTime> healTimes = new List<DateTime>();
         DispatcherTimer healPending;
         static string ClaudeSettings => Path.Combine(Environment.GetEnvironmentVariable("CLAUDE_CONFIG_DIR") is string d && d != "" ? d
             : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".claude"), "settings.json");
-        // ---------------- 心跳：各个 AI 最近一次发来消息的时间（和 macOS 版一样） ----------------
+        // ---------------- 心跳：各個 AI 最近一次發來訊息的時間（和 macOS 版一樣） ----------------
         static readonly Dictionary<string, string> SeenKeys = new Dictionary<string, string>
         {
             ["claude-hooks"] = "claude", ["claude-mod"] = "claude-mod", ["codex"] = "gpt", ["deepseek"] = "deepseek", ["gemini"] = "gemini",
@@ -58,9 +58,9 @@ namespace CrossPet
         static double Now => (DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
         static string AgoText(double? ts)
         {
-            if (ts == null) return "从没收到";
+            if (ts == null) return "從沒收到";
             var d = Now - ts.Value;
-            return d >= 86400 ? $"{(int)(d / 86400)} 天前" : d >= 3600 ? $"{(int)(d / 3600)} 小时前" : d >= 60 ? $"{(int)(d / 60)} 分钟前" : "刚刚";
+            return d >= 86400 ? $"{(int)(d / 86400)} 天前" : d >= 3600 ? $"{(int)(d / 3600)} 小時前" : d >= 60 ? $"{(int)(d / 60)} 分鐘前" : "剛剛";
         }
 
         void WatchClaudeConfig()
@@ -87,7 +87,7 @@ namespace CrossPet
                 List<string> healed = null;
                 try { healed = (Store.Json.DeserializeObject(output.Trim().Split('\n').Last()) as object[])?.OfType<string>().ToList(); } catch { }
                 if (healed == null || healed.Count == 0) return;
-                Store.Log("接回被冲掉的接入: " + string.Join(", ", healed));
+                Store.Log("接回被沖掉的接入: " + string.Join(", ", healed));
                 Window.Dispatcher.Invoke(() => { healTimes.Add(DateTime.UtcNow); Js("configHealed()"); RefreshIntegrated(); });
             });
         }
@@ -104,9 +104,9 @@ namespace CrossPet
             RefreshPlugins();
         }
 
-        string pluginStatus = "[]";   // 插件版本（接入工具的只读检查 integrate.py plugins，JSON 数组），桌宠和设置页据此提醒更新
-        /// <summary>插件版本（只读检查，不改任何配置）：有新版本 / 更新了还没重开时，设置页那一行挂提醒；tellPet：桌宠刚启动，让她闲下来时说一句。
-        /// 只提醒、不自动更新——改别家配置一律让用户自己点「更新」。和 macOS 版 refreshPlugins 一致</summary>
+        string pluginStatus = "[]";   // 外掛版本（接入工具的只讀檢查 integrate.py plugins，JSON 陣列），桌寵和設定頁據此提醒更新
+        /// <summary>外掛版本（只讀檢查，不改任何配置）：有新版本 / 更新了還沒重開時，設定頁那一行掛提醒；tellPet：桌寵剛啟動，讓她閒下來時說一句。
+        /// 只提醒、不自動更新——改別家配置一律讓使用者自己點「更新」。和 macOS 版 refreshPlugins 一致</summary>
         void RefreshPlugins(bool tellPet = false)
         {
             Task.Run(() =>
@@ -120,18 +120,18 @@ namespace CrossPet
 
         static readonly (string id, string label, string note)[] IntegrationTargets =
         {
-            ("claude-hooks", "Claude Code（标准钩子）", "所有版本可用，不显示额度"),
-            ("claude-mod", "Claude Code 增强版 mod", "能显示额度；终端里要 2.1.287 以上，桌面 App 2.1.286 以上"),
-            ("codex", "Codex", "接入后要在 Codex 里用 /hooks 信任一次"),
-            ("deepseek", "DeepSeek Harness", "工作状态 + 余额"),
-            ("antigravity", "Antigravity", "桌面版和命令行都有效"),
+            ("claude-hooks", "Claude Code（標準鉤子）", "所有版本可用，不顯示額度"),
+            ("claude-mod", "Claude Code 增強版 mod", "能顯示額度；終端裡要 2.1.287 以上，桌面 App 2.1.286 以上"),
+            ("codex", "Codex", "接入後要在 Codex 裡用 /hooks 信任一次"),
+            ("deepseek", "DeepSeek Harness", "工作狀態 + 餘額"),
+            ("antigravity", "Antigravity", "桌面版和命令列都有效"),
             ("gemini", "Gemini CLI", null),
-            ("workbuddy", "WorkBuddy", "按当前模型换角色，没有对应角色的模型由当前角色来演"),
-            ("zcode", "ZCode（智谱）", "按会话的模型换角色，GLM 角色没装时由当前角色来演"),
-            ("hermes", "Hermes Agent", "按当前模型换角色，没有对应角色的模型由当前角色来演；新开的会话生效"),
-            ("cursor", "Cursor", "按当前模型换角色，认不出的模型由当前角色来演；新开的对话生效"),
-            ("qwen", "Qwen Code（阿里）", "按当前模型换角色，没有对应角色的模型由当前角色来演；新开的会话生效"),
-            ("grok", "Grok Build（xAI）", "新开的会话生效；新文件夹第一次用要在 Grok 里 /hooks-trust 信任一次"),
+            ("workbuddy", "WorkBuddy", "按當前模型換角色，沒有對應角色的模型由當前角色來演"),
+            ("zcode", "ZCode（智譜）", "按會話的模型換角色，GLM 角色沒裝時由當前角色來演"),
+            ("hermes", "Hermes Agent", "按當前模型換角色，沒有對應角色的模型由當前角色來演；新開的會話生效"),
+            ("cursor", "Cursor", "按當前模型換角色，認不出的模型由當前角色來演；新開的對話生效"),
+            ("qwen", "Qwen Code（阿里）", "按當前模型換角色，沒有對應角色的模型由當前角色來演；新開的會話生效"),
+            ("grok", "Grok Build（xAI）", "新開的會話生效；新資料夾第一次用要在 Grok 裡 /hooks-trust 信任一次"),
         };
 
         public Dictionary<string, object> SettingsState()
@@ -144,7 +144,7 @@ namespace CrossPet
                 ["gptQuota"] = Store.Flag("gptQuota"), ["agyQuota"] = Store.Flag("agyQuota"), ["gptQuotaNote"] = codexNote,
                 ["login"] = LoginEnabled, ["edgeDock"] = EdgeDockEnabled, ["dsQuota"] = DsQuotaEnabled, ["quotaAggregate"] = QuotaAggregate, ["codexResets"] = CodexResets, ["peakStyle"] = PeakStyle, ["quotaStyle"] = QuotaStyle, ["peakSkins"] = PeakSkins, ["appVersion"] = Store.Version, ["whatsNewSeen"] = Store.Settings.TryGetValue("whatsNewSeen", out var wns) && wns is string ws ? ws : Store.Version, ["powerSave"] = PowerSave,
                 ["hideHotkey"] = HideHotkey, ["hotkeyFailed"] = hotkeyFailed,
-                ["hotkeys"] = new[] { new Dictionary<string, object> { ["id"] = "off", ["label"] = "不用快捷键" } }.Concat(HotkeyChoices.Select(h => new Dictionary<string, object> { ["id"] = h.id, ["label"] = h.label })).ToList(), ["aiAutostart"] = AIAutostart, ["character"] = current, ["updating"] = updating,
+                ["hotkeys"] = new[] { new Dictionary<string, object> { ["id"] = "off", ["label"] = "不用快捷鍵" } }.Concat(HotkeyChoices.Select(h => new Dictionary<string, object> { ["id"] = h.id, ["label"] = h.label })).ToList(), ["aiAutostart"] = AIAutostart, ["character"] = current, ["updating"] = updating,
                 ["characters"] = Characters().Select(c =>
                 {
                     var info = Store.ReadJson(Path.Combine(Store.Characters, c.id, "character.json"));
@@ -153,10 +153,10 @@ namespace CrossPet
                         ["id"] = c.id, ["name"] = c.name,
                         ["defaultName"] = info?["name"] as string ?? c.id,
                         ["accent"] = info?["accent"] as string,
-                        ["images"] = CardImages.Of(Store.Characters, c.id, Store.DataHost),   // 角色页卡片图（原版）
+                        ["images"] = CardImages.Of(Store.Characters, c.id, Store.DataHost),   // 角色頁卡片圖（原版）
                         ["custom"] = Store.Names.TryGetValue(c.id, out var n) ? n as string ?? "" : "",
                     };
-                    if (Store.SkinChoices.TryGetValue(c.id, out var skins) && skins.Count > 0)   // 有别的衣服：原版排第一
+                    if (Store.SkinChoices.TryGetValue(c.id, out var skins) && skins.Count > 0)   // 有別的衣服：原版排第一
                     {
                         var list = new List<object> { new Dictionary<string, object> { ["id"] = "", ["name"] = Store.BaseOutfit.TryGetValue(c.id, out var bo) && bo != null ? bo : "原版", ["images"] = d["images"] } };
                         list.AddRange(skins.Select(k => (object)new Dictionary<string, object> { ["id"] = k.id, ["name"] = k.name, ["images"] = CardImages.Of(Store.Characters, k.id, Store.DataHost) }));
@@ -192,7 +192,7 @@ namespace CrossPet
                             var v = Math.Min(1.6, Math.Max(0.6, Math.Round(Convert.ToDouble(value) * 100) / 100));
                             Store.Settings["size"] = v; Store.SaveSettings(); ApplySizes(v);
                             break;
-                        case "textSize":   // 单独调文字：同时记为解锁
+                        case "textSize":   // 單獨調文字：同時記為解鎖
                             Store.Settings["textSize"] = Math.Min(1.6, Math.Max(0.6, Math.Round(Convert.ToDouble(value) * 100) / 100));
                             Store.Settings["textLinked"] = false; Store.SaveSettings(); ApplySizes();
                             break;
@@ -201,7 +201,7 @@ namespace CrossPet
                         case "hideFullscreen": Store.Settings["hideFullscreen"] = on; Store.SaveSettings(); ApplyLayer(); break;
                         case "hideHotkey": if (value is string hk) { Store.Settings["hideHotkey"] = hk; Store.SaveSettings(); RegisterHideHotKey(); } break;
                         case "quotaAggregate": Store.Settings["quotaAggregate"] = on; Store.SaveSettings(); Js($"setQuotaAggregate({(on ? "true" : "false")})"); break;
-                        case "whatsNewSeen": if (value is string seen) { Store.Settings["whatsNewSeen"] = seen; Store.SaveSettings(); } break;   // 打开了「新功能」页：小红点消失
+                        case "whatsNewSeen": if (value is string seen) { Store.Settings["whatsNewSeen"] = seen; Store.SaveSettings(); } break;   // 開啟了「新功能」頁：小紅點消失
                         case "codexResets": Store.Settings["codexResets"] = on; Store.SaveSettings(); Js($"setCodexResets({(on ? "true" : "false")})"); break;
                         case "peakSkins": Store.Settings["peakSkins"] = CleanPeakSkins(value); Store.SaveSettings(); Js($"setPeakSkins({Store.Json.Serialize(PeakSkins)})"); break;
                         case "quotaStyle":
@@ -227,7 +227,7 @@ namespace CrossPet
                         case "aiAutostart": SetAIAutostart(on); break;
                         case "dsQuota":
                             Store.Settings["dsQuota"] = on; Store.SaveSettings();
-                            stamps.Remove("deepseek-quota");   // 重新打开时马上读一次
+                            stamps.Remove("deepseek-quota");   // 重新開啟時馬上讀一次
                             if (!on) Js("setQuota('deepseek', null)");
                             break;
                         case "edgeDock": Store.Settings["edgeDock"] = on; Store.SaveSettings(); if (!on) Undock(); break;
@@ -235,7 +235,7 @@ namespace CrossPet
                         case "character": if (value is string id) SwitchTo(id, "manual", "settings"); break;
                     }
                     break;
-                case "skin":   // 换衣服：记下来，重新载入立绘，并换成这个角色
+                case "skin":   // 換衣服：記下來，重新載入立繪，並換成這個角色
                     if (msg.TryGetValue("id", out var kid) && kid is string skinId && Characters().Any(x => x.id == skinId) && msg.TryGetValue("skin", out var kv) && kv is string skinName)
                     { Wear(skinId, skinName); SwitchTo(skinId, "skin", skinName); }
                     break;
@@ -273,25 +273,25 @@ namespace CrossPet
             PushSettings();
         }
 
-        /// <summary>背景光晕：auto（跟着系统深浅色，深色模式下关）/ on / off</summary>
+        /// <summary>背景光暈：auto（跟著系統深淺色，深色模式下關）/ on / off</summary>
         static string AuraMode => Store.Settings.TryGetValue("auraMode", out var v) && v is string s && (s == "on" || s == "off") ? s : "auto";
 
         static void Toggle(string key) { Store.Settings[key] = !Store.Flag(key); Store.SaveSettings(); }
-        static void Open(string target) { try { Process.Start(new ProcessStartInfo(target) { UseShellExecute = true }); } catch (Exception e) { Store.Log("打开失败: " + e.Message); } }
+        static void Open(string target) { try { Process.Start(new ProcessStartInfo(target) { UseShellExecute = true }); } catch (Exception e) { Store.Log("開啟失敗: " + e.Message); } }
 
-        // ---------------- 接入 AI：用随包 Python 跑和 macOS 共用的 tools/integrate.py ----------------
+        // ---------------- 接入 AI：用隨包 Python 跑和 macOS 共用的 tools/integrate.py ----------------
         void Integrate(string action, string target, string label)
         {
-            if (!File.Exists(Store.Python)) { MessageBox.Show("没找到随包的 Python，请用完整的安装包重新安装。", "CrossPet AI 接入"); return; }
+            if (!File.Exists(Store.Python)) { MessageBox.Show("沒找到隨包的 Python，請用完整的安裝包重新安裝。", "CrossPet AI 接入"); return; }
             Task.Run(() =>
             {
                 var (output, code) = RunIntegrate($"{action} {target}");
                 Store.Log($"接入 {action} {target} → {code}\n{output}");
                 Window.Dispatcher.Invoke(() =>
                 {
-                    // 没找到 AI 的配置目录时脚本正常退出但什么都没改，不能显示成「已更新」
-                    var missing = output.Contains("没找到");
-                    var title = code != 0 ? "没有完成" : missing ? "没有接入：没找到这个 AI 的配置" : action == "install" ? "已接入" : "已撤销";
+                    // 沒找到 AI 的配置目錄時指令碼正常退出但什麼都沒改，不能顯示成「已更新」
+                    var missing = output.Contains("沒找到");
+                    var title = code != 0 ? "沒有完成" : missing ? "沒有接入：沒找到這個 AI 的配置" : action == "install" ? "已接入" : "已撤銷";
                     MessageBox.Show($"{label}：{title}\n\n{output.Trim()}", "CrossPet AI 接入", MessageBoxButton.OK,
                         code != 0 ? MessageBoxImage.Error : missing ? MessageBoxImage.Warning : MessageBoxImage.Information);
                     RefreshIntegrated();
@@ -299,7 +299,7 @@ namespace CrossPet
             });
         }
 
-        /// <summary>用随包 Python 跑一次 tools/integrate.py，返回输出和退出码</summary>
+        /// <summary>用隨包 Python 跑一次 tools/integrate.py，返回輸出和退出碼</summary>
         (string output, int code) RunIntegrate(string args)
         {
             var psi = new ProcessStartInfo(Store.Python, $"\"{Path.Combine(Store.Install, "tools", "integrate.py")}\" {args}")
@@ -318,7 +318,7 @@ namespace CrossPet
                 {
                     var err = p.StandardError.ReadToEndAsync();
                     output = p.StandardOutput.ReadToEnd() + err.Result;
-                    if (!p.WaitForExit(30000)) { p.Kill(); output += "\n（超时）"; }
+                    if (!p.WaitForExit(30000)) { p.Kill(); output += "\n（超時）"; }
                     code = p.ExitCode;
                 }
             }
