@@ -26,7 +26,7 @@ namespace CrossPet
     /// </summary>
     sealed partial class Pet
     {
-        const string Repo = "lokicorvus/crosspet";
+        const string Repo = "DuridMing/crosspet";   // maid fork：更新來源指向自己的 fork，不會被上游覆蓋
         CoreWebView2Environment env;   // 浏览器进程崩溃后要换一个新的（见 RecoverWeb）
         Grid grid;
         public Window Window { get; private set; }

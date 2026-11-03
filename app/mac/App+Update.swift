@@ -41,6 +41,8 @@ extension App {
     }
 
     func checkForUpdate(manual: Bool) {
+        // maid fork：預設不自動檢查更新，只在設定裡手動按「檢查更新」時查；要恢復自動檢查：defaults write io.github.crosspet autoUpdateCheck -bool true
+        guard manual || defaults.bool(forKey: "autoUpdateCheck") else { return }
         // 装的是测试版：也收下一个测试版。releases/latest 不含测试版，改看发布页的订阅源（releases.atom，不限流），
         // 在比现在新的版本里挑最新、且 macOS 安装包真的在的（测试版发布页删了、标签还留着的不算）；没有就照常查正式版
         if currentVersion.contains("-"), let feed = URL(string: "https://github.com/\(repoSlug)/releases.atom") {

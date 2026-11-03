@@ -46,7 +46,7 @@ final class App: NSObject, NSApplicationDelegate, WKNavigationDelegate {
 
 
     // 更新 用的
-    let repoSlug = "lokicorvus/crosspet"
+    let repoSlug = "DuridMing/crosspet"   // maid fork：更新來源指向自己的 fork，不會被上游覆蓋
     var lastUpdateCheck = "还没查过"
     var updating = false
 
