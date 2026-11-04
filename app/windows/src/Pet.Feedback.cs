@@ -23,8 +23,8 @@ namespace CrossPet
     {
         // ---------------- 反饋問題 ----------------
         // 點選「哪方面」+ 必填一句「具體是哪裡」，附上版本、系統、接入情況、最近日誌，
-        // 由頁面拼成卡片，發到飛書群機器人。地址可在 settings.json 裡用 "feedbackURL" 改（測試用）
-        const string FeedbackEndpoint = "https://open.feishu.cn/open-apis/bot/v2/hook/854f8a9a-d3f4-4705-b6f8-15cc007f714b";
+        // 由頁面拼成卡片再送出。maid fork：拿掉上游作者的飛書端點與入口，預設不送到任何地方；要測試才在 settings.json 用 "feedbackURL" 指定
+        const string FeedbackEndpoint = "";
 
         void OpenFeedback()
         {

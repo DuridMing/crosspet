@@ -7,7 +7,7 @@ extension App {
     // MARK: 反饋問題
     // 右鍵「反饋問題…」：web/feedback.html 裡點選「哪方面」+ 必填一句「具體是哪裡」，App 附上版本、系統、接入情況、最近日誌，
     // 由頁面拼成卡片，發到飛書群機器人。地址可用 `defaults write io.github.crosspet feedbackURL <地址>` 改（測試用）
-    static let feedbackEndpoint = "https://open.feishu.cn/open-apis/bot/v2/hook/854f8a9a-d3f4-4705-b6f8-15cc007f714b"
+    static let feedbackEndpoint = ""
 
     @objc func openFeedback() {
         if let w = feedbackWindow {
