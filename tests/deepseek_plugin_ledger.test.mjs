@@ -15,9 +15,17 @@ function harness() {
   apply(ctx, { stateDir: join(dataDir, 'state'), dataDir, autostart: false, balanceGapMs: 1e9 })
   const fire = async (n, ...a) => { for (const h of handlers[n] || []) await h(...a, async () => {}) }
   const rows = async () => {
-    await new Promise((r) => setTimeout(r, 80))
+    // Windows 上寫檔比較慢，固定等 80 ms 會讀到還沒寫完的記錄：等到內容連續幾次不變
     const p = join(dataDir, 'events', 'deepseek.jsonl')
-    return existsSync(p) ? readFileSync(p, 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l)) : []
+    let text = '', stable = 0
+    for (let i = 0; i < 100 && stable < 3; i++) {
+      await new Promise((r) => setTimeout(r, 80))
+      let now = text
+      try { now = existsSync(p) ? readFileSync(p, 'utf8') : '' } catch {}   // 正在換檔案，下一輪再讀
+      stable = now === text ? stable + 1 : 0
+      text = now
+    }
+    return text.split('\n').filter(Boolean).map((l) => JSON.parse(l))
   }
   return { fire, rows, dataDir }
 }

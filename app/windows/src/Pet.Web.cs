@@ -73,7 +73,8 @@ namespace CrossPet
             if (HostRoutesChanged()) FollowForeground("host");
             var latestActive = (id: (string)null, ts: 0.0);
             // current：多模型宿主（WorkBuddy）裡沒有對應角色的模型，由當前角色來演；它只有狀態，沒有額度
-            foreach (var id in Characters().Select(c => c.id).Concat(new[] { "current" }))
+            var known = Characters().Select(c => c.id).Concat(new[] { "current" }).ToList();
+            foreach (var id in known.Concat(StateFiles.OtherHosts(Store.State, known)))   // maid fork：沒有對應角色的 AI 也交給網頁，寫了 reactTo 的角色才接得到
                 foreach (var kind in new[] { "state", "quota", "sessions" })   // sessions：好幾個對話同時幹活時各自的狀態
                 {
                     if (id == "current" && kind == "quota") continue;

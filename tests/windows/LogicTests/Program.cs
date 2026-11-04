@@ -19,9 +19,20 @@ static class Program
             && file == Path.GetFullPath(Path.Combine(root, "claude", "idle.webp")) && mime == "image/webp");
         Check("png", SpritePath.TryResolve(root, "/characters/gpt/edge_left.png", out file, out mime) && mime == "image/png");
         Check("副檔名大寫", SpritePath.TryResolve(root, "/characters/gpt/IDLE.WEBP", out file, out mime) && mime == "image/webp");
-        Check("中文角色名（網址編碼）", SpritePath.TryResolve(root, "/characters/%E5%8F%AF%E8%90%9D/idle.webp", out file, out mime)
+        Check("中文角色名（網址編碼）", SpritePath.TryResolve(root, "/characters/%E5%8F%AF%E8%98%BF/idle.webp", out file, out mime)
             && file == Path.GetFullPath(Path.Combine(root, "可蘿", "idle.webp")));
         Check("檔名裡有空格（%20）", SpritePath.TryResolve(root, "/characters/my%20pet/idle%201.webp", out file, out mime));
+
+        // maid fork：沒有對應角色的 AI 也要讀得到狀態檔（reactTo 才接得到）
+        var stateDir = Path.Combine(Path.GetTempPath(), "crosspet-state-test-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(stateDir);
+        foreach (var name in new[] { "claude-state.json", "current-state.json", "gpt-state.json", "deepseek-state.json", ".gpt-state.123.json", "gpt-quota.json", "pet.pid" })
+            File.WriteAllText(Path.Combine(stateDir, name), "{}");
+        var known = new[] { "claude", "current" };
+        Check("狀態檔：列出沒有對應角色的 AI", StateFiles.OtherHosts(stateDir, known).SequenceEqual(new[] { "deepseek", "gpt" }));
+        Check("狀態檔：全部都有角色就是空的", StateFiles.OtherHosts(stateDir, new[] { "claude", "current", "gpt", "deepseek" }).Count == 0);
+        Check("狀態檔：目錄不存在也不出錯", StateFiles.OtherHosts(Path.Combine(stateDir, "none"), known).Count == 0);
+        Directory.Delete(stateDir, true);
 
         Check("角色目錄是 ..", !SpritePath.TryResolve(root, "/characters/%2E%2E/settings.webp", out file, out mime));
         Check("檔名裡編碼的斜槓", !SpritePath.TryResolve(root, "/characters/claude/..%2F..%2Fsettings.webp", out file, out mime));
