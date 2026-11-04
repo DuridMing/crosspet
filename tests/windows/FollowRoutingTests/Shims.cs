@@ -68,6 +68,7 @@ namespace CrossPet
         FakeDev dev = null;
         DateTime? codexBusyAt;
         readonly Dictionary<string, string> stamps = new Dictionary<string, string>();
+        void PushSettings() { }
         readonly Dictionary<string, (string pose, DateTime at)> lastPose = new Dictionary<string, (string, DateTime)>();
         public string ManifestJson = "{}";
         public List<(string id, string name)> Catalog = new List<(string, string)> {
