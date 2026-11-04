@@ -1,0 +1,19 @@
+[package]
+name = "native"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+name = "composite"
+path = "src/lib.rs"
+
+[dependencies]
+image = { version = "0.25", default-features = false, features = ["webp"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+
+[workspace]
