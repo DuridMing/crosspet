@@ -24,6 +24,7 @@
 | 彩蛋（DeepSeek 偷穿 Grok 的衣服） | CrossPet 原创情节，基于以上角色 |
 | Gemini | 社区流行的 Gemini 娘设定（猫耳、异色瞳、四芒星发饰） |
 | Claude | 社区流行的 Claude 娘设定（铜橙色长发、橙花发饰、书） |
+| C醬（maid fork） | 改編自上面的 Claude 角色：改名 C醬、校對台詞，並新增第一批補畫 23 張（ChatGPT 依 `docs/prompts/ref-claude.webp` 生成，2026-11），同樣採 CC BY-NC-SA 4.0 |
 | 彩蛋（DeepSeek cos Claude / GPT） | CrossPet 原创情节，基于以上角色 |
 
 参考资料：[萌娘百科 DeepSeek 娘](https://zh.moegirl.org.cn/DeepSeek%E5%A8%98)、[ai-school-op](https://github.com/lshhhhhhh/ai-school-op)、[openpet-ai-girls](https://github.com/AwesomeHou/openpet-ai-girls)。
