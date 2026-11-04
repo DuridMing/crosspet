@@ -87,7 +87,7 @@ async function timeStartup(dataDir) {
 // so other programs' WebView2 processes are excluded.
 function sampleTree(rootPid) {
   const ps = `Get-CimInstance Win32_Process -Filter "Name='CrossPet.exe' OR Name='msedgewebview2.exe'" | ` +
-    `Select-Object ProcessId,ParentProcessId,KernelModeTime,UserModeTime,WorkingSetSize,PrivatePageCount | ConvertTo-Json -Compress`
+    `Select-Object Name,ProcessId,ParentProcessId,KernelModeTime,UserModeTime,WorkingSetSize,PrivatePageCount | ConvertTo-Json -Compress`
   const r = spawnSync('powershell.exe', ['-NoProfile', '-Command', ps], { encoding: 'utf8' })
   const rows = [].concat(JSON.parse(r.stdout || '[]'))
   const members = new Set([rootPid])
@@ -99,15 +99,23 @@ function sampleTree(rootPid) {
   return {
     at: performance.now(),
     cpu: new Map(tree.map(p => [p.ProcessId, (Number(p.KernelModeTime) + Number(p.UserModeTime)) / 1e4])),   // ms
+    shell: tree.find(p => p.ProcessId === rootPid),
     privateMb: tree.reduce((s, p) => s + Number(p.PrivatePageCount), 0) / 1e6,
     workingSetMb: tree.reduce((s, p) => s + Number(p.WorkingSetSize), 0) / 1e6,
     processes: tree.length,
   }
 }
-function cpuPercent(a, b) {
+function cpuPercent(a, b, only) {
   let used = 0
-  for (const [pid, ms] of b.cpu) used += ms - (a.cpu.get(pid) || 0)
+  for (const [pid, ms] of b.cpu) if (only === undefined || pid === only) used += ms - (a.cpu.get(pid) || 0)
   return used / (b.at - a.at) * 100
+}
+
+// Whole-machine load during a sample, so a noisy reading can be told apart from a real cost.
+function systemTimes() {
+  let idle = 0, total = 0
+  for (const { times } of os.cpus()) { idle += times.idle; total += times.user + times.nice + times.sys + times.idle + times.irq }
+  return { idle, total }
 }
 
 async function main() {
@@ -124,21 +132,27 @@ async function main() {
   await c.evaluate(`devActive = true; say(''); 0`)
   const poses = {}
   for (const p of POSES) {
-    await c.evaluate(`clearTimeout(revertTimer); clearTimeout(pending); setPose(${JSON.stringify(p)}, true); 0`)
+    // noteRest: setPose does nothing when the pose is already showing, so arm the rest timer explicitly.
+    await c.evaluate(`clearTimeout(revertTimer); clearTimeout(pending); setPose(${JSON.stringify(p)}, true); noteRest(pose); 0`)
     await sleep(1500)   // let the transition finish
+    // Idle and sleeping only slow their effects down after a delay (0 and 5 fps): sample the settled state.
+    for (let i = 0; i < 300 && await c.evaluate(`RESTING.has(pose) && !fxResting`); i++) await sleep(100)
+    if (await c.evaluate(`RESTING.has(pose) && !fxResting`)) throw new Error(`pose ${p} never settled`)
     // The app pauses every animation while it is concealed (a fullscreen program, a locked screen):
     // numbers taken then look great and mean nothing, so refuse them.
     const assertVisible = async () => {
       if (await c.evaluate('pageHidden')) throw new Error('the pet is concealed (fullscreen program or locked screen); close it and measure again')
     }
     await assertVisible()
-    const a = sampleTree(child.pid)
+    const a = sampleTree(child.pid), sysA = systemTimes()
     await sleep(SECONDS * 1000)
-    const b = sampleTree(child.pid)
+    const b = sampleTree(child.pid), sysB = systemTimes()
     await assertVisible()
     const shown = await c.evaluate('pose')
     if (shown !== p) throw new Error(`pose changed during sample: wanted ${p}, got ${shown}`)
-    poses[p] = { cpu_pct_of_one_core: Number(cpuPercent(a, b).toFixed(1)), private_mb: Math.round(b.privateMb),
+    poses[p] = { cpu_pct_of_one_core: Number(cpuPercent(a, b).toFixed(1)), shell_cpu_pct: Number(cpuPercent(a, b, child.pid).toFixed(1)),
+      fx_fps: await c.evaluate('fxFps'), system_busy_pct: Number((100 * (1 - (sysB.idle - sysA.idle) / (sysB.total - sysA.total))).toFixed(1)),
+      private_mb: Math.round(b.privateMb),
       working_set_mb: Math.round(b.workingSetMb), processes: b.processes }
   }
   c.close()
