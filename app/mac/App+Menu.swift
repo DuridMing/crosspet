@@ -42,7 +42,6 @@ extension App {
         layerItem.submenu = layerMenu
         menu.addItem(layerItem)
         add(menu, "設定…", #selector(openSettings))
-        add(menu, "反饋問題…", #selector(openFeedback))
         if NSEvent.modifierFlags.contains(.option) {  // 按住 ⌥ 右鍵才出現：給自己換立繪、加角色的人檢查效果用
             add(menu, "開發者控制台…", #selector(openDevConsole))
         }

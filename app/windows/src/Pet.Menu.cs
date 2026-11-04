@@ -55,7 +55,6 @@ namespace CrossPet
             }
             menu.Items.Add(layer);
             menu.Items.Add(Item("設定…", () => OpenSettings()));
-            menu.Items.Add(Item("反饋問題…", OpenFeedback));
             if (developer)
             {
                 menu.Items.Add(Item("開發者控制台…", OpenDev));
