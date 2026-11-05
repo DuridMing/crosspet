@@ -11,7 +11,7 @@
 | 不自動換角色 | `followApps`、`followEvents` 兩平台預設都關 | `App+Settings.swift`、`Store.cs` |
 | 台灣繁體 | `tools/zh_tw.py`（OpenCC s2twp）轉程式、畫面、Claude 台詞、接入腳本與測試；docs、README 不轉 | 見腳本開頭的 `TARGETS` |
 | 國慶特效 | 改在 10/10 | `app/web/index.html` 的 `festivalOf` |
-| 其他 AI 由 C醬 演出 | `character.json` 寫 `reactTo: "*"`；沒有對應角色的 AI 狀態檔也交給網頁（只改了 Windows） | `app/windows/src/StateFiles.cs`、`Pet.Web.cs` |
+| 其他 AI 由 Chloe 演出 | `character.json` 寫 `reactTo: "*"`；沒有對應角色的 AI 狀態檔也交給網頁（只改了 Windows） | `app/windows/src/StateFiles.cs`、`Pet.Web.cs` |
 | 回報問題 | 拿掉上游作者的飛書端點與選單、設定頁入口，預設不送到任何地方 | `Pet.Feedback.cs`、`App+Feedback.swift`、兩平台的選單、`settings.html` |
 | 效能測試 | 照評估報告重寫，用來重測 Windows 的數字；不進安裝包 | `maid/bench/` |
 
